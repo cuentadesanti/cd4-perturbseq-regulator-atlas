@@ -1,10 +1,13 @@
-program,n_members,n_pcs,metric,mean_intra_distance,null_mean_distance,null_sd,z,p_perm,compact_vs_random
-SAGA/chromatin,9,10,cosine,0.1225,0.9746,0.0946,9.0,0.0002,yes
-SAGA/chromatin,9,10,euclidean_raw,32.1814,42.8274,10.0333,1.06,0.12857,ns
-SAGA/chromatin,9,10,euclidean_whitened,3.1144,4.1125,0.7683,1.3,0.08638,ns
-Mediator/transcription,3,10,cosine,0.2068,0.9691,0.2752,2.77,0.0106,yes
-Mediator/transcription,3,10,euclidean_raw,20.1895,43.311,18.2941,1.26,0.04359,yes
-Mediator/transcription,3,10,euclidean_whitened,2.1837,4.1008,1.3848,1.38,0.06559,ns
-TCR signaling,13,10,cosine,0.1621,0.9715,0.0724,11.18,0.0002,yes
-TCR signaling,13,10,euclidean_raw,51.6253,42.8084,8.1929,-1.08,0.84603,ns
-TCR signaling,13,10,euclidean_whitened,3.4391,4.1104,0.632,1.06,0.13897,ns
+program,n_members,n_pcs,metric,mean_intra_distance,null_mean_distance,mean_intra_similarity,null_mean_similarity,null_sd,z,p_perm,compact_vs_random
+SAGA/chromatin,9,10,cosine,0.1225,0.9746,0.877,0.025,0.0946,9.0,0.0002,yes
+SAGA/chromatin,9,10,cosine_full,0.2724,0.994,0.728,0.006,0.0466,15.47,0.0002,yes
+SAGA/chromatin,9,10,euclidean_raw,32.1814,42.8594,,,9.9875,1.07,0.11978,ns
+SAGA/chromatin,9,10,euclidean_whitened,3.1144,4.1138,,,0.7692,1.3,0.08858,ns
+Mediator/transcription,3,10,cosine,0.2068,0.9746,0.793,0.025,0.2701,2.84,0.01,yes
+Mediator/transcription,3,10,cosine_full,0.5219,0.992,0.478,0.008,0.1443,3.26,0.0076,yes
+Mediator/transcription,3,10,euclidean_raw,20.1895,42.3894,,,17.7925,1.25,0.04859,yes
+Mediator/transcription,3,10,euclidean_whitened,2.1837,4.1268,,,1.4058,1.38,0.06559,ns
+TCR signaling,13,10,cosine,0.1621,0.9733,0.838,0.027,0.0714,11.37,0.0002,yes
+TCR signaling,13,10,cosine_full,0.3836,0.9944,0.616,0.006,0.0339,18.0,0.0002,yes
+TCR signaling,13,10,euclidean_raw,51.6253,42.7957,,,8.4394,-1.05,0.84143,ns
+TCR signaling,13,10,euclidean_whitened,3.4391,4.1061,,,0.6234,1.07,0.14257,ns
