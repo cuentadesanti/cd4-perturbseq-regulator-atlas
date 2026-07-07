@@ -21,7 +21,7 @@ suplementarias (~15 MB)**:
 2. **Modelo de datos** del dataset (`docs/DATA_MODEL.md` + [artifact interactivo](docs/data-model.html)).
 3. **EDA 80/20** (`scripts/eda.py`) — distribución de efectos, calidad de KD, hubs, reproducibilidad.
 4. **Modelo 2 · empirical-Bayes** (`scripts/model_hubs.py`) — ranking de reguladores con incertidumbre.
-5. **Modelo 1 · red probabilística de edges** (opcional, `scripts/model_edges.py`) — lee por *slice*
+5. **Modelo 1 · red de efectos con incertidumbre** (opcional, `scripts/model_edges.py`) — lee por *slice*
    el `.h5ad` de 17 GB desde S3 **sin descargarlo**.
 
 ## Dataset
@@ -39,8 +39,9 @@ suplementarias (~15 MB)**:
 - **Ranking robusto ≠ hubs crudos**: el modelo EB surface maquinaria de **cromatina/transcripción**
   (complejo SAGA: TADA1/TADA2B/SGF29/SUPT20H · Mediador: MED12/CCNC · KDM1A, SETD2) — reguladores con
   efecto grande **y** estable entre condiciones, por encima de los hubs de señalización TCR específicos de Stim8hr.
-- **Red probabilística (bonus)**: ~2,470 edges robustos (`P(|efecto|>1.5×)>0.8`) para los top reguladores,
-  extraídos del h5ad remoto sin descargarlo.
+- **Red de efectos con incertidumbre (bonus)**: ~2,470 edges robustos (`P(|efecto|>1.5×)>0.8`, es decir
+  probabilidad de que la *magnitud* del efecto supere 1.5×, no de que exista una arista causal) para los top
+  reguladores, extraídos del h5ad remoto sin descargarlo.
 
 Detalle: [`docs/report.md`](docs/report.md) · [`docs/EDA.md`](docs/EDA.md) · [`docs/MODELING.md`](docs/MODELING.md).
 
@@ -85,7 +86,7 @@ Opcional (remoto, requiere `pip install h5py s3fs fsspec`): `make spike` · `mak
 | `docs/report.md` | reporte judge-facing consolidado |
 | `docs/tables/top_regulators_for_review.csv` | top 30 reguladores (judge-facing) |
 | `docs/tables/hub_ranking_bayes.csv` | ranking EB completo (todos los genes) |
-| `docs/tables/robust_edges.csv` | red probabilística de edges (bonus, Modelo 1) |
+| `docs/tables/robust_edges.csv` | red de efectos con incertidumbre (bonus, Modelo 1) |
 | `docs/figures/*.png` | EDA + ranking + overview |
 | `docs/data-model.html` | explorador interactivo del modelo de datos |
 
@@ -103,7 +104,8 @@ Opcional (remoto, requiere `pip install h5py s3fs fsspec`): `make spike` · `mak
 
 Producto reproducible que convierte una matriz de DE de 1.8 TB en un **ranking de reguladores robustos
 con incertidumbre**, ejecutable en una laptop con ~10 GB de disco usando solo 15 MB de datos, más una
-**red regulatoria probabilística** opcional leída en streaming del h5ad de 17 GB sin descargarlo.
+**red de efectos con incertidumbre** (uncertainty-aware effect network) opcional leída en streaming del
+h5ad de 17 GB sin descargarlo.
 `make all` reproduce todo el core; ver `docs/report.md`.
 
 ---

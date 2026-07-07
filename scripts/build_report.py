@@ -46,7 +46,7 @@ def pipeline_overview():
     arrow(47, 55, 17, "ranking")
     box(55, 10, 20, 14, "Modelo 2 · EB", ACCENT, "reguladores robustos\nscripts/model_hubs.py")
     arrow(75, 83, 17, "candidatos")
-    box(83, 4, 16, 26, "Modelo 1 (opcional)", VIOLET, "red probabilística\nstreaming h5ad\n17 GB · sin bajar")
+    box(83, 4, 16, 26, "Modelo 1 (opcional)", VIOLET, "red de efectos\ncon incertidumbre\nh5ad · sin bajar")
 
     ax.text(50, 30.5, "Pipeline — de CSV local a reguladores con incertidumbre",
             ha="center", fontsize=12, fontweight="bold", color=INK)
@@ -92,8 +92,9 @@ def build_report():
         poc = " Se evaluó como **proof-of-concept** (ver `docs/EDGE_ANALYSIS.md`): coherente" \
               " y biológicamente sensato, pero de cobertura mínima — se deja como bonus, no como" \
               " resultado fuerte." if (ROOT / "docs" / "EDGE_ANALYSIS.md").exists() else ""
-        edges_line = (f"\nSe generó además una **red probabilística de edges** (bonus, Modelo 1) "
-                      f"con **{n:,} edges robustos** (`P(|efecto|>1.5×)>0.8`) de {nreg} reguladores en "
+        edges_line = (f"\nSe generó además una **red de efectos con incertidumbre** (bonus, Modelo 1) "
+                      f"con **{n:,} edges robustos** (`P(|efecto|>1.5×)>0.8` — probabilidad de que la "
+                      f"*magnitud* supere 1.5×, no de que exista una arista causal) de {nreg} reguladores en "
                       f"`docs/tables/robust_edges.csv`.{poc}\n")
 
     # --- secciones de la auditoría (condicionales a que exista el audit) ---

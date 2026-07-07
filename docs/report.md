@@ -19,7 +19,7 @@ señal real de ruido y priorizando por efecto **grande y reproducible**, no por 
   latente con incertidumbre. El top robusto es maquinaria de **cromatina/transcripción**
   (complejo SAGA, Mediador, KDM1A, SETD2) — efecto grande **y** estable entre condiciones.
 
-Se generó además una **red probabilística de edges** (bonus, Modelo 1) con **2,470 edges robustos** (`P(|efecto|>1.5×)>0.8`) de 6 reguladores en `docs/tables/robust_edges.csv`. Se evaluó como **proof-of-concept** (ver `docs/EDGE_ANALYSIS.md`): coherente y biológicamente sensato, pero de cobertura mínima — se deja como bonus, no como resultado fuerte.
+Se generó además una **red de efectos con incertidumbre** (bonus, Modelo 1) con **2,470 edges robustos** (`P(|efecto|>1.5×)>0.8` — probabilidad de que la *magnitud* supere 1.5×, no de que exista una arista causal) de 6 reguladores en `docs/tables/robust_edges.csv`. Se evaluó como **proof-of-concept** (ver `docs/EDGE_ANALYSIS.md`): coherente y biológicamente sensato, pero de cobertura mínima — se deja como bonus, no como resultado fuerte.
 
 ## Top reguladores (para revisión)
 
@@ -394,7 +394,8 @@ de ruido con incertidumbre en vez de rankear por conteos crudos y `adj_p_value <
 
 `docs/tables/hub_ranking_bayes.csv` (todos los genes) y `docs/tables/top_regulators_for_review.csv`
 (top 30, judge-facing). Columnas clave: `regpower_eb_mean/sd` (poder regulatorio log-rate),
-`p_top_1pct` (P de estar en el top 1%), `expected_downstream`. Figura `07_hub_posterior_ranking.png`.
+`p_top_1pct` (probabilidad EB de exceder el umbral empírico del top-1%, no "P de estar en el top 1%"),
+`expected_downstream`. Figura `07_hub_posterior_ranking.png`.
 
 ### Lectura del resultado
 
@@ -413,7 +414,7 @@ shrinkage premia a los reguladores con efecto grande **y** estable.
 
 ---
 
-## Modelo 1 — red probabilística de edges (ESTRICTAMENTE OPCIONAL)
+## Modelo 1 — red de efectos con incertidumbre (ESTRICTAMENTE OPCIONAL)
 
 **Scripts:** `scripts/model_edges_spike.py` (validación) y `scripts/model_edges.py` (escalado).
 **Regla:** si el spike remoto falla o es lento, el entregable oficial es el Modelo 2 + docs.

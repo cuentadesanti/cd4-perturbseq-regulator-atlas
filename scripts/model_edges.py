@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Modelo 1 — red probabilística de edges (EB normal-normal). OPCIONAL / bonus.
+"""Modelo 1 — red de efectos con incertidumbre (EB normal-normal). OPCIONAL / bonus.
 
 Solo se ejecuta si el spike (model_edges_spike.py) declaró VIABLE el acceso remoto.
 Lee por *slice* desde S3 las filas de los reguladores candidatos (top del Modelo 2) —

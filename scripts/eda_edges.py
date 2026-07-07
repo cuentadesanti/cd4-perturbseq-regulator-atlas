@@ -164,7 +164,7 @@ def main():
 
 ## Qué se analizó
 
-La red probabilística `docs/tables/robust_edges.csv`: **{len(e):,} edges** robustos
+La red de efectos con incertidumbre `docs/tables/robust_edges.csv`: **{len(e):,} edges** robustos
 (`P(|efecto|>1.5×)>0.8`) de **{n_reg} reguladores** × **{n_cond} condiciones**, leídos por slice del
 `DE_stats.h5ad` remoto. Se resumió por regulador y por gen downstream, con dirección y convergencia.
 
@@ -191,9 +191,9 @@ La red probabilística `docs/tables/robust_edges.csv`: **{len(e):,} edges** robu
 
 ## Veredicto
 
-Dejar como **bonus / proof-of-concept**: demuestra que el pipeline produce una red probabilística
-biológicamente sensata sin descargar 1.8 TB, pero la cobertura y la semántica no sostienen todavía
-afirmaciones de red a escala. Para promoverlo a resultado fuerte: correr los ~150 top reguladores en
+Dejar como **bonus / proof-of-concept**: demuestra que el pipeline produce una red de efectos con
+incertidumbre biológicamente sensata sin descargar 1.8 TB, pero la cobertura y la semántica no
+sostienen todavía afirmaciones de red a escala. Para promoverlo a resultado fuerte: correr los ~150 top reguladores en
 las 3 condiciones y añadir P(edge) con prior sparse.
 """
     (DOCS / "EDGE_ANALYSIS.md").write_text(md)
