@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Inspecciona un .h5ad / .h5mu sin cargar toda la matriz en memoria.
+"""Inspects a .h5ad / .h5mu without loading the whole matrix into memory.
 
-Uso:
+Usage:
     python scripts/inspect.py data/GWCD4i.DE_stats.h5ad
 """
 import sys
@@ -14,7 +14,7 @@ def summarize(path: str) -> None:
         def show(name, obj):
             if isinstance(obj, h5py.Dataset):
                 print(f"  {name:60s} {str(obj.shape):>18s} {obj.dtype}")
-        # Solo el primer nivel para no inundar la salida
+        # Only the first level so as not to flood the output
         for key in f.keys():
             print(f"[{key}]")
             f[key].visititems(show) if isinstance(f[key], h5py.Group) else None

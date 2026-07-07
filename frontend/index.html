@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -80,17 +80,17 @@
     </div>
     <div class="conn">
       <span class="dot" id="dot"></span>
-      <span id="conntxt">conectando…</span>
-      <input id="apibase" value="http://localhost:8000" title="URL de la API">
+      <span id="conntxt">connecting…</span>
+      <input id="apibase" value="http://localhost:8000" title="API URL">
     </div>
   </header>
 
   <div class="tabs" role="tablist">
     <button class="tab" data-view="overview" aria-selected="true">Overview</button>
-    <button class="tab" data-view="explorer">Explorar reguladores</button>
-    <button class="tab" data-view="audit">Auditoría</button>
-    <button class="tab" data-view="edges">Red de efectos</button>
-    <button class="tab" data-view="programs">Programas</button>
+    <button class="tab" data-view="explorer">Explore regulators</button>
+    <button class="tab" data-view="audit">Audit</button>
+    <button class="tab" data-view="edges">Effect network</button>
+    <button class="tab" data-view="programs">Programs</button>
   </div>
 
   <section id="v-overview"></section>
@@ -103,15 +103,15 @@
 <script>
 const $=s=>document.querySelector(s);
 const _qp=new URLSearchParams(location.search).get("api");
-// si la UI se sirve desde la propia API (http://…), usa ese mismo origen (sin CORS)
+// if the UI is served by the API itself (http://…), use that same origin (no CORS)
 const _sameOrigin=location.protocol.startsWith("http")?location.origin:null;
 let API=_qp||_sameOrigin||localStorage.getItem("atlas_api")||"http://localhost:8000";
 if(_qp)localStorage.setItem("atlas_api",_qp);
 $("#apibase").value=API;
 const fmt=n=>n==null?"—":(typeof n==="number"?(Number.isInteger(n)?n.toLocaleString():n.toFixed(2)):n);
 const pct=n=>n==null?"—":(n*100).toFixed(0)+"%";
-// celda de correlación: si falta metadata, muestra "—" con tooltip
-const corr=n=>n==null?`<span class="muted" title="sin metadata cross-guide/donor → peso neutral">—</span>`:n.toFixed(2);
+// correlation cell: if metadata is missing, show "—" with a tooltip
+const corr=n=>n==null?`<span class="muted" title="no cross-guide/donor metadata → neutral weight">—</span>`:n.toFixed(2);
 async function api(path){const r=await fetch(API+path);if(!r.ok)throw new Error(r.status+" "+path);return r.json();}
 
 // ---- fuzzy matching de genes ----
@@ -129,10 +129,10 @@ function suggest(q){const genes=GENES||[];const qu=q.toUpperCase();
 let SUMMARY=null;
 async function connect(){
   try{ const h=await api("/health"); SUMMARY=await api("/summary");
-    $("#dot").className="dot ok"; $("#conntxt").textContent=`ok · ${h.n_regulators.toLocaleString()} reguladores`;
+    $("#dot").className="dot ok"; $("#conntxt").textContent=`ok · ${h.n_regulators.toLocaleString()} regulators`;
     render(current);
-  }catch(e){ $("#dot").className="dot bad"; $("#conntxt").textContent="API no disponible";
-    $("#v-"+current).innerHTML=`<div class="panel err">No se pudo conectar a <b>${API}</b>.<br>Arranca la API: <span class="muted">uvicorn api.main:app --port 8000</span></div>`; }
+  }catch(e){ $("#dot").className="dot bad"; $("#conntxt").textContent="API unavailable";
+    $("#v-"+current).innerHTML=`<div class="panel err">Couldn't connect to <b>${API}</b>.<br>Start the API: <span class="muted">uvicorn api.main:app --port 8000</span></div>`; }
 }
 $("#apibase").addEventListener("change",e=>{API=e.target.value.replace(/\/$/,"");localStorage.setItem("atlas_api",API);connect();});
 
@@ -151,14 +151,14 @@ async function renderOverview(){
   const s=SUMMARY;
   $("#v-overview").innerHTML=`
     <div class="cards">
-      <div class="card"><div class="n">${s.n_regulators.toLocaleString()}</div><div class="k">reguladores rankeados</div></div>
-      <div class="card"><div class="n">${fmt(s.n_global)}</div><div class="k">globales</div></div>
+      <div class="card"><div class="n">${s.n_regulators.toLocaleString()}</div><div class="k">ranked regulators</div></div>
+      <div class="card"><div class="n">${fmt(s.n_global)}</div><div class="k">global</div></div>
       <div class="card"><div class="n">${fmt(s.n_context_specific)}</div><div class="k">context-specific</div></div>
-      <div class="card"><div class="n">${s.edges_available?"sí":"no"}</div><div class="k">red de efectos (PoC)</div></div>
+      <div class="card"><div class="n">${s.edges_available?"yes":"no"}</div><div class="k">effect network (PoC)</div></div>
     </div>
-    <div class="panel"><div class="sec">Top reguladores robustos</div>
-      <div id="ov-top" class="muted">cargando…</div></div>
-    <p class="lead" style="margin-top:14px">El pipeline (<span class="mono">make all</span>) produce los artefactos; esta API los hace explorables. Nada se calcula en vivo.</p>`;
+    <div class="panel"><div class="sec">Top robust regulators</div>
+      <div id="ov-top" class="muted">loading…</div></div>
+    <p class="lead" style="margin-top:14px">The pipeline (<span class="mono">make all</span>) produces the artifacts; this API makes them explorable. Nothing is computed live.</p>`;
   const list=await api("/regulators?limit=10");
   $("#ov-top").innerHTML=regTable(list);
   wireRows($("#ov-top"));
@@ -168,13 +168,13 @@ async function renderOverview(){
 async function renderExplorer(){
   $("#v-explorer").innerHTML=`
     <div class="panel">
-      <div class="search"><input id="q" placeholder="buscar gen (p. ej. SGF29, ZAP70)…" autocomplete="off">
-        <button id="go">Ver perfil</button></div>
+      <div class="search"><input id="q" placeholder="search a gene (e.g. SGF29, ZAP70)…" autocomplete="off">
+        <button id="go">View profile</button></div>
       <div class="filters">
-        <select id="fclass"><option value="">todas las clases</option><option value="global">global</option><option value="condition-specific">context-specific</option></select>
-        <select id="fsort"><option value="core_rank">orden: rank EB</option><option value="stability_frequency">estabilidad</option><option value="reweighted_score">reproducibilidad</option></select>
+        <select id="fclass"><option value="">all classes</option><option value="global">global</option><option value="condition-specific">context-specific</option></select>
+        <select id="fsort"><option value="core_rank">sort: EB rank</option><option value="stability_frequency">stability</option><option value="reweighted_score">reproducibility</option></select>
       </div>
-      <div id="reglist" class="muted">cargando…</div>
+      <div id="reglist" class="muted">loading…</div>
     </div>
     <div id="profile"></div>`;
   const load=async()=>{const c=$("#fclass").value,so=$("#fsort").value;
@@ -190,22 +190,22 @@ async function showProfile(gene){
   document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected",x.dataset.view==="explorer"));
   document.querySelectorAll("section[id^=v-]").forEach(s=>s.classList.toggle("hide",s.id!=="v-explorer"));
   if(!$("#profile")){await renderExplorer();}
-  const box=$("#profile"); box.innerHTML=`<div class="panel muted">cargando ${gene}…</div>`;
+  const box=$("#profile"); box.innerHTML=`<div class="panel muted">loading ${gene}…</div>`;
   let p; try{ p=await api("/regulators/"+encodeURIComponent(gene.toUpperCase())); }
   catch(e){
     await loadGenes(); const sug=suggest(gene);
-    const sugHtml=sug.length?`<div style="margin-top:10px">¿Quisiste decir: ${sug.map(g=>`<span class="chip sug" data-gene="${g}" style="cursor:pointer;border-color:var(--accent);color:var(--accent)">${g}</span>`).join(" ")}</div>`:"";
-    box.innerHTML=`<div class="panel err">No se encontró <b>${gene}</b>.${sugHtml}</div>`;
+    const sugHtml=sug.length?`<div style="margin-top:10px">Did you mean: ${sug.map(g=>`<span class="chip sug" data-gene="${g}" style="cursor:pointer;border-color:var(--accent);color:var(--accent)">${g}</span>`).join(" ")}</div>`:"";
+    box.innerHTML=`<div class="panel err"><b>${gene}</b> not found.${sugHtml}</div>`;
     box.querySelectorAll(".sug").forEach(s=>s.addEventListener("click",()=>{$("#q").value=s.dataset.gene;showProfile(s.dataset.gene);}));
     return; }
   const cond=p.condition_profile||{}; const mx=Math.max(1,...Object.values(cond));
   const order=["Rest","Stim8hr","Stim48hr"];
   const condBars=order.filter(c=>c in cond).map(c=>`<div class="barrow"><span class="muted">${c}</span>
-    <div class="track"><div class="fill" style="width:${(cond[c]/mx*100).toFixed(0)}%"></div></div><span>${cond[c].toLocaleString()}</span></div>`).join("")||`<span class="muted">sin perfil por condición</span>`;
+    <div class="track"><div class="fill" style="width:${(cond[c]/mx*100).toFixed(0)}%"></div></div><span>${cond[c].toLocaleString()}</span></div>`).join("")||`<span class="muted">no per-condition profile</span>`;
   const edges=(p.top_downstream_edges||[]).map(e=>`<tr><td class="gn">${e.measured_gene}</td>
     <td class="${e.direction}">${e.direction==="up"?"↑":"↓"} ${e.log_fc}</td>
     <td class="num">${e.p_abs_effect_gt_1p5x}</td><td class="muted">${e.condition}</td></tr>`).join("");
-  const stt=p.audit_status; const sttc=stt==="demotado"?"dem":stt==="promovido"?"pro":"sur";
+  const stt=p.audit_status; const sttc=stt==="demoted"?"dem":stt==="promoted"?"pro":"sur";
   box.innerHTML=`<div class="panel">
     <div class="prof-head"><h2>${p.gene}</h2>
       <span class="rk">EB #${p.core_rank}</span>
@@ -213,38 +213,38 @@ async function showProfile(gene){
       ${stt?`<span class="stt ${sttc}">${stt}</span>`:""}</div>
     <p class="interp">${p.interpretation}</p>
     <div class="kv">
-      <div class="b"><div class="v">${fmt(p.regpower_eb_mean)}</div><div class="l">poder regulatorio EB</div></div>
-      <div class="b"><div class="v">${pct(p.stability_frequency)}</div><div class="l">estabilidad (bootstrap)</div></div>
-      <div class="b"><div class="v">${p.kd_significant_conditions??"—"}/3</div><div class="l">condiciones con KD sig.</div></div>
+      <div class="b"><div class="v">${fmt(p.regpower_eb_mean)}</div><div class="l">EB regulatory power</div></div>
+      <div class="b"><div class="v">${pct(p.stability_frequency)}</div><div class="l">stability (bootstrap)</div></div>
+      <div class="b"><div class="v">${p.kd_significant_conditions??"—"}/3</div><div class="l">conditions with sig. KD</div></div>
       <div class="b"><div class="v">${fmt(p.condition_specificity)}</div><div class="l">condition specificity</div></div>
-      <div class="b"><div class="v">${fmt(p.guide_corr)}</div><div class="l">reprod. cross-guide</div></div>
-      <div class="b"><div class="v">${fmt(p.donor_corr)}</div><div class="l">reprod. cross-donor</div></div>
+      <div class="b"><div class="v">${fmt(p.guide_corr)}</div><div class="l">cross-guide repro.</div></div>
+      <div class="b"><div class="v">${fmt(p.donor_corr)}</div><div class="l">cross-donor repro.</div></div>
     </div>
-    <div class="sec" style="margin-top:20px">Perfil por condición (n_downstream)</div>${condBars}
-    ${edges?`<div class="sec" style="margin-top:20px">Top edges downstream (bonus)</div>
-      <table><thead><tr><th>gen</th><th>efecto (log₂FC)</th><th class="num">P(&gt;1.5×)</th><th>cond.</th></tr></thead><tbody>${edges}</tbody></table>`:""}
+    <div class="sec" style="margin-top:20px">Per-condition profile (n_downstream)</div>${condBars}
+    ${edges?`<div class="sec" style="margin-top:20px">Top downstream edges (bonus)</div>
+      <table><thead><tr><th>gene</th><th>effect (log₂FC)</th><th class="num">P(&gt;1.5×)</th><th>cond.</th></tr></thead><tbody>${edges}</tbody></table>`:""}
   </div>`;
 }
 
 /* ---- Audit ---- */
 async function renderAudit(){
-  $("#v-audit").innerHTML=`<div class="panel"><div class="sec">Auditoría de reproducibilidad</div><div id="au" class="muted">cargando…</div></div>`;
+  $("#v-audit").innerHTML=`<div class="panel"><div class="sec">Reproducibility audit</div><div id="au" class="muted">loading…</div></div>`;
   const d=await api("/audit/reproducibility");
-  if(!d.available){$("#au").innerHTML=`<span class="muted">No disponible (corre <span class="mono">make repro-meta</span>).</span>`;return;}
+  if(!d.available){$("#au").innerHTML=`<span class="muted">Not available (run <span class="mono">make repro-meta</span>).</span>`;return;}
   const c=d.coverage||{};
-  const rows=d.rows.map(r=>{const sc=r.status==="demotado"?"dem":r.status==="promovido"?"pro":"sur";
+  const rows=d.rows.map(r=>{const sc=r.status==="demoted"?"dem":r.status==="promoted"?"pro":"sur";
     return `<tr><td class="gn">${r.gene}</td><td class="num">${r.old_rank}→${r.new_rank}</td>
       <td><span class="stt ${sc}">${r.status}</span></td><td class="num">${fmt(r.guide_corr)}</td>
       <td class="num">${fmt(r.donor_corr)}</td><td class="muted" style="font-size:11px">${r.reason||""}</td></tr>`;}).join("");
-  $("#au").innerHTML=`<p class="lead">Análisis de <b>sensibilidad</b> (no un modelo nuevo): reponderamos el score EB con reproducibilidad real. Cobertura cross-guide <b>${c.pct_guide_corr_available??"?"}%</b>, cross-donor <b>${c.pct_donor_corr_available??"?"}%</b> (parcial → peso neutral).</p>
-    <table><thead><tr><th>gen</th><th class="num">rank</th><th>estado</th><th class="num">guide</th><th class="num">donor</th><th>razón</th></tr></thead><tbody>${rows}</tbody></table>`;
+  $("#au").innerHTML=`<p class="lead"><b>Sensitivity</b> analysis (not a new model): we reweight the EB score with real reproducibility. Cross-guide coverage <b>${c.pct_guide_corr_available??"?"}%</b>, cross-donor <b>${c.pct_donor_corr_available??"?"}%</b> (partial → neutral weight).</p>
+    <table><thead><tr><th>gene</th><th class="num">rank</th><th>status</th><th class="num">guide</th><th class="num">donor</th><th>reason</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
 /* ---- Edges ---- */
 async function renderEdges(){
-  $("#v-edges").innerHTML=`<div class="panel"><div class="sec">Red de efectos con incertidumbre · proof-of-concept</div><div id="ed" class="muted">cargando…</div></div>`;
+  $("#v-edges").innerHTML=`<div class="panel"><div class="sec">Uncertainty-aware effect network · proof-of-concept</div><div id="ed" class="muted">loading…</div></div>`;
   const sum=await api("/edges/summary"); const dn=await api("/edges/downstream?limit=12");
-  if(!sum.available){$("#ed").innerHTML=`<span class="muted">No disponible (corre <span class="mono">make edges</span> + <span class="mono">make eda-edges</span>).</span>`;return;}
+  if(!sum.available){$("#ed").innerHTML=`<span class="muted">Not available (run <span class="mono">make edges</span> + <span class="mono">make eda-edges</span>).</span>`;return;}
   const byreg={}; sum.rows.forEach(r=>{byreg[r.perturbed_gene]=(byreg[r.perturbed_gene]||{p:0,n:0});byreg[r.perturbed_gene].p+=r.n_positive;byreg[r.perturbed_gene].n+=r.n_negative;});
   const reg=Object.entries(byreg).sort((a,b)=>(b[1].p+b[1].n)-(a[1].p+a[1].n));
   const mx=Math.max(...reg.map(r=>r[1].p+r[1].n));
@@ -253,9 +253,9 @@ async function renderEdges(){
     <div style="background:var(--up);width:${(v.p/(v.p+v.n)*100).toFixed(0)}%"></div><div style="background:var(--down);flex:1"></div></div></div>
     <span>${v.p+v.n}</span></div>`).join("");
   const conv=dn.rows.map(r=>`<span class="chip"><b>${r.measured_gene}</b> · ${r.n_upstream_regulators}/6</span>`).join(" ");
-  $("#ed").innerHTML=`<p class="lead">2.470 edges de 6 reguladores del complejo SAGA. <span class="mono">P(|efecto|&gt;1.5×)</span>, no P(arista causal). Cobertura mínima → <b>bonus</b>.</p>
-    <div class="sec" style="margin-top:6px">Edges por regulador <span class="up">↑</span>/<span class="down">↓</span></div>${regRows}
-    <div class="sec" style="margin-top:18px">Targets convergentes</div><div style="display:flex;flex-wrap:wrap;gap:6px">${conv}</div>`;
+  $("#ed").innerHTML=`<p class="lead">2,470 edges from 6 SAGA-complex regulators. <span class="mono">P(|effect|&gt;1.5×)</span>, not P(causal edge). Minimal coverage → <b>bonus</b>.</p>
+    <div class="sec" style="margin-top:6px">Edges per regulator <span class="up">↑</span>/<span class="down">↓</span></div>${regRows}
+    <div class="sec" style="margin-top:18px">Convergent targets</div><div style="display:flex;flex-wrap:wrap;gap:6px">${conv}</div>`;
 }
 
 /* ---- Programas (transcriptional fingerprints) ---- */
@@ -268,16 +268,16 @@ const COLBY={regulator_class:{global:"#4c8bf5","condition-specific":"#37b24d",NA
   condition:{Rest:"#888",Stim8hr:"#f59f00",Stim48hr:"#e03131"}};
 let PCA_PTS=null;
 async function renderPrograms(){
-  $("#v-programs").innerHTML=`<div class="panel"><div class="sec">Mapa de programas transcriptómicos · side analysis</div><div id="pg" class="muted">cargando…</div></div>`;
+  $("#v-programs").innerHTML=`<div class="panel"><div class="sec">Map of transcriptomic programs · side analysis</div><div id="pg" class="muted">loading…</div></div>`;
   let d; try{ d=await api("/programs/pca"); }catch(e){ d={available:false}; }
-  if(!d||!d.available){$("#pg").innerHTML=`<span class="muted">No disponible (corre <span class="mono">make fingerprints</span>).</span>`;return;}
+  if(!d||!d.available){$("#pg").innerHTML=`<span class="muted">Not available (run <span class="mono">make fingerprints</span>).</span>`;return;}
   PCA_PTS=d.points;
-  $("#pg").innerHTML=`<p class="lead">De "qué reguladores son fuertes" a "<b>qué programa induce cada perturbación</b>". PCA sobre las huellas transcriptómicas (zscore) de un panel balanceado. Anillos = complejo conocido. Exploratorio, no descubrimiento causal.</p>
-    <div class="filters"><label class="muted">colorear por</label>
-      <select id="colby"><option value="regulator_class">clase</option><option value="source">fuente del panel</option><option value="condition">condición</option></select>
+  $("#pg").innerHTML=`<p class="lead">From "which regulators are strong" to "<b>what program each perturbation induces</b>". PCA over the transcriptional fingerprints (zscore) of a balanced panel. Rings = known complex. Exploratory, not causal discovery.</p>
+    <div class="filters"><label class="muted">color by</label>
+      <select id="colby"><option value="regulator_class">class</option><option value="source">panel source</option><option value="condition">condition</option></select>
       <span id="leg" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"></span></div>
     <div id="scatter" style="margin-top:6px"></div>
-    <div class="search" style="margin-top:14px"><input id="nq" placeholder="reguladores similares a… (p. ej. SGF29, ZAP70)" autocomplete="off"><button id="ngo">Ver vecinos</button></div>
+    <div class="search" style="margin-top:14px"><input id="nq" placeholder="regulators similar to… (e.g. SGF29, ZAP70)" autocomplete="off"><button id="ngo">Find neighbors</button></div>
     <div id="neighbors"></div>`;
   const draw=()=>drawScatter($("#colby").value);
   $("#colby").onchange=draw; draw();
@@ -301,29 +301,29 @@ function drawScatter(colby){
 }
 async function showNeighbors(gene){
   if(!gene)return; const box=$("#neighbors"); const g=gene.toUpperCase();
-  box.innerHTML=`<div class="panel muted">buscando vecinos de ${g}…</div>`;
+  box.innerHTML=`<div class="panel muted">finding neighbors of ${g}…</div>`;
   let d; try{ d=await api("/programs/neighbors/"+encodeURIComponent(g)); }catch(e){ d={in_panel:false}; }
-  if(!d.in_panel){box.innerHTML=`<div class="panel muted"><b>${g}</b> no está en el panel de huellas (200 reguladores balanceados). Prueba SGF29, ZAP70, MED12…</div>`;return;}
+  if(!d.in_panel){box.innerHTML=`<div class="panel muted"><b>${g}</b> is not in the fingerprint panel (200 balanced regulators). Try SGF29, ZAP70, MED12…</div>`;return;}
   const chips=d.neighbors.map(n=>`<span class="chip" data-gene="${n.neighbor}" style="cursor:pointer">
     <b>${n.neighbor}</b> · ${n.similarity.toFixed(2)} <span class="muted">${n.neighbor_condition}</span></span>`).join(" ");
-  box.innerHTML=`<div class="panel"><div class="sec">Reguladores transcriptómicamente similares a ${g}</div>
-    <p class="muted" style="margin:2px 0 10px">Vecinos por similitud coseno de huella. Clic → perfil.</p>
+  box.innerHTML=`<div class="panel"><div class="sec">Regulators transcriptomically similar to ${g}</div>
+    <p class="muted" style="margin:2px 0 10px">Neighbors by fingerprint cosine similarity. Click → profile.</p>
     <div style="display:flex;flex-wrap:wrap;gap:6px">${chips}</div></div>`;
   box.querySelectorAll(".chip[data-gene]").forEach(c=>c.addEventListener("click",()=>showProfile(c.dataset.gene)));
 }
 
 /* helpers */
 function regTable(list){
-  return `<table><thead><tr><th>gen</th><th class="num">rank</th><th>clase</th>
-      <th class="num" title="poder regulatorio empirical-Bayes (log-rate)">Reg. power</th>
-      <th class="num" title="frecuencia de selección en el top-30 (bootstrap B=200)">estab.</th>
-      <th class="num" title="correlación cross-guide (reproducibilidad entre las 2 guías)">guide</th>
-      <th class="num" title="correlación cross-donor (reproducibilidad entre donantes)">donor</th></tr></thead><tbody>${
+  return `<table><thead><tr><th>gene</th><th class="num">rank</th><th>class</th>
+      <th class="num" title="empirical-Bayes regulatory power (log-rate)">Reg. power</th>
+      <th class="num" title="selection frequency in the top-30 (bootstrap B=200)">stab.</th>
+      <th class="num" title="cross-guide correlation (reproducibility between the 2 guides)">guide</th>
+      <th class="num" title="cross-donor correlation (reproducibility across donors)">donor</th></tr></thead><tbody>${
     list.map(r=>`<tr data-gene="${r.gene}"><td class="gn">${r.gene}</td><td class="num">${r.core_rank}</td>
       <td>${r.regulator_class?`<span class="cls ${r.regulator_class==="global"?"global":"cs"}">${r.regulator_class}</span>`:"—"}</td>
       <td class="num">${fmt(r.regpower_eb_mean)}</td><td class="num">${pct(r.stability_frequency)}</td>
       <td class="num">${corr(r.guide_corr)}</td><td class="num">${corr(r.donor_corr)}</td></tr>`).join("")}</tbody></table>
-    <div class="muted" style="font-size:11px;margin-top:8px;font-family:var(--mono)">Reg. power = poder regulatorio EB · <b>—</b> en guide/donor = sin metadata (peso neutral, no penaliza)</div>`;
+    <div class="muted" style="font-size:11px;margin-top:8px;font-family:var(--mono)">Reg. power = EB regulatory power · <b>—</b> in guide/donor = no metadata (neutral weight, no penalty)</div>`;
 }
 function wireRows(container){ container.querySelectorAll("tr[data-gene]").forEach(tr=>tr.addEventListener("click",()=>showProfile(tr.dataset.gene))); }
 

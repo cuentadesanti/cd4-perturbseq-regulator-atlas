@@ -1,125 +1,125 @@
-# Modelado — de la matriz de DE a reguladores con incertidumbre
+# Modeling — from the DE matrix to regulators with uncertainty
 
-Dos modelos pequeños, **dependency-light** (solo `scipy` + `statsmodels`), que separan señal
-de ruido con incertidumbre en vez de rankear por conteos crudos y `adj_p_value < 0.1`.
+Two small, **dependency-light** models (only `scipy` + `statsmodels`) that separate signal
+from noise with uncertainty instead of ranking by raw counts and `adj_p_value < 0.1`.
 
-> **Nomenclatura honesta:** ambos son **empirical-Bayes / pseudo-bayesianos**. No hay PPL,
-> ni random effects formales, ni posterior conjunto muestreado por MCMC. Donde decimos
-> "posterior" es la aproximación normal del EB con parámetros de prior estimados de los datos.
+> **Honest naming:** both are **empirical-Bayes / pseudo-Bayesian**. There is no PPL,
+> no formal random effects, no jointly MCMC-sampled posterior. Where we say
+> "posterior" we mean the normal EB approximation with prior parameters estimated from the data.
 
 ---
 
-## Modelo 2 — ranking de reguladores (core, corre local)
+## Model 2 — regulator ranking (core, runs locally)
 
-**Script:** `scripts/model_hubs.py` · **Corre con:** `DE_stats.suppl_table.csv` (local, sin descargas).
-**Grano:** 1 fila = gen perturbado × condición.
+**Script:** `scripts/model_hubs.py` · **Runs on:** `DE_stats.suppl_table.csv` (local, no downloads).
+**Grain:** 1 row = perturbed gene × condition.
 
-### Especificación
+### Specification
 
-1. **Efectos fijos (media condicional).** GLM sobre `n_downstream`:
+1. **Fixed effects (conditional mean).** GLM on `n_downstream`:
 
    ```
    n_downstream ~ C(culture_condition) + ontarget_significant + offtarget_flag
    ```
 
-   Poisson y NB comparten el mismo modelo de media; como solo usamos la media ajustada `μᵢ`
-   (no inferencia sobre coeficientes) ajustamos por IRLS estable: Poisson GLM → `α` de NB por
-   método de momentos (`Var = μ + α·μ²`) → NB GLM con `α` fijo. Evita los problemas de
-   convergencia del NB por MLE completo.
+   Poisson and NB share the same mean model; since we only use the fitted mean `μᵢ`
+   (no inference on coefficients) we fit by stable IRLS: Poisson GLM → NB `α` by
+   method of moments (`Var = μ + α·μ²`) → NB GLM with fixed `α`. This avoids the
+   convergence problems of full NB MLE.
 
-2. **Shrinkage empirical-Bayes del efecto por gen.** Desviación log-rate respecto al baseline:
+2. **Empirical-Bayes shrinkage of the per-gene effect.** Log-rate deviation from the baseline:
 
    ```
    workᵢ = log(yᵢ + 0.5) − log(μᵢ + 0.5)
    ```
 
-   Por gen g:  `d_g = mean(work)`,  `s²_g = σ²_e / n_g`.
-   Prior `u_g ~ Normal(0, τ²)` con `τ²` por método de momentos (`Var(d_g) − mean(s²_g)`).
-   Posterior aproximado:
+   Per gene g:  `d_g = mean(work)`,  `s²_g = σ²_e / n_g`.
+   Prior `u_g ~ Normal(0, τ²)` with `τ²` by method of moments (`Var(d_g) − mean(s²_g)`).
+   Approximate posterior:
 
    ```
-   u_g | datos ~ Normal( shrink·d_g ,  shrink·s²_g ),   shrink = τ²/(τ²+s²_g)
+   u_g | data ~ Normal( shrink·d_g ,  shrink·s²_g ),   shrink = τ²/(τ²+s²_g)
    ```
 
-   Genes con pocas condiciones / poca señal se encogen hacia 0.
+   Genes with few conditions / little signal are shrunk toward 0.
 
-### Salidas
+### Outputs
 
-`docs/tables/hub_ranking_bayes.csv` (todos los genes) y `docs/tables/top_regulators_for_review.csv`
-(top 30, judge-facing). Columnas clave: `regpower_eb_mean/sd` (poder regulatorio log-rate),
-`p_top_1pct` (probabilidad EB de exceder el umbral empírico del top-1%, no "P de estar en el top 1%"),
-`expected_downstream`. Figura `07_hub_posterior_ranking.png`.
+`docs/tables/hub_ranking_bayes.csv` (all genes) and `docs/tables/top_regulators_for_review.csv`
+(top 30, judge-facing). Key columns: `regpower_eb_mean/sd` (log-rate regulatory power),
+`p_top_1pct` (EB probability of exceeding the empirical top-1% threshold, not "P of being in the top 1%"),
+`expected_downstream`. Figure `07_hub_posterior_ranking.png`.
 
-### Lectura del resultado
+### Reading the result
 
-El ranking robusto surface maquinaria de **cromatina/transcripción** consistente entre condiciones
-—complejo SAGA (TADA1/TADA2B/SGF29/SUPT20H/TAF6L), Mediador (MED12/CCNC), KDM1A, SETD2, CTBP1—
-por encima de los hubs de señalización TCR crudos que eran específicos de Stim8hr. Es decir: el
-shrinkage premia a los reguladores con efecto grande **y** estable.
+The robust ranking surfaces **chromatin/transcription** machinery consistent across conditions
+— SAGA complex (TADA1/TADA2B/SGF29/SUPT20H/TAF6L), Mediator (MED12/CCNC), KDM1A, SETD2, CTBP1 —
+above the raw TCR-signaling hubs that were Stim8hr-specific. In other words: the shrinkage
+rewards regulators with a large **and** stable effect.
 
 ### Caveats
 
-- `xcond_reproducibility` es una **feature exploratoria** (estabilidad cross-condición). **No**
-  sustituye la reproducibilidad cross-donor / cross-guide, que requiere `DE_stats.h5ad`.
-- El baseline de efectos fijos se trata como conocido (plug-in) → pseudo-bayesiano, no full-Bayes.
-- `single_guide_estimate` y `n_guides` NO están en el CSV; en la tabla de review del core aparecen como
-  `NA (requiere DE_stats.h5ad)` — sí están en la auditoría de sensibilidad de abajo.
+- `xcond_reproducibility` is an **exploratory feature** (cross-condition stability). It does **not**
+  replace cross-donor / cross-guide reproducibility, which requires `DE_stats.h5ad`.
+- The fixed-effects baseline is treated as known (plug-in) → pseudo-Bayesian, not full Bayes.
+- `single_guide_estimate` and `n_guides` are NOT in the CSV; in the core review table they appear as
+  `NA (requires DE_stats.h5ad)` — they are present in the sensitivity audit below.
 
-### Auditoría de sensibilidad guide/donor-aware (opcional)
+### Guide/donor-aware sensitivity audit (optional)
 
-Cuando existe `de_obs_reproducibility_metadata.csv` (extraído del `.obs` de `DE_stats.h5ad`,
-sin `.layers`), `model_hubs.py` corre una auditoría: **repondera** el score EB con reproducibilidad
-real (`reweighted_score = regpower_eb_mean · repro_weight`) y reporta qué reguladores sobreviven
-(`reproducibility_audit.csv`, fig 19).
+When `de_obs_reproducibility_metadata.csv` exists (extracted from the `.obs` of `DE_stats.h5ad`,
+without `.layers`), `model_hubs.py` runs an audit: it **reweights** the EB score with real
+reproducibility (`reweighted_score = regpower_eb_mean · repro_weight`) and reports which regulators
+survive (`reproducibility_audit.csv`, fig 19).
 
-- **Es un análisis de sensibilidad, no un posterior nuevo**: NO se reestima el modelo EB.
-- **Cobertura parcial**: `guide_correlation_all` ~78% de contrastes, `donor_correlation_hits_mean`
-  solo ~19% → en la práctica es más *guide-aware* que *donor-aware*. Donde falta la métrica se usa un
-  **peso neutral** (0.75), de modo que **un gen no se penaliza solo por no tener metadata de donante**.
-- El ranking **core no depende** de este archivo (`make all` corre sin él).
+- **It is a sensitivity analysis, not a new posterior**: the EB model is NOT re-estimated.
+- **Partial coverage**: `guide_correlation_all` ~78% of contrasts, `donor_correlation_hits_mean`
+  only ~19% → in practice more *guide-aware* than *donor-aware*. Where the metric is missing, a
+  **neutral weight** (0.75) is used, so **a gene is not penalized just for lacking donor metadata**.
+- The **core** ranking does **not depend** on this file (`make all` runs without it).
 
 ---
 
-## Modelo 1 — red de efectos con incertidumbre (ESTRICTAMENTE OPCIONAL)
+## Model 1 — uncertainty-aware effect network (STRICTLY OPTIONAL)
 
-**Scripts:** `scripts/model_edges_spike.py` (validación) y `scripts/model_edges.py` (escalado).
-**Regla:** si el spike remoto falla o es lento, el entregable oficial es el Modelo 2 + docs.
+**Scripts:** `scripts/model_edges_spike.py` (validation) and `scripts/model_edges.py` (scaling).
+**Rule:** if the remote spike fails or is slow, the official deliverable is Model 2 + docs.
 
 ### Idea
 
-EB normal-normal exacto sobre `log_fc` / `lfcSE` de los `.layers` del h5ad:
+Exact normal-normal EB on `log_fc` / `lfcSE` from the h5ad `.layers`:
 
 ```
-yᵢ | θᵢ ~ Normal(θᵢ, seᵢ²)          # observado
-θᵢ     ~ Normal(0, τ²)              # prior con shrinkage
+yᵢ | θᵢ ~ Normal(θᵢ, seᵢ²)          # observed
+θᵢ     ~ Normal(0, τ²)              # shrinkage prior
 θᵢ|yᵢ  ~ Normal(mᵢ, vᵢ),  vᵢ = 1/(1/τ² + 1/seᵢ²),  mᵢ = vᵢ·yᵢ/seᵢ²
 ```
 
-Salidas por edge: `theta_post_mean/sd`, `p_effect_positive`, `p_abs_effect_gt_1p5x`.
-**Regla de decisión** (más interpretable que FDR): `p_abs_effect_gt_1p5x > 0.8 AND ontarget_significant`.
+Per-edge outputs: `theta_post_mean/sd`, `p_effect_positive`, `p_abs_effect_gt_1p5x`.
+**Decision rule** (more interpretable than FDR): `p_abs_effect_gt_1p5x > 0.8 AND ontarget_significant`.
 
-### Estrategia consciente de memoria/cómputo
+### Memory/compute-aware strategy
 
-Disco: **9.8 GB libres < 17 GB** del h5ad → no se descarga. En vez de eso:
-- Solo se necesitan las edges de los **reguladores candidatos** (top del Modelo 2), no las ~350M.
-- `model_edges_spike.py` **mide** (no asume) el layout/chunking y el coste real de leer una fila
-  por slice desde S3 (`fsspec` anónimo + `h5py`). Si es viable, `model_edges.py` baja solo esas
-  filas y corre el EB vectorizado (segundos, ~15 MB de RAM).
-- `τ²` se estima de una muestra de filas, no de toda la matriz (aproximación documentada).
+Disk: **9.8 GB free < 17 GB** for the h5ad → not downloaded. Instead:
+- Only the edges of the **candidate regulators** (top of Model 2) are needed, not the ~350M.
+- `model_edges_spike.py` **measures** (does not assume) the layout/chunking and the real cost of
+  reading one row per slice from S3 (anonymous `fsspec` + `h5py`). If viable, `model_edges.py`
+  fetches only those rows and runs the vectorized EB (seconds, ~15 MB RAM).
+- `τ²` is estimated from a sample of rows, not the whole matrix (documented approximation).
 
-Ver el veredicto real del spike en `docs/report.md` (sección Modelo 1).
+See the real spike verdict in `docs/report.md` (Model 1 section).
 
 ---
 
-## Cómo correr
+## How to run
 
 ```bash
-make model          # Modelo 2 (core)
-make spike          # Modelo 1 spike (opcional, requiere: pip install h5py s3fs fsspec)
+make model          # Model 2 (core)
+make spike          # Model 1 spike (optional, requires: pip install h5py s3fs fsspec)
 ```
 
-## Next steps (no incluidos)
+## Next steps (not included)
 
-- Reforzar `regpower` con reproducibilidad cross-donor/cross-guide real desde `DE_stats.h5ad`.
-- Término condición-específico `γ_{p,c,g}` y prior spike-and-slab (`z ~ Bernoulli(π)`) para la red.
-- Full-Bayes (NumPyro/PyMC) si el EB deja de ser suficiente.
+- Strengthen `regpower` with real cross-donor/cross-guide reproducibility from `DE_stats.h5ad`.
+- A condition-specific term `γ_{p,c,g}` and a spike-and-slab prior (`z ~ Bernoulli(π)`) for the network.
+- Full Bayes (NumPyro/PyMC) if EB stops being sufficient.

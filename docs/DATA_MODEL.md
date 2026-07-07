@@ -1,35 +1,35 @@
-# Modelo de datos — Genome-scale CD4+ T cell Perturb-seq (Marson 2025)
+# Data model — Genome-scale CD4+ T cell Perturb-seq (Marson 2025)
 
-El dataset es un **esquema en estrella** cuyo eje es la tripleta
-**(guía sgRNA → gen perturbado) × condición de cultivo × donante**.
-La expresión se agrega en cascada: **célula → pseudobulk → estadísticos de DE**.
+The dataset is a **star schema** whose axis is the triple
+**(sgRNA guide → perturbed gene) × culture condition × donor**.
+Expression is aggregated in a cascade: **cell → pseudobulk → DE statistics**.
 
-## Diagrama ER
+## ER diagram
 
 ```mermaid
 erDiagram
-    DONOR ||--o{ SAMPLE : "tiene"
-    SAMPLE ||--o{ CELL : "contiene (lane/library)"
-    GENE ||--o{ SGRNA : "es diana de"
-    SGRNA ||--o{ CELL : "detectada en (guide_id)"
+    DONOR ||--o{ SAMPLE : "has"
+    SAMPLE ||--o{ CELL : "contains (lane/library)"
+    GENE ||--o{ SGRNA : "is target of"
+    SGRNA ||--o{ CELL : "detected in (guide_id)"
     GENE ||--o{ CELL : "perturbed_gene_id"
 
-    SGRNA ||--o{ PSEUDOBULK : "agrega"
-    DONOR ||--o{ PSEUDOBULK : "agrega"
-    CELL }o--|| PSEUDOBULK : "agregada por (guide,donor,cond)"
+    SGRNA ||--o{ PSEUDOBULK : "aggregates"
+    DONOR ||--o{ PSEUDOBULK : "aggregates"
+    CELL }o--|| PSEUDOBULK : "aggregated by (guide,donor,cond)"
 
     GENE ||--o{ DE_RESULT : "target_contrast"
-    PSEUDOBULK ||--o{ DE_RESULT : "input a DESeq2"
-    DE_RESULT ||--o{ DE_VALUE : "por gen medido"
-    GENE ||--o{ DE_VALUE : "gen medido (var)"
+    PSEUDOBULK ||--o{ DE_RESULT : "input to DESeq2"
+    DE_RESULT ||--o{ DE_VALUE : "per measured gene"
+    GENE ||--o{ DE_VALUE : "measured gene (var)"
 
-    SGRNA ||--o{ DE_BY_GUIDE : "DE por guía"
-    DE_RESULT ||--o{ DE_BY_GUIDE : "desagrega"
-    DONOR ||--o{ DE_BY_DONOR : "par de donantes"
-    DE_RESULT ||--o{ DE_BY_DONOR : "desagrega"
+    SGRNA ||--o{ DE_BY_GUIDE : "DE per guide"
+    DE_RESULT ||--o{ DE_BY_GUIDE : "disaggregates"
+    DONOR ||--o{ DE_BY_DONOR : "donor pair"
+    DE_RESULT ||--o{ DE_BY_DONOR : "disaggregates"
 
-    SGRNA ||--o{ GUIDE_KD : "eficiencia KD"
-    GENE ||--o{ GUIDE_KD : "gen diana"
+    SGRNA ||--o{ GUIDE_KD : "KD efficiency"
+    GENE ||--o{ GUIDE_KD : "target gene"
 
     DONOR {
         string donor_id PK "CE0008162..."
@@ -47,7 +47,7 @@ erDiagram
         string donor_id FK
         string culture_condition "Rest|Stim8hr|Stim48hr"
         string x10xrun_id "R1|R2"
-        string library_id "= output cellranger"
+        string library_id "= cellranger output"
         string library_prep_kit
         string sequencing_platform
         date   harvest_date
@@ -56,7 +56,7 @@ erDiagram
     GENE {
         string gene_id PK "ENSG..."
         string gene_name
-        bool   mt "mitocondrial"
+        bool   mt "mitochondrial"
     }
 
     SGRNA {
@@ -65,16 +65,16 @@ erDiagram
         int    pos
         string strand
         string seq
-        string target_gene_id FK "diana curada"
+        string target_gene_id FK "curated target"
         string target_gene_name
-        string designed_target_gene_id "diana de diseño"
+        string designed_target_gene_id "designed target"
         string guide_type "targeting|non-targeting"
         int    distance_to_closest_target_tss
         bool   putative_bidirectional_promoter
     }
 
     CELL {
-        string barcode PK "obs_names del h5ad"
+        string barcode PK "obs_names of the h5ad"
         string lane_id FK "-> library/sample"
         string guide_id FK "-> SGRNA | 'multi-guide'"
         string perturbed_gene_id FK "-> GENE"
@@ -86,9 +86,9 @@ erDiagram
     }
 
     PSEUDOBULK {
-        string guide_id FK "PK compuesta"
-        string donor_id FK "PK compuesta"
-        string culture_condition "PK compuesta"
+        string guide_id FK "composite PK"
+        string donor_id FK "composite PK"
+        string culture_condition "composite PK"
         int    n_cells
         int    total_counts
         bool   keep_for_DE
@@ -96,22 +96,22 @@ erDiagram
     }
 
     DE_RESULT {
-        string target_contrast FK "gene_id, PK compuesta"
-        string culture_condition "PK compuesta"
+        string target_contrast FK "gene_id, composite PK"
+        string culture_condition "composite PK"
         string target_contrast_gene_name
         int    n_cells_target
         int    n_up_genes
         int    n_down_genes
-        int    n_downstream "trans-efectos"
+        int    n_downstream "trans-effects"
         float  ontarget_effect_size
         bool   ontarget_significant
-        int    n_guides "guías agregadas"
+        int    n_guides "aggregated guides"
     }
 
     DE_VALUE {
-        string target_contrast FK "PK compuesta"
-        string culture_condition FK "PK compuesta"
-        string gene_id FK "gen medido"
+        string target_contrast FK "composite PK"
+        string culture_condition FK "composite PK"
+        string gene_id FK "measured gene"
         float  log_fc
         float  p_value
         float  adj_p_value
@@ -121,7 +121,7 @@ erDiagram
     }
 
     DE_BY_GUIDE {
-        string guide_id FK "modalidad guide_1|guide_2"
+        string guide_id FK "modality guide_1|guide_2"
         string target_contrast FK
         string culture_condition FK
     }
@@ -133,8 +133,8 @@ erDiagram
     }
 
     GUIDE_KD {
-        string sgRNA FK "PK compuesta"
-        string culture_condition "PK compuesta"
+        string sgRNA FK "composite PK"
+        string culture_condition "composite PK"
         float  t_statistic
         float  adj_p_value
         bool   signif_knockdown
@@ -142,40 +142,40 @@ erDiagram
     }
 ```
 
-## Entidades y su origen físico
+## Entities and their physical origin
 
-| Entidad | Archivo(s) | Grano (1 fila =) |
+| Entity | File(s) | Grain (1 row =) |
 |---|---|---|
-| **DONOR** | `sample_metadata.suppl_table.csv` (desnormalizado) | un donante (4) |
-| **SAMPLE** | `sample_metadata.suppl_table.csv` | donante × condición × run (11) |
-| **GENE** | `.var` de cualquier h5ad (referencia) | un gen medido (~18k–36k) |
-| **SGRNA** | `sgrna_library_metadata.suppl_table.csv` | una guía (31.109) |
-| **CELL** | `D*_*.assigned_guide.h5ad` `.obs` | una célula |
-| **PSEUDOBULK** | `GWCD4i.pseudobulk_merged.h5ad` `.obs` | guía × donante × condición |
-| **DE_RESULT** | `GWCD4i.DE_stats.h5ad` `.obs` / `DE_stats.suppl_table.csv` | gen perturbado × condición (33.983) |
-| **DE_VALUE** | `GWCD4i.DE_stats.h5ad` `.layers` | (perturbación×condición) × gen medido |
-| **DE_BY_GUIDE** | `GWCD4i.DE_stats.by_guide.h5mu` | guía × condición |
-| **DE_BY_DONOR** | `GWCD4i.DE_stats.by_donors.h5mu` | par-de-donantes × perturbación × condición |
-| **GUIDE_KD** | `guide_kd_efficiency.suppl_table.csv` | guía × condición |
+| **DONOR** | `sample_metadata.suppl_table.csv` (denormalized) | one donor (4) |
+| **SAMPLE** | `sample_metadata.suppl_table.csv` | donor × condition × run (11) |
+| **GENE** | `.var` of any h5ad (reference) | one measured gene (~18k–36k) |
+| **SGRNA** | `sgrna_library_metadata.suppl_table.csv` | one guide (31,109) |
+| **CELL** | `D*_*.assigned_guide.h5ad` `.obs` | one cell |
+| **PSEUDOBULK** | `GWCD4i.pseudobulk_merged.h5ad` `.obs` | guide × donor × condition |
+| **DE_RESULT** | `GWCD4i.DE_stats.h5ad` `.obs` / `DE_stats.suppl_table.csv` | perturbed gene × condition (33,983) |
+| **DE_VALUE** | `GWCD4i.DE_stats.h5ad` `.layers` | (perturbation×condition) × measured gene |
+| **DE_BY_GUIDE** | `GWCD4i.DE_stats.by_guide.h5mu` | guide × condition |
+| **DE_BY_DONOR** | `GWCD4i.DE_stats.by_donors.h5mu` | donor-pair × perturbation × condition |
+| **GUIDE_KD** | `guide_kd_efficiency.suppl_table.csv` | guide × condition |
 
-## Claves y joins principales
+## Keys and main joins
 
-- **Gen** es la entidad de referencia central (`gene_id` = Ensembl `ENSG…`, `gene_name` = símbolo).
-  Aparece en dos roles: *gen perturbado* (diana de la guía) y *gen medido* (columna de la matriz de expresión / `.var`).
-- **SGRNA.target_gene_id → GENE.gene_id**: cada guía apunta a un gen (ojo: `designed_target_gene_id`
-  puede diferir de `target_gene_id` por curación post-hoc; hay ~1–2 guías por gen).
-- **CELL.guide_id → SGRNA.sgRNA** (valor especial `multi-guide` si se detectó más de una guía).
-  **CELL.lane_id → SAMPLE** (una lane 10x = un output de cellranger = una library).
-- **PSEUDOBULK** = agregación de CELL por la clave compuesta `(guide_id, donor_id, culture_condition)`.
-- **DE_RESULT** = agregación por `(target_contrast = gene_id, culture_condition)`; junta las `n_guides` guías del gen.
-  `DE_stats.suppl_table.csv` es exactamente el `.obs` de este objeto en forma tabular.
-- **DE_VALUE** (en `.layers`: `log_fc`, `zscore`, `adj_p_value`, …) es la relación N:N entre
-  **DE_RESULT** (obs) y **GENE** (var): para cada perturbación×condición, un vector sobre los genes medidos.
-- **DE_BY_GUIDE** y **DE_BY_DONOR** son la misma estructura que DE_RESULT pero desagregada
-  (por guía individual, o por par de donantes) — sirven para métricas de reproducibilidad
-  (`guide_correlation_*`, `donor_correlation_*`) que viven en `DE_RESULT.obs`.
+- **Gene** is the central reference entity (`gene_id` = Ensembl `ENSG…`, `gene_name` = symbol).
+  It appears in two roles: *perturbed gene* (the guide's target) and *measured gene* (a column of the expression matrix / `.var`).
+- **SGRNA.target_gene_id → GENE.gene_id**: each guide points to a gene (note: `designed_target_gene_id`
+  may differ from `target_gene_id` due to post-hoc curation; there are ~1–2 guides per gene).
+- **CELL.guide_id → SGRNA.sgRNA** (special value `multi-guide` if more than one guide was detected).
+  **CELL.lane_id → SAMPLE** (one 10x lane = one cellranger output = one library).
+- **PSEUDOBULK** = aggregation of CELL by the composite key `(guide_id, donor_id, culture_condition)`.
+- **DE_RESULT** = aggregation by `(target_contrast = gene_id, culture_condition)`; it joins the gene's `n_guides` guides.
+  `DE_stats.suppl_table.csv` is exactly the `.obs` of this object in tabular form.
+- **DE_VALUE** (in `.layers`: `log_fc`, `zscore`, `adj_p_value`, …) is the N:N relation between
+  **DE_RESULT** (obs) and **GENE** (var): for each perturbation×condition, a vector over the measured genes.
+- **DE_BY_GUIDE** and **DE_BY_DONOR** are the same structure as DE_RESULT but disaggregated
+  (by individual guide, or by donor pair) — they feed the reproducibility metrics
+  (`guide_correlation_*`, `donor_correlation_*`) that live in `DE_RESULT.obs`.
 
-### Nota sobre IDs de donante
-Las etiquetas cortas `D1..D4` (nombres de archivo cell-level) se resuelven al `donor_id`
-canónico `CE…` vía `sample_metadata` (`cell_sample_id` codifica `run_D#_condición`).
-Las modalidades de `DE_stats.by_donors.h5mu` usan los IDs `CE…` unidos por `_`.
+### Note on donor IDs
+The short labels `D1..D4` (cell-level file names) resolve to the canonical `donor_id`
+`CE…` via `sample_metadata` (`cell_sample_id` encodes `run_D#_condition`).
+The modalities of `DE_stats.by_donors.h5mu` use the `CE…` IDs joined by `_`.

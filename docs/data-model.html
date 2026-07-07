@@ -1,4 +1,4 @@
-<title>Modelo de datos · CD4+ T cell Perturb-seq</title>
+<title>Data model · CD4+ T cell Perturb-seq</title>
 <style>
   :root{
     --bg:#0b0e14; --panel:#12161f; --panel-2:#161b26; --panel-3:#1b2130;
@@ -282,33 +282,33 @@
 
 <div class="wrap">
   <header>
-    <div class="eyebrow">Modelo de datos · Perturb-seq</div>
+    <div class="eyebrow">Data model · Perturb-seq</div>
     <h1>Genome-scale CD4+ T&nbsp;cell Perturb-seq</h1>
-    <p class="sub">Dos lecturas del mismo dataset: el <b>flujo de granularidad</b> (célula → efecto diferencial)
-      y el <b>mapa de artefactos</b> (qué vive en cada archivo). Clic en cualquier entidad para su esquema y datos.</p>
+    <p class="sub">Two readings of the same dataset: the <b>granularity flow</b> (cell → differential effect)
+      and the <b>artifact map</b> (what lives in each file). Click any entity for its schema and data.</p>
     <div class="stats" id="stats"></div>
   </header>
 
   <div class="tabs" role="tablist">
-    <button class="tab" role="tab" id="tab-flow" aria-selected="true" aria-controls="view-flow">Flujo de granularidad</button>
-    <button class="tab" role="tab" id="tab-files" aria-selected="false" aria-controls="view-files">Artefactos y archivos</button>
+    <button class="tab" role="tab" id="tab-flow" aria-selected="true" aria-controls="view-flow">Granularity flow</button>
+    <button class="tab" role="tab" id="tab-files" aria-selected="false" aria-controls="view-files">Artifacts and files</button>
     <button class="tab" role="tab" id="tab-eda" aria-selected="false" aria-controls="view-eda">EDA · 80/20</button>
-    <button class="tab" role="tab" id="tab-study" aria-selected="false" aria-controls="view-study">Estudio · reguladores</button>
+    <button class="tab" role="tab" id="tab-study" aria-selected="false" aria-controls="view-study">Study · regulators</button>
   </div>
 
   <!-- ============ VIEW: FLOW ============ -->
   <section id="view-flow" role="tabpanel" aria-labelledby="tab-flow">
-    <p class="tabhint mono">¿Cómo fluye la información desde célula hasta efecto diferencial? · spine central · Esc cierra el detalle</p>
+    <p class="tabhint mono">How does information flow from cell to differential effect? · central spine · Esc closes the detail</p>
     <div class="pgrid" id="pgrid">
       <svg class="plinks" id="plinks" aria-hidden="true"></svg>
 
       <div class="zone zone-refs">
-        <h3 class="zone-h">Dimensiones y referencia</h3>
+        <h3 class="zone-h">Dimensions and reference</h3>
         <div id="ref-slot"></div>
       </div>
 
       <div class="zone zone-spine">
-        <h3 class="zone-h">Flujo de granularidad</h3>
+        <h3 class="zone-h">Granularity flow</h3>
         <div id="spine-slot"></div>
       </div>
 
@@ -321,25 +321,25 @@
 
   <!-- ============ VIEW: FILES ============ -->
   <section id="view-files" role="tabpanel" aria-labelledby="tab-files" class="hide">
-    <p class="tabhint mono">¿En qué archivo vive cada cosa? · clic en un objeto para su esquema</p>
+    <p class="tabhint mono">Which file does each thing live in? · click an object for its schema</p>
     <div class="files" id="files"></div>
   </section>
 
   <!-- ============ VIEW: EDA ============ -->
   <section id="view-eda" role="tabpanel" aria-labelledby="tab-eda" class="hide">
-    <p class="tabhint mono">Análisis exploratorio 80/20 · solo con las tablas suplementarias (~15 MB) · regenerable con <span style="color:var(--accent)">scripts/eda.py</span></p>
+    <p class="tabhint mono">80/20 exploratory analysis · supplementary tables only (~15 MB) · reproducible with <span style="color:var(--accent)">scripts/eda.py</span></p>
     <div class="findings" id="findings"></div>
     <div class="charts" id="charts"></div>
   </section>
 
   <!-- ============ VIEW: STUDY ============ -->
   <section id="view-study" role="tabpanel" aria-labelledby="tab-study" class="hide">
-    <p class="tabhint mono">De la matriz de DE a reguladores robustos con incertidumbre · empirical-Bayes + auditorías</p>
+    <p class="tabhint mono">From the DE matrix to robust regulators with uncertainty · empirical-Bayes + audits</p>
     <div id="study"></div>
   </section>
 
   <footer>
-    <span>Fuente: <a href="https://virtualcellmodels.cziscience.com/dataset/genome-scale-tcell-perturb-seq">CZI Virtual Cells Platform</a></span>
+    <span>Source: <a href="https://virtualcellmodels.cziscience.com/dataset/genome-scale-tcell-perturb-seq">CZI Virtual Cells Platform</a></span>
     <span class="mono">s3://genome-scale-tcell-perturb-seq/marson2025_data/</span>
     <span>Marson Lab · 2025</span>
   </footer>
@@ -348,8 +348,8 @@
 <div class="scrim" id="scrim"></div>
 <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dTitle" tabindex="-1">
   <div class="dhead">
-    <div class="eyebrow" id="dEye">Entidad</div>
-    <button class="close" id="dClose" aria-label="Cerrar">✕</button>
+    <div class="eyebrow" id="dEye">Entity</div>
+    <button class="close" id="dClose" aria-label="Close">✕</button>
     <h2 id="dTitle" class="mono">—</h2>
     <p class="role" id="dRole"></p>
     <div class="chips" id="dChips"></div>
@@ -395,69 +395,69 @@ const G={
 
 /* ---------------- entities ---------------- */
 const E={
-  donor:{name:"DONOR",cls:"dim",g:G.donor,tag:"Dimensión",grain:"1 donante",rows:"4",key:"donor_id",
-    role:"Los 4 donantes primarios de células T CD4+. Metadatos demográficos.",
+  donor:{name:"DONOR",cls:"dim",g:G.donor,tag:"Dimension",grain:"1 donor",rows:"4",key:"donor_id",
+    role:"The 4 primary CD4+ T cell donors. Demographic metadata.",
     file:"sample_metadata.suppl_table.csv",
-    fields:[["donor_id","str · CE…","pk","ID canónico"],["age","int","","Edad (años)"],["sex","str","","Sexo"],["ethnicity","str","","Etnia"],["blood_type","str","","Grupo sanguíneo"],["smoker","bool","","Fumador"]],viz:"donor"},
-  sample:{name:"SAMPLE",cls:"dim",g:G.sample,tag:"Dimensión",grain:"donante × condición × run",rows:"12",key:"cell_sample_id",
-    role:"Una muestra biológica = donante × condición × run de 10x. Cada library_id = un output de cellranger.",
+    fields:[["donor_id","str · CE…","pk","canonical ID"],["age","int","","Age (years)"],["sex","str","","Sex"],["ethnicity","str","","Ethnicity"],["blood_type","str","","Blood type"],["smoker","bool","","Smoker"]],viz:"donor"},
+  sample:{name:"SAMPLE",cls:"dim",g:G.sample,tag:"Dimension",grain:"donor × condition × run",rows:"12",key:"cell_sample_id",
+    role:"One biological sample = donor × condition × 10x run. Each library_id = one cellranger output.",
     file:"sample_metadata.suppl_table.csv",
-    fields:[["cell_sample_id","str","pk","CD4i_R1_D1_Rest"],["donor_id","str","fk","→ DONOR"],["culture_condition","str","fk","→ CONDITION"],["10xrun_id","str","","Lote R1 / R2"],["library_id","str","","= cellranger"],["sequencing_platform","str","","p. ej. Ultima"]],viz:"sample"},
-  condition:{name:"CONDITION",cls:"dim",g:G.cond,tag:"Dimensión",grain:"1 condición",rows:"3",key:"culture_condition",
-    role:"Condición de cultivo: reposo o estimulación TCR a 8h / 48h. Parte de la clave de agregación del pseudobulk.",
-    file:"—  (valor categórico)",
+    fields:[["cell_sample_id","str","pk","CD4i_R1_D1_Rest"],["donor_id","str","fk","→ DONOR"],["culture_condition","str","fk","→ CONDITION"],["10xrun_id","str","","Batch R1 / R2"],["library_id","str","","= cellranger"],["sequencing_platform","str","","e.g. Ultima"]],viz:"sample"},
+  condition:{name:"CONDITION",cls:"dim",g:G.cond,tag:"Dimension",grain:"1 condition",rows:"3",key:"culture_condition",
+    role:"Culture condition: rest or TCR stimulation at 8h / 48h. Part of the pseudobulk aggregation key.",
+    file:"—  (categorical value)",
     fields:[["culture_condition","str","pk","Rest · Stim8hr · Stim48hr"]],viz:"condition"},
-  sgrna:{name:"SGRNA",cls:"dim",g:G.guide,tag:"Referencia",grain:"1 guía",rows:"26,504",key:"sgRNA",
-    role:"Librería CRISPRi de sgRNAs a escala genómica. ~2 guías por gen diana, más controles no dirigidos (NTC).",
+  sgrna:{name:"SGRNA",cls:"dim",g:G.guide,tag:"Reference",grain:"1 guide",rows:"26,504",key:"sgRNA",
+    role:"Genome-scale CRISPRi sgRNA library. ~2 guides per target gene, plus non-targeting controls (NTC).",
     file:"sgrna_library_metadata.suppl_table.csv",
-    fields:[["sgRNA","str","pk","ID de la guía"],["target_gene_id","str","fk","→ GENE (diana curada)"],["designed_target_gene_id","str","fk","Diana de diseño"],["chromosome / pos / strand","str/int","","Sitio genómico"],["seq","str","","Secuencia"],["guide_type","str","","targeting · non-targeting"]],viz:"sgrna"},
-  perturbedgene:{name:"PERTURBED_GENE",cls:"dim",g:G.gene,tag:"Referencia · alias de GENE",grain:"1 gen (diana)",rows:"12,654",key:"gene_id",
-    role:"El gen silenciado por la guía. Es la tabla GENE en su rol de diana: define el eje de filas (obs) de los resultados de DE.",
-    file:".var / gene_id (tabla GENE)",
-    fields:[["gene_id","str · ENSG…","pk","Identificador Ensembl"],["gene_name","str","","Símbolo"],["target_contrast","str","fk","como aparece en DE_RESULT"]],viz:"perturbedgene"},
-  measuredgene:{name:"MEASURED_GENE",cls:"dim",g:G.gene,tag:"Referencia · alias de GENE",grain:"1 gen (medido)",rows:"10,282",key:"gene_id",
-    role:"El gen cuyo cambio de expresión se cuantifica. Es la misma tabla GENE en su rol de readout: define el eje de columnas (var) de la matriz de DE.",
-    file:".var (tabla GENE)",
-    fields:[["gene_id","str · ENSG…","pk","Identificador Ensembl"],["gene_name","str","","Símbolo"],["mt","bool","","Mitocondrial"]],viz:"measuredgene"},
-  cell:{name:"CELL",cls:"cascade",g:G.cell,tag:"Nivel 0 · observación",grain:"1 célula",rows:"~22M",key:"cell barcode",
-    role:"Perfil de expresión de una célula. Su guía detectada la asigna a una perturbación; >1 guía → 'multi-guide'.",
+    fields:[["sgRNA","str","pk","guide ID"],["target_gene_id","str","fk","→ GENE (curated target)"],["designed_target_gene_id","str","fk","Designed target"],["chromosome / pos / strand","str/int","","Genomic site"],["seq","str","","Sequence"],["guide_type","str","","targeting · non-targeting"]],viz:"sgrna"},
+  perturbedgene:{name:"PERTURBED_GENE",cls:"dim",g:G.gene,tag:"Reference · alias of GENE",grain:"1 gene (target)",rows:"12,654",key:"gene_id",
+    role:"The gene silenced by the guide. It is the GENE table in its target role: it defines the row axis (obs) of the DE results.",
+    file:".var / gene_id (GENE table)",
+    fields:[["gene_id","str · ENSG…","pk","Ensembl identifier"],["gene_name","str","","Symbol"],["target_contrast","str","fk","as it appears in DE_RESULT"]],viz:"perturbedgene"},
+  measuredgene:{name:"MEASURED_GENE",cls:"dim",g:G.gene,tag:"Reference · alias of GENE",grain:"1 gene (measured)",rows:"10,282",key:"gene_id",
+    role:"The gene whose expression change is quantified. It is the same GENE table in its readout role: it defines the column axis (var) of the DE matrix.",
+    file:".var (GENE table)",
+    fields:[["gene_id","str · ENSG…","pk","Ensembl identifier"],["gene_name","str","","Symbol"],["mt","bool","","Mitochondrial"]],viz:"measuredgene"},
+  cell:{name:"CELL",cls:"cascade",g:G.cell,tag:"Level 0 · observation",grain:"1 cell",rows:"~22M",key:"cell barcode",
+    role:"Expression profile of one cell. Its detected guide assigns it to a perturbation; >1 guide → 'multi-guide'.",
     file:"D*_*.assigned_guide.h5ad · .obs",
-    fields:[["barcode","str","pk","obs_names"],["lane_id","str","fk","→ SAMPLE (lane 10x)"],["guide_id","str","fk","→ SGRNA · o 'multi-guide'"],["perturbed_gene_id","str","fk","→ GENE"],["total_counts","int","","UMIs totales"],["n_genes_by_counts","int","","Genes detectados"],["pct_counts_mt","float","","% mitocondrial"],["low_quality","bool","","Marca de filtrado"]],viz:"cell"},
-  pseudobulk:{name:"PSEUDOBULK",cls:"cascade",g:G.pseudo,tag:"Nivel 1 · agregado",grain:"guía × donante × condición",rows:"n_vars 18,129",key:"guide + donor + cond",
-    role:"Suma de UMIs de todas las células que comparten (guía, donante, condición). Input de DESeq2.",
+    fields:[["barcode","str","pk","obs_names"],["lane_id","str","fk","→ SAMPLE (10x lane)"],["guide_id","str","fk","→ SGRNA · or 'multi-guide'"],["perturbed_gene_id","str","fk","→ GENE"],["total_counts","int","","total UMIs"],["n_genes_by_counts","int","","detected genes"],["pct_counts_mt","float","","% mitochondrial"],["low_quality","bool","","filter flag"]],viz:"cell"},
+  pseudobulk:{name:"PSEUDOBULK",cls:"cascade",g:G.pseudo,tag:"Level 1 · aggregate",grain:"guide × donor × condition",rows:"n_vars 18,129",key:"guide + donor + cond",
+    role:"Sum of UMIs of all cells sharing (guide, donor, condition). Input to DESeq2.",
     file:"GWCD4i.pseudobulk_merged.h5ad · .obs",
-    fields:[["guide_id","str","fk pk","→ SGRNA"],["donor_id","str","fk pk","→ DONOR"],["culture_condition","str","fk pk","→ CONDITION"],["n_cells","int","","Células agregadas"],["total_counts","int","","UMIs sumados"],["keep_for_DE","bool","","Apto para DE"],["keep_effective_guides","bool","","Guía efectiva"]],viz:"pseudobulk"},
-  deresult:{name:"DE_RESULT",cls:"cascade",g:G.de,tag:"Nivel 2 · resultado",grain:"gen perturbado × condición",rows:"33,983",key:"target_contrast + cond",
-    role:"DESeq2 por perturbación × condición, agregando las guías del gen. Su .obs = DE_stats.suppl_table.csv.",
+    fields:[["guide_id","str","fk pk","→ SGRNA"],["donor_id","str","fk pk","→ DONOR"],["culture_condition","str","fk pk","→ CONDITION"],["n_cells","int","","aggregated cells"],["total_counts","int","","summed UMIs"],["keep_for_DE","bool","","DE-eligible"],["keep_effective_guides","bool","","effective guide"]],viz:"pseudobulk"},
+  deresult:{name:"DE_RESULT",cls:"cascade",g:G.de,tag:"Level 2 · result",grain:"perturbed gene × condition",rows:"33,983",key:"target_contrast + cond",
+    role:"DESeq2 per perturbation × condition, aggregating the gene's guides. Its .obs = DE_stats.suppl_table.csv.",
     file:"GWCD4i.DE_stats.h5ad · .obs",
-    fields:[["target_contrast","str","fk pk","→ GENE (perturbado)"],["culture_condition","str","fk pk","→ CONDITION"],["n_cells_target","int","","Células con guía"],["n_up_genes / n_down_genes","int","","DEGs ↑ / ↓ (10% FDR)"],["n_downstream","int","","Trans-efectos"],["ontarget_effect_size","float","","Efecto en la diana"],["ontarget_significant","bool","","KD on-target signif."],["n_guides","int","","Guías agregadas"]],viz:"deresult"},
-  devalue:{name:"DE_VALUE",cls:"cascade",g:G.value,tag:"Nivel 3 · matriz",grain:"contraste × gen medido",rows:"n_vars 10,282",key:"contrast × gene_id",
-    role:"Los .layers del objeto de DE: para cada perturbación×condición, un vector sobre los genes medidos. N:N entre DE_RESULT (obs) y GENE (var).",
+    fields:[["target_contrast","str","fk pk","→ GENE (perturbed)"],["culture_condition","str","fk pk","→ CONDITION"],["n_cells_target","int","","cells with guide"],["n_up_genes / n_down_genes","int","","DEGs ↑ / ↓ (10% FDR)"],["n_downstream","int","","trans-effects"],["ontarget_effect_size","float","","effect on the target"],["ontarget_significant","bool","","significant on-target KD"],["n_guides","int","","aggregated guides"]],viz:"deresult"},
+  devalue:{name:"DE_VALUE",cls:"cascade",g:G.value,tag:"Level 3 · matrix",grain:"contrast × measured gene",rows:"n_vars 10,282",key:"contrast × gene_id",
+    role:"The .layers of the DE object: for each perturbation×condition, a vector over the measured genes. N:N between DE_RESULT (obs) and GENE (var).",
     file:"GWCD4i.DE_stats.h5ad · .layers",
-    fields:[["target_contrast + cond","str","fk","→ DE_RESULT (obs)"],["gene_id","str","fk","→ GENE (var, medido)"],["log_fc","float","","Log2 fold-change"],["zscore","float","","log_fc / lfcSE"],["p_value / adj_p_value","float","","Crudo / FDR"],["baseMean","float","","Expresión basal"]],viz:"devalue"},
-  byguide:{name:"DE_BY_GUIDE",cls:"derived",g:G.guide,tag:"Derivado",grain:"guía × condición",rows:"2 modalidades",key:"{contrast}_{cond}",src:"DE_RESULT",
-    role:"Mismo esquema que DE_RESULT pero DE por guía individual (guide_1 / guide_2). Base de la correlación entre guías.",
+    fields:[["target_contrast + cond","str","fk","→ DE_RESULT (obs)"],["gene_id","str","fk","→ GENE (var, measured)"],["log_fc","float","","Log2 fold-change"],["zscore","float","","log_fc / lfcSE"],["p_value / adj_p_value","float","","raw / FDR"],["baseMean","float","","baseline expression"]],viz:"devalue"},
+  byguide:{name:"DE_BY_GUIDE",cls:"derived",g:G.guide,tag:"Derived",grain:"guide × condition",rows:"2 modalities",key:"{contrast}_{cond}",src:"DE_RESULT",
+    role:"Same schema as DE_RESULT but DE per individual guide (guide_1 / guide_2). Basis of the cross-guide correlation.",
     file:"GWCD4i.DE_stats.by_guide.h5mu",
     fields:[["obs key","str","pk","{target_contrast}_{cond}"],["guide_id","str","fk","→ SGRNA (guide_1/2)"],["target_contrast","str","fk","→ GENE"],["…layers","float","","log_fc · zscore · padj"]],viz:"byguide"},
-  bydonorpair:{name:"DE_BY_DONOR_PAIR",cls:"derived",g:G.donor,tag:"Derivado",grain:"par × perturbación × cond",rows:"6 pares",key:"{contrast}_{cond}",src:"DE_RESULT",
-    role:"DE recalculada dentro de cada par de donantes (una modalidad por par). Base de la reproducibilidad cross-donor.",
+  bydonorpair:{name:"DE_BY_DONOR_PAIR",cls:"derived",g:G.donor,tag:"Derived",grain:"pair × perturbation × cond",rows:"6 pairs",key:"{contrast}_{cond}",src:"DE_RESULT",
+    role:"DE recomputed within each donor pair (one modality per pair). Basis of cross-donor reproducibility.",
     file:"GWCD4i.DE_stats.by_donors.h5mu",
     fields:[["obs key","str","pk","{target_contrast}_{cond}"],["donor_pair","str","fk","→ DONOR × DONOR"],["target_contrast","str","fk","→ GENE"],["…layers","float","","log_fc · zscore · padj"]],viz:"bydonorpair"},
-  guidekd:{name:"GUIDE_KD_EFFICIENCY",cls:"derived",g:G.kd,tag:"QC",grain:"guía × condición",rows:"—",key:"sgRNA + cond",src:"SGRNA",
-    role:"Eficiencia de knockdown de cada guía: t-test de la expresión de la diana vs controles no dirigidos, por condición.",
+  guidekd:{name:"GUIDE_KD_EFFICIENCY",cls:"derived",g:G.kd,tag:"QC",grain:"guide × condition",rows:"—",key:"sgRNA + cond",src:"SGRNA",
+    role:"Knockdown efficiency of each guide: t-test of target expression vs. non-targeting controls, per condition.",
     file:"guide_kd_efficiency.suppl_table.csv",
-    fields:[["sgRNA","str","fk pk","→ SGRNA"],["culture_condition","str","pk","→ CONDITION"],["perturbed_gene_id","str","fk","→ GENE"],["t_statistic","float","","Welch vs NTC (neg=KD)"],["adj_p_value","float","","FDR"],["signif_knockdown","bool","","KD significativo"]],viz:"guidekd"}
+    fields:[["sgRNA","str","fk pk","→ SGRNA"],["culture_condition","str","pk","→ CONDITION"],["perturbed_gene_id","str","fk","→ GENE"],["t_statistic","float","","Welch vs NTC (neg=KD)"],["adj_p_value","float","","FDR"],["signif_knockdown","bool","","significant KD"]],viz:"guidekd"}
 };
 
 /* ---------------- stats strip ---------------- */
-$("#stats").innerHTML=[["4","donantes"],["12","muestras · 4×3"],["26,504","guías → 12,654 genes"],
-  ["33,983","tests de DE"],["~1.8 TB","tamaño total"]]
+$("#stats").innerHTML=[["4","donors"],["12","samples · 4×3"],["26,504","guides → 12,654 genes"],
+  ["33,983","DE tests"],["~1.8 TB","total size"]]
   .map(([n,k])=>`<div class="stat"><div class="n">${n}</div><div class="k">${k}</div></div>`).join("");
 
 /* ---------------- card builder ---------------- */
 function card(id,extra){
   const e=E[id];
-  const src=extra&&e.src?`<div class="refcard-src">fuente · <b>${e.src}</b></div>`:"";
+  const src=extra&&e.src?`<div class="refcard-src">source · <b>${e.src}</b></div>`:"";
   return `<button class="ecard ${e.cls}${extra&&extra.big?' big':''}" data-id="${id}" id="n-${id}">
     <div class="etag">${e.tag}</div>
     <div class="enm">${e.g}${e.name}</div>
@@ -473,7 +473,7 @@ function arrow(lb){
   return `<div class="flowarr"><span class="ln"></span>${lb?`<span class="lb">${lb}</span>`:""}<span class="cv">▼</span><span class="ln"></span></div>`;
 }
 const spine=[
-  ["cell","desde SAMPLE · una muestra → sus células"],
+  ["cell","from SAMPLE · one sample → its cells"],
   ["pseudobulk","group by  guide × donor × condition"],
   ["deresult","DESeq2"],
   ["devalue","layers · log_fc, zscore, padj"]
@@ -483,9 +483,9 @@ $("#spine-slot").innerHTML=spine.map(([id,lb])=>arrow(lb)+card(id,{big:true})).j
 /* references */
 $("#ref-slot").innerHTML=
   card("donor")+card("sample")+card("condition")+
-  `<div class="subhead">Referencia genética</div>`+
+  `<div class="subhead">Genetic reference</div>`+
   card("sgrna")+card("perturbedgene")+card("measuredgene")+
-  `<div class="gene-note">PERTURBED_GENE y MEASURED_GENE<br>son la misma tabla <b>GENE</b> (gene_id)</div>`;
+  `<div class="gene-note">PERTURBED_GENE and MEASURED_GENE<br>are the same <b>GENE</b> table (gene_id)</div>`;
 
 /* derived */
 $("#der-slot").innerHTML=card("byguide",{src:1})+card("bydonorpair",{src:1})+card("guidekd",{src:1});
@@ -529,18 +529,18 @@ function drawLinks(){
 /* ---------------- files view ---------------- */
 const FILES=[
   {fn:"D*_*.assigned_guide.h5ad",sz:"12 archivos · ~1.7 TB",cls:"cascade",
-   fd:"Matrices de conteo single-cell, una por donante × condición.",objs:[["cell","1 célula"]]},
+   fd:"Single-cell count matrices, one per donor × condition.",objs:[["cell","1 cell"]]},
   {fn:"GWCD4i.pseudobulk_merged.h5ad",sz:"45 GB",cls:"cascade",
-   fd:"Perfiles de expresión pseudobulk agregados.",objs:[["pseudobulk","guía×donante×cond"]]},
+   fd:"Aggregated pseudobulk expression profiles.",objs:[["pseudobulk","guide×donor×cond"]]},
   {fn:"GWCD4i.DE_stats.h5ad",sz:"17 GB",cls:"cascade",
-   fd:"Resultados de DE: estadísticos en .obs y la matriz por gen en .layers.",objs:[["deresult",".obs"],["devalue",".layers"]]},
+   fd:"DE results: statistics in .obs and the per-gene matrix in .layers.",objs:[["deresult",".obs"],["devalue",".layers"]]},
   {fn:"GWCD4i.DE_stats.by_guide.h5mu",sz:"29 GB",cls:"derived",
-   fd:"DE por guía individual — reproducibilidad técnica.",objs:[["byguide","guía×cond"]]},
+   fd:"DE per individual guide — technical reproducibility.",objs:[["byguide","guide×cond"]]},
   {fn:"GWCD4i.DE_stats.by_donors.h5mu",sz:"17 GB",cls:"derived",
-   fd:"DE por par de donantes — reproducibilidad biológica.",objs:[["bydonorpair","par×cond"]]},
+   fd:"DE per donor pair — biological reproducibility.",objs:[["bydonorpair","pair×cond"]]},
   {fn:"*.suppl_table.csv",sz:"~15 MB",cls:"dim",
-   fd:"Metadatos y QC tabulares: muestras, donantes, librería de guías, eficiencia de KD.",
-   objs:[["sample","muestras"],["donor","donantes"],["sgrna","guías"],["guidekd","KD eff."]]}
+   fd:"Tabular metadata and QC: samples, donors, guide library, KD efficiency.",
+   objs:[["sample","samples"],["donor","donors"],["sgrna","guides"],["guidekd","KD eff."]]}
 ];
 $("#files").innerHTML=FILES.map(f=>
   `<div class="file ${f.cls}">
@@ -560,44 +560,44 @@ function bars(rows,color){
       <span class="vv">${r[2]??fmt(r[1])}</span></div>`;}).join("")+`</div>`;
 }
 function sec(t){return `<div class="sec-t">${t}</div>`;}
-function geneCallout(){return `<div class="callout"><b>PERTURBED_GENE</b> y <b>MEASURED_GENE</b> son la misma tabla <b>GENE</b> (clave <span class="mono">gene_id</span>) en dos roles: eje de filas (qué se silencia) y eje de columnas (qué se mide).</div>`;}
+function geneCallout(){return `<div class="callout"><b>PERTURBED_GENE</b> and <b>MEASURED_GENE</b> are the same <b>GENE</b> table (key <span class="mono">gene_id</span>) in two roles: the row axis (what is silenced) and the column axis (what is measured).</div>`;}
 
 const VIZ={
-  donor(){return sec("Los 4 donantes")+`<div class="donor-grid">`+D.donors.map(d=>
-    `<div class="dcard"><div class="id">${d.id}</div><div class="age">${d.age}<small> años · ${d.sex}</small></div>
-      <div class="meta">${d.eth}<br>Grupo ${d.bt} · no fumador</div></div>`).join("")+`</div>`+
-    `<div class="callout">Cohorte pequeña y diversa: <b>3 mujeres / 1 hombre</b>, 22–34 años, 4 etnias, todos <b>O+</b>. Cada donante aporta las 3 condiciones.</div>`;},
+  donor(){return sec("The 4 donors")+`<div class="donor-grid">`+D.donors.map(d=>
+    `<div class="dcard"><div class="id">${d.id}</div><div class="age">${d.age}<small> yrs · ${d.sex}</small></div>
+      <div class="meta">${d.eth}<br>Type ${d.bt} · non-smoker</div></div>`).join("")+`</div>`+
+    `<div class="callout">Small, diverse cohort: <b>3 female / 1 male</b>, 22–34 years, 4 ethnicities, all <b>O+</b>. Each donor contributes all 3 conditions.</div>`;},
   sample(){let m=`<div class="matrix"><div></div>`+D.conditions.map(c=>`<div class="mh">${c}</div>`).join("");
     ["D1","D2","D3","D4"].forEach((d,i)=>{m+=`<div class="rl">${d}</div>`+D.conditions.map(()=>`<div class="cell${i>=1?' r2':''}">✓</div>`).join("");});
-    m+=`</div>`;return sec("Diseño donante × condición")+m+
-    `<div class="callout"><b>12 muestras</b> = 4 donantes × 3 condiciones, en 2 lotes de 10x: <b>R1</b> (4) y <b>R2</b> (8).</div>`;},
-  condition(){return sec("Línea temporal de estímulo")+
+    m+=`</div>`;return sec("Donor × condition design")+m+
+    `<div class="callout"><b>12 samples</b> = 4 donors × 3 conditions, in 2 10x batches: <b>R1</b> (4) and <b>R2</b> (8).</div>`;},
+  condition(){return sec("Stimulation timeline")+
     `<div class="funnel">
-      <div class="fstep"><span class="fn">Rest</span><span class="fk">Sin estimular · <b>${fmt(D.deByCond.Rest)}</b> tests de DE</span></div>
-      <div class="fstep"><span class="fn" style="color:var(--accent)">Stim8hr</span><span class="fk">TCR 8h · <b>${fmt(D.deByCond.Stim8hr)}</b> · pico de trans-efectos</span></div>
+      <div class="fstep"><span class="fn">Rest</span><span class="fk">Unstimulated · <b>${fmt(D.deByCond.Rest)}</b> DE tests</span></div>
+      <div class="fstep"><span class="fn" style="color:var(--accent)">Stim8hr</span><span class="fk">TCR 8h · <b>${fmt(D.deByCond.Stim8hr)}</b> · peak of trans-effects</span></div>
       <div class="fstep"><span class="fn">Stim48hr</span><span class="fk">TCR 48h · <b>${fmt(D.deByCond.Stim48hr)}</b> tests</span></div>
-    </div>`+`<div class="callout">La condición modula qué reguladores importan: los hubs de señalización del TCR dominan en <b>Stim8hr</b>.</div>`;},
-  sgrna(){const gpg=Object.entries(D.guidesPerGene).map(([k,v])=>[`${k} guía${k==="1"?"":"s"}/gen`,v]);
-    return sec("Guías por gen diana")+bars(gpg,"var(--amber)")+
-    `<div class="callout"><b>~2 guías por gen</b> (12,440 genes) → replicación interna para las correlaciones cross-guide. Más <b>${fmt(D.ntc)}</b> controles NTC.</div>`+
-    sec("Guías por cromosoma (top 8)")+bars(Object.entries(D.chrom),"var(--amber)");},
-  perturbedgene(){return sec("Rol: gen perturbado")+
-    `<div class="funnel"><div class="fstep"><span class="fn">12,654</span><span class="fk"><b>genes con guía</b> en la librería CRISPRi</span></div>
-      <div class="fstep"><span class="fn" style="color:var(--up)">34k</span><span class="fk">contrastes = gen × condición en <b>DE_RESULT</b></span></div></div>`+geneCallout();},
-  measuredgene(){return sec("Rol: gen medido")+
-    `<div class="funnel"><div class="fstep"><span class="fn">10,282</span><span class="fk"><b>genes medidos</b> = columnas (.var) de la matriz de DE</span></div>
-      <div class="fstep"><span class="fn" style="color:var(--down)">.layers</span><span class="fk">log_fc · zscore · adj_p_value por gen</span></div></div>`+geneCallout();},
-  cell(){return sec("Pasaporte de la célula (.obs)")+
-    `<div class="callout">Cada célula lleva su <b>guía asignada</b>, el <b>gen perturbado</b> y su QC (total_counts, pct_counts_mt, low_quality). La guía es lo que la ancla a una perturbación.</div>`+
-    sec("De célula a perturbación")+
-    `<div class="funnel"><div class="fstep"><span class="fn">1</span><span class="fk">célula → <b>1 guía</b> (o 'multi-guide')</span></div>
-      <div class="farr">↓</div><div class="fstep"><span class="fn">1</span><span class="fk">guía → <b>1 gen</b> perturbado</span></div></div>`;},
-  pseudobulk(){return sec("Cascada de agregación")+
-    `<div class="funnel"><div class="fstep"><span class="fn">~22M</span><span class="fk"><b>células</b> con guía asignada</span></div>
-      <div class="farr">↓ group by (guía, donante, condición)</div>
-      <div class="fstep"><span class="fn" style="color:var(--accent)">pseudobulk</span><span class="fk">suma de UMIs · <b>n_vars 18,129</b></span></div>
-      <div class="farr">↓ filtros keep_for_DE</div>
-      <div class="fstep"><span class="fn">DESeq2</span><span class="fk">input al modelo de <b>DE</b></span></div></div>`;},
+    </div>`+`<div class="callout">The condition modulates which regulators matter: TCR-signaling hubs dominate in <b>Stim8hr</b>.</div>`;},
+  sgrna(){const gpg=Object.entries(D.guidesPerGene).map(([k,v])=>[`${k} guide${k==="1"?"":"s"}/gene`,v]);
+    return sec("Guides per target gene")+bars(gpg,"var(--amber)")+
+    `<div class="callout"><b>~2 guides per gene</b> (12,440 genes) → internal replication for the cross-guide correlations. Plus <b>${fmt(D.ntc)}</b> NTC controls.</div>`+
+    sec("Guides per chromosome (top 8)")+bars(Object.entries(D.chrom),"var(--amber)");},
+  perturbedgene(){return sec("Role: perturbed gene")+
+    `<div class="funnel"><div class="fstep"><span class="fn">12,654</span><span class="fk"><b>genes with a guide</b> in the CRISPRi library</span></div>
+      <div class="fstep"><span class="fn" style="color:var(--up)">34k</span><span class="fk">contrasts = gene × condition in <b>DE_RESULT</b></span></div></div>`+geneCallout();},
+  measuredgene(){return sec("Role: measured gene")+
+    `<div class="funnel"><div class="fstep"><span class="fn">10,282</span><span class="fk"><b>measured genes</b> = columns (.var) of the DE matrix</span></div>
+      <div class="fstep"><span class="fn" style="color:var(--down)">.layers</span><span class="fk">log_fc · zscore · adj_p_value per gene</span></div></div>`+geneCallout();},
+  cell(){return sec("Cell passport (.obs)")+
+    `<div class="callout">Each cell carries its <b>assigned guide</b>, the <b>perturbed gene</b>, and its QC (total_counts, pct_counts_mt, low_quality). The guide is what anchors it to a perturbation.</div>`+
+    sec("From cell to perturbation")+
+    `<div class="funnel"><div class="fstep"><span class="fn">1</span><span class="fk">cell → <b>1 guide</b> (or 'multi-guide')</span></div>
+      <div class="farr">↓</div><div class="fstep"><span class="fn">1</span><span class="fk">guide → <b>1 gene</b> perturbed</span></div></div>`;},
+  pseudobulk(){return sec("Aggregation cascade")+
+    `<div class="funnel"><div class="fstep"><span class="fn">~22M</span><span class="fk"><b>cells</b> with an assigned guide</span></div>
+      <div class="farr">↓ group by (guide, donor, condition)</div>
+      <div class="fstep"><span class="fn" style="color:var(--accent)">pseudobulk</span><span class="fk">sum of UMIs · <b>n_vars 18,129</b></span></div>
+      <div class="farr">↓ keep_for_DE filters</div>
+      <div class="fstep"><span class="fn">DESeq2</span><span class="fk">input to the <b>DE</b> model</span></div></div>`;},
   deresult(){const hubs=D.hubs.map(h=>({...h,tot:h.up+h.down})).sort((a,b)=>b.tot-a.tot);
     const max=Math.max(...hubs.map(h=>h.tot));
     const hb=`<div class="bars">`+hubs.map(h=>{const w=(h.tot/max*100).toFixed(1),uw=(h.up/h.tot*100).toFixed(1);
@@ -605,27 +605,27 @@ const VIZ={
         <div class="bar-track" style="background:transparent"><div class="split" style="width:${w}%">
         <div class="u" style="width:${uw}%"></div><div class="d" style="flex:1"></div></div></div>
         <span class="vv">${fmt(h.tot)}</span></div>`;}).join("")+`</div>`;
-    return sec("Nº de DEGs por perturbación")+bars(Object.entries(D.deBuckets),"var(--accent)")+
-    `<div class="callout">La mayoría mueve <b>pocos genes</b>: 5,226 sin efecto, 21,187 con 1–10 DEGs. Solo <b>519</b> son hubs masivos (>1000).</div>`+
+    return sec("Number of DEGs per perturbation")+bars(Object.entries(D.deBuckets),"var(--accent)")+
+    `<div class="callout">Most move <b>few genes</b>: 5,226 with no effect, 21,187 with 1–10 DEGs. Only <b>519</b> are massive hubs (>1000).</div>`+
     sec("Top hubs — <span style='color:var(--up)'>↑up</span> / <span style='color:var(--down)'>↓down</span>")+hb+
-    `<div class="callout">Los mayores reguladores son el <b>módulo de señalización del TCR</b> — CD3E/D/G, LAT, ZAP70, PLCG1, LCP2, VAV1 — en Stim8hr. Validación biológica del screen.</div>`+
-    sec("On-target")+`<div class="callout"><b>${fmt(D.ontargetSig)}</b> de ${fmt(D.nDE)} (${Math.round(D.ontargetSig/D.nDE*100)}%) con knockdown on-target significativo.</div>`;},
-  devalue(){return sec("Estructura .layers — volcano")+
-    `<canvas class="volcano" id="volcano" width="440" height="280" aria-label="Volcano plot ilustrativo"></canvas>`+
-    `<p class="vnote">Esquema ilustrativo: cada punto es un gen medido; X = log₂FC, Y = −log₁₀(p). Rojo/azul = ↑/↓ significativos.</p>`+
-    `<div class="callout">Cada fila (perturbación×condición) tiene un vector sobre <b>10,282 genes medidos</b>, con capas <span class="mono">log_fc · zscore · adj_p_value · baseMean · lfcSE</span>.</div>`;},
-  byguide(){return sec("Replicación por guía")+
-    `<div class="funnel"><div class="fstep"><span class="fn" style="color:var(--violet)">guide_1</span><span class="fk">DE de la 1ª guía de cada (gen, condición)</span></div>
-      <div class="fstep"><span class="fn" style="color:var(--violet)">guide_2</span><span class="fk">2ª guía · ausente en dianas de guía única</span></div></div>`+
-    `<div class="callout">Comparar las dos guías da <b>guide_correlation_signif</b> — reproducibilidad técnica, que luego vive en DE_RESULT.obs.</div>`;},
+    `<div class="callout">The largest regulators are the <b>TCR-signaling module</b> — CD3E/D/G, LAT, ZAP70, PLCG1, LCP2, VAV1 — in Stim8hr. Biological validation of the screen.</div>`+
+    sec("On-target")+`<div class="callout"><b>${fmt(D.ontargetSig)}</b> of ${fmt(D.nDE)} (${Math.round(D.ontargetSig/D.nDE*100)}%) with a significant on-target knockdown.</div>`;},
+  devalue(){return sec(".layers structure — volcano")+
+    `<canvas class="volcano" id="volcano" width="440" height="280" aria-label="Illustrative volcano plot"></canvas>`+
+    `<p class="vnote">Illustrative schematic: each point is a measured gene; X = log₂FC, Y = −log₁₀(p). Red/blue = ↑/↓ significant.</p>`+
+    `<div class="callout">Each row (perturbation×condition) has a vector over <b>10,282 measured genes</b>, with layers <span class="mono">log_fc · zscore · adj_p_value · baseMean · lfcSE</span>.</div>`;},
+  byguide(){return sec("Per-guide replication")+
+    `<div class="funnel"><div class="fstep"><span class="fn" style="color:var(--violet)">guide_1</span><span class="fk">DE of the 1st guide of each (gene, condition)</span></div>
+      <div class="fstep"><span class="fn" style="color:var(--violet)">guide_2</span><span class="fk">2nd guide · absent for single-guide targets</span></div></div>`+
+    `<div class="callout">Comparing the two guides gives <b>guide_correlation_signif</b> — technical reproducibility, which then lives in DE_RESULT.obs.</div>`;},
   bydonorpair(){const ids=D.donors.map(d=>d.id.slice(-4));const pairs=[];
     for(let i=0;i<ids.length;i++)for(let j=i+1;j<ids.length;j++)pairs.push(ids[i]+"_"+ids[j]);
-    return sec("6 pares de donantes")+`<div class="pairs">`+pairs.map(p=>`<span class="pair">…${p}</span>`).join("")+`</div>`+
-    `<div class="callout">Con 4 donantes hay <b>C(4,2)=6 pares</b>. La DE se recalcula en cada par para medir la <b>reproducibilidad biológica</b> (donor_correlation_*).</div>`;},
-  guidekd(){return sec("Eficiencia de knockdown")+
-    `<div class="funnel"><div class="fstep"><span class="fn" style="color:var(--down)">t &lt; 0</span><span class="fk">expresión de la diana <b>vs</b> NTC (Welch)</span></div>
+    return sec("6 donor pairs")+`<div class="pairs">`+pairs.map(p=>`<span class="pair">…${p}</span>`).join("")+`</div>`+
+    `<div class="callout">With 4 donors there are <b>C(4,2)=6 pairs</b>. DE is recomputed within each pair to measure <b>biological reproducibility</b> (donor_correlation_*).</div>`;},
+  guidekd(){return sec("Knockdown efficiency")+
+    `<div class="funnel"><div class="fstep"><span class="fn" style="color:var(--down)">t &lt; 0</span><span class="fk">target expression <b>vs</b> NTC (Welch)</span></div>
       <div class="fstep"><span class="fn">FDR</span><span class="fk"><b>signif_knockdown</b> = adj_p &lt; 0.1 y t &lt; 0</span></div></div>`+
-    `<div class="callout">Filtro por guía y condición: distingue guías que <b>silencian de verdad</b> de las inefectivas, antes de agregar a nivel de gen.</div>`;},
+    `<div class="callout">Filter per guide and condition: it tells guides that <b>truly silence</b> from ineffective ones, before aggregating at the gene level.</div>`;},
 };
 
 function drawVolcano(){
@@ -683,18 +683,18 @@ const EDA={
   pts:PTS_DATA  /* [ontarget_effect_size, n_downstream, significant] · x se grafica como kd_strength = -effect */
 };
 const findings=[
-  {n:"01",t:"El efecto es de cola larga",big:`2 <small>DEGs medianos</small>`,
-   x:`La perturbación mediana mueve <b>2 genes</b> y el <b>15%</b> ninguno; la media (60.5) la inflan los hubs. Usa <b>mediana</b>, no media.`},
-  {n:"02",t:"El screen funcionó",big:`62% <small>KD on-target</small>`,
-   x:`<b>21,216 / 33,983</b> contrastes con knockdown on-target significativo (10% FDR), estable entre condiciones.`},
-  {n:"03",t:"Los hubs son plausibles",big:`TCR`,
-   x:`El top incluye genes de <b>señalización TCR e inmunoregulación</b> (CD3E/D/G, LAT, ZAP70) — sugiere que la pantalla captura señal biológica interpretable, no ruido.`},
-  {n:"04",t:"La estimulación amplía los efectos",big:`69 <small>vs 53 DEGs</small>`,
-   x:`Media de DEGs en <b>Stim8hr</b> (68.9) &gt; <b>Rest</b> (53.1): con el TCR encendido los efectos se propagan más.`},
-  {n:"05",t:"El KD gatea la señal utilizable",big:`85% <small>de trans-efectos</small>`,
-   x:`Los contrastes con KD significativo concentran el <b>85%</b> de todos los trans-efectos. Filtrar por <b>ontarget_significant</b> sube la densidad de señal (no es prueba causal).`},
-  {n:"06",t:"Librería limpia",big:`~2 <small>guías/gen</small>`,
-   x:`12,440 de 12,654 genes con <b>2 guías</b> → replicación interna para correlaciones cross-guide.`}
+  {n:"01",t:"The effect is long-tailed",big:`2 <small>median DEGs</small>`,
+   x:`The median perturbation moves <b>2 genes</b> and <b>15%</b> move none; the mean (60.5) is inflated by hubs. Use the <b>median</b>, not the mean.`},
+  {n:"02",t:"The screen worked",big:`62% <small>on-target KD</small>`,
+   x:`<b>21,216 / 33,983</b> contrasts with a significant on-target knockdown (10% FDR), stable across conditions.`},
+  {n:"03",t:"The hubs are plausible",big:`TCR`,
+   x:`The top includes genes of <b>TCR signaling and immunoregulation</b> (CD3E/D/G, LAT, ZAP70) — suggesting the screen captures interpretable biological signal, not noise.`},
+  {n:"04",t:"Stimulation broadens the effects",big:`69 <small>vs 53 DEGs</small>`,
+   x:`Mean DEGs in <b>Stim8hr</b> (68.9) &gt; <b>Rest</b> (53.1): with the TCR on, effects propagate more.`},
+  {n:"05",t:"KD gates the usable signal",big:`85% <small>of trans-effects</small>`,
+   x:`Contrasts with a significant KD concentrate <b>85%</b> of all trans-effects. Filtering by <b>ontarget_significant</b> raises signal density (not causal proof).`},
+  {n:"06",t:"Clean library",big:`~2 <small>guides/gene</small>`,
+   x:`12,440 of 12,654 genes with <b>2 guides</b> → internal replication for cross-guide correlations.`}
 ];
 function renderEDA(){
   $("#findings").innerHTML=findings.map(f=>
@@ -713,33 +713,33 @@ function renderEDA(){
 
   $("#charts").innerHTML=`
     <div class="cpanel">
-      <h4>Distribución de DEGs</h4><p class="csub">nº de contrastes por rango de genes movidos</p>
+      <h4>DEG distribution</h4><p class="csub">number of contrasts by range of genes moved</p>
       ${barsC(Object.entries(D.deBuckets),"var(--accent)")}</div>
     <div class="cpanel">
-      <h4>Media de DEGs por condición</h4><p class="csub">la estimulación amplifica los trans-efectos</p>
+      <h4>Mean DEGs per condition</h4><p class="csub">stimulation amplifies the trans-effects</p>
       ${barsC(cond,"var(--accent)",v=>v.toFixed(1))}</div>
     <div class="cpanel">
-      <h4>Top hub regulators</h4><p class="csub">genes con más trans-efectos (Stim8hr)</p>${hubBars}
+      <h4>Top hub regulators</h4><p class="csub">genes with the most trans-effects (Stim8hr)</p>${hubBars}
       <div class="legend-in"><span><i style="background:var(--up)"></i>↑ up</span><span><i style="background:var(--down)"></i>↓ down</span></div></div>
     <div class="cpanel">
-      <h4>Guías por gen diana</h4><p class="csub">diseño de ~2 guías por gen</p>
-      ${barsC(Object.entries(D.guidesPerGene).map(([k,v])=>[`${k} guía${k==="1"?"":"s"}`,v]),"var(--amber)")}</div>
+      <h4>Guides per target gene</h4><p class="csub">design of ~2 guides per gene</p>
+      ${barsC(Object.entries(D.guidesPerGene).map(([k,v])=>[`${k} guide${k==="1"?"":"s"}`,v]),"var(--amber)")}</div>
     <div class="cpanel wide">
-      <h4>Knockdown vs trans-efectos</h4><p class="csub">los contrastes sin KD significativo casi no concentran downstream · muestra de 1,400 contrastes</p>
+      <h4>Knockdown vs. trans-effects</h4><p class="csub">contrasts without a significant KD carry almost no downstream · sample of 1,400 contrasts</p>
       <canvas class="scatter" id="scatter" width="820" height="320" aria-label="Scatter kd_strength vs downstream"></canvas>
-      <div class="legend-in"><span><i style="background:var(--accent)"></i>KD significativo</span><span><i style="background:var(--faint)"></i>no significativo (KD ≈ 0)</span></div></div>
+      <div class="legend-in"><span><i style="background:var(--accent)"></i>significant KD</span><span><i style="background:var(--faint)"></i>non-significant (KD ≈ 0)</span></div></div>
     <div class="cpanel wide">
-      <h4>Reproducibilidad vs magnitud del efecto</h4><p class="csub">arriba-derecha = reguladores robustos · proxy <b>cross-condición</b> (el cross-donante requiere DE_stats.h5ad)</p>
-      <canvas class="scatter" id="repro" width="820" height="300" aria-label="Reproducibilidad vs efecto"></canvas></div>
+      <h4>Reproducibility vs. effect magnitude</h4><p class="csub">top-right = robust regulators · <b>cross-condition</b> proxy (cross-donor requires DE_stats.h5ad)</p>
+      <canvas class="scatter" id="repro" width="820" height="300" aria-label="Reproducibility vs effect"></canvas></div>
     <div class="cpanel wide">
-      <h4>Top reguladores robustos <span style="font-weight:400;color:var(--muted);font-size:12px">— accionable</span></h4>
-      <p class="csub">ranking por <span class="mono">robust_score</span> = log1p(downstream) · KD signif. · penalización off-target · reproducibilidad cross-cond · fracción de condiciones significativas</p>
+      <h4>Top robust regulators <span style="font-weight:400;color:var(--muted);font-size:12px">— actionable</span></h4>
+      <p class="csub">ranked by <span class="mono">robust_score</span> = log1p(downstream) · sig. KD · off-target penalty · cross-cond reproducibility · fraction of significant conditions</p>
       <div style="overflow-x:auto">${robustTable()}</div>
-      <div class="legend-in" style="margin-top:12px">Siguiente paso: reforzar con <span class="mono" style="color:var(--accent);margin:0 4px">single_guide_estimate</span> y <span class="mono" style="color:var(--accent);margin-left:4px">donor_correlation_hits_mean</span> desde el .h5ad.</div></div>`;
+      <div class="legend-in" style="margin-top:12px">Next step: strengthen with <span class="mono" style="color:var(--accent);margin:0 4px">single_guide_estimate</span> and <span class="mono" style="color:var(--accent);margin-left:4px">donor_correlation_hits_mean</span> from the .h5ad.</div></div>`;
   requestAnimationFrame(()=>{drawScatter();drawRepro();});
 }
 function robustTable(){
-  const head=["gen","cond","downstream","KD (effect)","conds sig","repro","score"];
+  const head=["gene","cond","downstream","KD (effect)","sig conds","repro","score"];
   return `<table class="rtable"><thead><tr>${head.map((h,i)=>`<th${i>1?' class="num"':''}>${h}</th>`).join("")}</tr></thead><tbody>`+
     ROBUST.map(r=>`<tr>
       <td class="gn">${r[0]}</td><td class="cn">${r[1]}</td>
@@ -778,8 +778,8 @@ function drawScatter(){
     a.x.fillStyle=p[2]?accent:faint;a.x.globalAlpha=p[2]?0.62:0.34;
     a.x.beginPath();a.x.arc(px,py,p[2]?2.4:1.9,0,6.2832);a.x.fill();});
   a.x.globalAlpha=1;a.x.fillStyle=mut;a.x.textAlign="center";
-  a.x.fillText("kd_strength = −ontarget_effect_size   →   más a la derecha = knockdown más fuerte",a.w/2,a.h-5);
-  a.x.save();a.x.translate(12,a.h/2);a.x.rotate(-Math.PI/2);a.x.fillText("trans-efectos (log)",0,0);a.x.restore();
+  a.x.fillText("kd_strength = −ontarget_effect_size   →   further right = stronger knockdown",a.w/2,a.h-5);
+  a.x.save();a.x.translate(12,a.h/2);a.x.rotate(-Math.PI/2);a.x.fillText("trans-effects (log)",0,0);a.x.restore();
 }
 function drawRepro(){
   const c=$("#repro"); if(!c) return;
@@ -789,14 +789,14 @@ function drawRepro(){
     a.x.fillStyle=accent;a.x.globalAlpha=0.4;
     a.x.beginPath();a.x.arc(px,py,2.6,0,6.2832);a.x.fill();});
   a.x.globalAlpha=1;a.x.fillStyle=mut;a.x.textAlign="center";
-  a.x.fillText("reproducibilidad cross-condición (min/max de n_downstream · 1 = estable)  →",a.w/2,a.h-5);
-  a.x.save();a.x.translate(12,a.h/2);a.x.rotate(-Math.PI/2);a.x.fillText("efecto máx (log)",0,0);a.x.restore();
+  a.x.fillText("cross-condition reproducibility (min/max of n_downstream · 1 = stable)  →",a.w/2,a.h-5);
+  a.x.save();a.x.translate(12,a.h/2);a.x.rotate(-Math.PI/2);a.x.fillText("peak effect (log)",0,0);a.x.restore();
 }
 
 /* ---------------- STUDY view ---------------- */
 const S_EB=[["SGF29",2.5,0.84,"global"],["TADA2B",2.45,0.67,"global"],["SENP5",2.43,0.72,"global"],["SUPT20H",2.39,0.7,"global"],["TADA1",2.35,0.58,"global"],["CCNC",2.29,0.64,"global"],["MED12",2.28,0.62,"global"],["NFRKB",2.27,0.64,"global"],["TAF6L",2.24,0.68,"global"],["ARNT",2.22,0.52,"global"],["ATP2A2",2.22,0.64,"global"],["TAF13",2.19,0.59,"global"],["LEO1",2.18,0.58,"global"],["KDM1A",2.16,0.59,"global"]];
 const S_KD=[["TADA2B",1,1,2,false],["CD3E",2,2,309,false],["LAT",3,3,244,false],["SENP5",4,4,3,false],["PLCG1",5,5,320,false],["ZAP70",6,6,88,false],["CD3D",7,7,765,false],["LCP2",8,8,851,false],["CD3G",9,9,436,false],["VAV1",10,10,84,false],["SGF29",11,11,1,false],["TAF6L",12,12,9,false],["UBXN1",13,13,34,false],["CD247",15,15,389,false],["ZBED3",17,null,null,true],["MED12",18,17,7,false]];
-const S_MOV=[["SETDB1",37,14,"promovido",0.57,0.88],["CPSF6",31,16,"promovido",null,0.77],["WDR82",38,22,"promovido",0.43,0.85],["WAC",35,25,"promovido",0.36,0.82],["MED24",49,30,"promovido",0.42,0.83],["EIF4G2",23,31,"demotado",0.31,0.71],["ELOF1",15,33,"demotado",0.28,0.69],["ELOB",17,43,"demotado",0.24,0.64],["CCNC",6,45,"demotado",0.18,0.58],["SMG1",24,288,"demotado",0.05,0.45]];
+const S_MOV=[["SETDB1",37,14,"promoted",0.57,0.88],["CPSF6",31,16,"promoted",null,0.77],["WDR82",38,22,"promoted",0.43,0.85],["WAC",35,25,"promoted",0.36,0.82],["MED24",49,30,"promoted",0.42,0.83],["EIF4G2",23,31,"demoted",0.31,0.71],["ELOF1",15,33,"demoted",0.28,0.69],["ELOB",17,43,"demoted",0.24,0.64],["CCNC",6,45,"demoted",0.18,0.58],["SMG1",24,288,"demoted",0.05,0.45]];
 const S_SURV=[["TADA2B",2,1],["SGF29",1,2],["MED12",7,3],["TAF6L",9,4],["TADA1",5,5],["SUPT20H",4,8]];
 const S_COV={guide:78.3,donor:18.8};
 const S_GLOB=["SGF29","TADA2B","SENP5","SUPT20H","TADA1","CCNC"], S_CTX=["NCKAP1L","DOP1B","POGLUT3","ZAP70","TFAM","LCK"];
@@ -835,17 +835,17 @@ function renderStudy(){
   const kdSeries=S_KD.map(r=>{
     const dropped=r[4], eb=r[3];
     const col= dropped?UPc : (eb>30?AMBER:TEAL);
-    return {label:r[0], color:col, ranks:[r[1], r[2], r[3]], right: dropped?"sin KD":(eb>30?"▼":"")};
+    return {label:r[0], color:col, ranks:[r[1], r[2], r[3]], right: dropped?"no KD":(eb>30?"▼":"")};
   });
   // 3 — repro slope (movers + survivors), cap 50
   const reproSeries=[
     ...S_SURV.map(r=>({label:r[0],color:TEAL,ranks:[r[1],r[2]]})),
-    ...S_MOV.map(r=>({label:r[0], color:r[3]==="demotado"?AMBER:DOWNc,
+    ...S_MOV.map(r=>({label:r[0], color:r[3]==="demoted"?AMBER:DOWNc,
                       ranks:[r[1], Math.min(r[2],52)], right:"#"+r[2]}))
   ];
   const movRows=S_MOV.map(r=>`<tr>
     <td class="gn">${r[0]}</td><td class="num mono">${r[1]}→${r[2]}</td>
-    <td><span class="stt ${r[3]==="demotado"?"dem":"pro"}">${r[3]==="demotado"?"demotado":"promovido"}</span></td>
+    <td><span class="stt ${r[3]==="demoted"?"dem":"pro"}">${r[3]==="demoted"?"demoted":"promoted"}</span></td>
     <td class="num">${r[4]==null?"—":r[4]}</td><td class="num">${r[5]}</td>
     <td style="font-size:11px;color:var(--muted)">${r[6]}</td></tr>`).join("");
   // 4 — edges
@@ -858,68 +858,68 @@ function renderStudy(){
 
   $("#study").innerHTML=`
   <div class="study-sec">
-    <div class="study-h"><span class="n">01</span>Ranking empirical-Bayes de reguladores</div>
-    <p class="study-lead">Poder regulatorio latente por gen, con <b>gate de knockdown</b> y shrinkage. El top es
-      maquinaria de <b>cromatina/transcripción</b> (SAGA, Mediador), no los hubs crudos del TCR.</p>
+    <div class="study-h"><span class="n">01</span>Empirical-Bayes ranking of regulators</div>
+    <p class="study-lead">Latent per-gene regulatory power, with a <b>knockdown gate</b> and shrinkage. The top is
+      <b>chromatin/transcription</b> machinery (SAGA, Mediator), not the raw TCR hubs.</p>
     <div class="study-panel"><table class="rtable"><thead><tr>
-      <th>gen</th><th>poder regulatorio (EB)</th><th class="num">estab.</th><th>clase</th></tr></thead>
+      <th>gene</th><th>regulatory power (EB)</th><th class="num">stab.</th><th>class</th></tr></thead>
       <tbody>${ebRows}</tbody></table>
-      <div class="legend-in" style="margin-top:10px">estab. = frecuencia de selección en el top-30 (bootstrap B=200) · clase = global / context-specific</div></div>
+      <div class="legend-in" style="margin-top:10px">stab. = selection frequency in the top-30 (bootstrap B=200) · class = global / context-specific</div></div>
   </div>
 
   <div class="study-sec">
-    <div class="study-h"><span class="n">02</span>Auditoría de calidad — ¿por qué importan los gates?</div>
-    <p class="study-lead">Rankear por <b>n_downstream</b> crudo premia hubs que no sobreviven: <b>2/30</b> caen por
-      el gate de KD (sin knockdown validado) y <b>~9</b> se demotan por ser <b>context-specific</b>.</p>
-    <div class="slopewrap" style="margin-bottom:14px"><h4>El gate de KD + shrinkage reordena el top</h4>
-      <p class="csub">raw → KD-gated → EB · amarillo = hub TCR demotado (context-specific) · rojo = sin KD válido</p>
+    <div class="study-h"><span class="n">02</span>Quality audit — why do the gates matter?</div>
+    <p class="study-lead">Ranking by raw <b>n_downstream</b> rewards hubs that don't survive: <b>2/30</b> drop at
+      the KD gate (no validated knockdown) and <b>~9</b> are demoted for being <b>context-specific</b>.</p>
+    <div class="slopewrap" style="margin-bottom:14px"><h4>The KD gate + shrinkage reorders the top</h4>
+      <p class="csub">raw → KD-gated → EB · yellow = demoted TCR hub (context-specific) · red = no valid KD</p>
       ${slopeSVG(["raw\n(n_downstream)","KD-gated","EB (core)"], kdSeries, 40, 45, 440)}</div>
     <div>
       <div class="study-panel">
-        <div class="sec-t" style="margin-top:2px">Global vs context-specific</div>
-        <p style="font-size:12.5px;color:var(--muted);margin:0 0 8px">Separando por
-          <span class="mono">condition_specificity = max/sum</span> de n_downstream:</p>
-        <p style="font-size:12.5px;margin:0 0 6px"><b>Globales</b> (estables en ≥2 cond):</p>
+        <div class="sec-t" style="margin-top:2px">Global vs. context-specific</div>
+        <p style="font-size:12.5px;color:var(--muted);margin:0 0 8px">Splitting by
+          <span class="mono">condition_specificity = max/sum</span> of n_downstream:</p>
+        <p style="font-size:12.5px;margin:0 0 6px"><b>Global</b> (stable in ≥2 cond):</p>
         <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px">${S_GLOB.map(g=>`<span class="cls global">${g}</span>`).join("")}</div>
-        <p style="font-size:12.5px;margin:0 0 6px"><b>Context-specific</b> (una condición) — incluye TCR:</p>
+        <p style="font-size:12.5px;margin:0 0 6px"><b>Context-specific</b> (one condition) — includes TCR:</p>
         <div style="display:flex;flex-wrap:wrap;gap:5px">${S_CTX.map(g=>`<span class="cls cs">${g}</span>`).join("")}</div>
-        <div class="callout" style="margin-top:14px">La estabilidad por bootstrap es <b>moderada</b>: léelo como
-          un <b>conjunto</b> de reguladores robustos, no como un orden exacto.</div>
+        <div class="callout" style="margin-top:14px">The bootstrap stability is <b>moderate</b>: read it as
+          a <b>set</b> of robust regulators, not an exact ordering.</div>
       </div>
     </div>
   </div>
 
   <div class="study-sec">
-    <div class="study-h"><span class="n">03</span>Auditoría de sensibilidad — reproducibilidad real</div>
-    <p class="study-lead"><b>No es un modelo nuevo</b>: reponderamos el score EB con reproducibilidad real
-      (cross-guide, cross-donor) del <span class="mono">.obs</span> de DE_stats.h5ad, como análisis de sensibilidad.</p>
+    <div class="study-h"><span class="n">03</span>Sensitivity audit — real reproducibility</div>
+    <p class="study-lead"><b>Not a new model</b>: we reweight the EB score with real reproducibility
+      (cross-guide, cross-donor) from the <span class="mono">.obs</span> of DE_stats.h5ad, as a sensitivity analysis.</p>
     <div class="cov">
-      <div class="covc"><div class="cn">${S_COV.guide.toFixed(0)}%</div><div class="ck">cobertura cross-guide (amplia)</div></div>
-      <div class="covc partial"><div class="cn">${S_COV.donor.toFixed(0)}%</div><div class="ck">cobertura cross-donor (parcial → peso neutral)</div></div>
+      <div class="covc"><div class="cn">${S_COV.guide.toFixed(0)}%</div><div class="ck">cross-guide coverage (broad)</div></div>
+      <div class="covc partial"><div class="cn">${S_COV.donor.toFixed(0)}%</div><div class="ck">cross-donor coverage (partial → neutral weight)</div></div>
     </div>
-    <div class="slopewrap" style="margin-bottom:14px"><h4>¿Quién sobrevive a la reproducibilidad real?</h4>
-      <p class="csub">EB core → guide/donor-aware · amarillo = demotado · azul = promovido · teal = sobrevive</p>
+    <div class="slopewrap" style="margin-bottom:14px"><h4>Who survives real reproducibility?</h4>
+      <p class="csub">EB core → guide/donor-aware · yellow = demoted · blue = promoted · teal = survives</p>
       ${slopeSVG(["EB (core)","guide/donor-aware"], reproSeries, 52, 56, 470)}</div>
     <div>
-      <div class="study-panel"><div class="sec-t" style="margin-top:2px">Movimientos del top-30</div>
+      <div class="study-panel"><div class="sec-t" style="margin-top:2px">Top-30 movements</div>
         <div style="overflow-x:auto"><table class="rtable" style="min-width:0"><thead><tr>
-          <th>gen</th><th class="num">rank</th><th>estado</th><th class="num">guide</th><th class="num">donor</th><th>razón</th>
+          <th>gene</th><th class="num">rank</th><th>status</th><th class="num">guide</th><th class="num">donor</th><th>reason</th>
         </tr></thead><tbody>${movRows}</tbody></table></div></div>
     </div>
   </div>
 
   <div class="study-sec">
-    <div class="study-h"><span class="n">04</span>Red de efectos con incertidumbre<span class="bonus">bonus · proof-of-concept</span></div>
-    <p class="study-lead">EB normal-normal sobre log_fc/lfcSE del h5ad remoto (sin descargarlo). <b>2.470 edges</b>
-      de 6 reguladores del complejo <b>SAGA</b>. <span class="mono">P(|efecto|&gt;1.5×)</span>, no P(arista causal).</p>
+    <div class="study-h"><span class="n">04</span>Uncertainty-aware effect network<span class="bonus">bonus · proof-of-concept</span></div>
+    <p class="study-lead">Normal-normal EB over log_fc/lfcSE from the remote h5ad (without downloading it). <b>2,470 edges</b>
+      from 6 regulators of the <b>SAGA</b> complex. <span class="mono">P(|effect|&gt;1.5×)</span>, not P(causal edge).</p>
     <div class="two-col">
-      <div class="study-panel"><div class="sec-t" style="margin-top:2px">Edges por regulador
+      <div class="study-panel"><div class="sec-t" style="margin-top:2px">Edges per regulator
         <span style="color:var(--up)">↑</span>/<span style="color:var(--down)">↓</span></div>
         <div class="bars">${edrRows}</div></div>
-      <div class="study-panel"><div class="sec-t" style="margin-top:2px">Targets convergentes (6/6 reguladores)</div>
+      <div class="study-panel"><div class="sec-t" style="margin-top:2px">Convergent targets (6/6 regulators)</div>
         <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">${S_EDN.map(r=>`<span class="chip"><b>${r[0]}</b></span>`).join("")}</div>
-        <div class="callout">Los 6 co-miembros de SAGA comparten <b>579 targets</b> → convergencia esperada
-          que <b>valida el método</b>. Cobertura mínima (6/7913) → se deja como <b>bonus</b>, no resultado fuerte.</div></div>
+        <div class="callout">The 6 SAGA co-members share <b>579 targets</b> → expected convergence
+          that <b>validates the method</b>. Minimal coverage (6/7913) → kept as a <b>bonus</b>, not a strong result.</div></div>
     </div>
   </div>`;
 }

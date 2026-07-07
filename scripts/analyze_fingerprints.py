@@ -1,26 +1,26 @@
 #!/usr/bin/env python3
 """Side analysis — transcriptional fingerprints / perturbation program similarity.
 
-Pasa de "qué reguladores son fuertes" a "qué programas transcriptómicos produce cada
-perturbación y qué reguladores se parecen entre sí". NO reemplaza el ranking core, NO
-agrega modelos pesados, NO descarga el h5ad completo.
+Moves from "which regulators are strong" to "what transcriptomic programs each
+perturbation induces and which regulators resemble each other". Does NOT replace the
+core ranking, adds NO heavy models, does NOT download the full h5ad.
 
-La huella de una perturbación = su vector de efectos sobre los ~10k genes medidos
-(layers/zscore o layers/log_fc). Reguladores con huellas parecidas actúan sobre el
-mismo programa. Sobre un panel balanceado corremos PCA, similitud y clustering.
+A perturbation's fingerprint = its vector of effects over the ~10k measured genes
+(layers/zscore or layers/log_fc). Regulators with similar fingerprints act on the
+same program. Over a balanced panel we run PCA, similarity, and clustering.
 
-Panel BALANCEADO (no puro top-EB, que daría puro cromatina/SAGA/Mediator):
-    top global + top context-specific + promovidos/demotados por la auditoría de repro.
+BALANCED panel (not pure top-EB, which would give pure chromatin/SAGA/Mediator):
+    top global + top context-specific + promoted/demoted by the reproducibility audit.
 
     python scripts/analyze_fingerprints.py --n 200 --matrix zscore --top-genes 2000
 
-Fuente de datos:
-    --matrix log_fc  → cache local data/cache/log_fc.f32.npy (instantáneo)
-    --matrix zscore  → slice remoto de layers/zscore para las filas del panel (~pocos min),
-                       cacheado en data/cache/panel_<matrix>_<hash>.npy
+Data source:
+    --matrix log_fc  → local cache data/cache/log_fc.f32.npy (instant)
+    --matrix zscore  → remote slice of layers/zscore for the panel rows (~few min),
+                       cached in data/cache/panel_<matrix>_<hash>.npy
 
-Salidas: docs/tables/fingerprint_*.csv|json · docs/figures/2{0..3}_fingerprint_*.png ·
-         docs/FINGERPRINT_ANALYSIS.md (se escribe aparte).
+Outputs: docs/tables/fingerprint_*.csv|json · docs/figures/2{0..3}_fingerprint_*.png ·
+         docs/FINGERPRINT_ANALYSIS.md (written separately).
 """
 import argparse
 import hashlib
@@ -47,7 +47,7 @@ CLASS_COLOR = {"global": "#1f77b4", "condition-specific": "#2ca02c"}
 SOURCE_COLOR = {"global": "#1f77b4", "context-specific": "#2ca02c",
                 "promoted": "#9467bd", "demoted": "#8c564b"}
 
-# Complejos conocidos — validación de que el espacio recupera estructura real.
+# Known complexes — validation that the space recovers real structure.
 COMPLEXES = {
     "SAGA": ["TADA1", "TADA2A", "TADA2B", "TADA3", "SUPT20H", "SUPT7L", "TAF5L",
              "TAF6L", "SGF29", "ATXN7", "ATXN7L3", "USP22", "ENY2", "KAT2A",
@@ -71,7 +71,7 @@ def _read(name, base=TAB):
 def load_obs():
     obs = pd.read_csv(CACHE / "fingerprint_obs.csv")
     obs = obs.reset_index(drop=True)
-    obs["row"] = np.arange(len(obs))  # posición == fila en cache/h5ad
+    obs["row"] = np.arange(len(obs))  # position == row in cache/h5ad
     var = pd.read_csv(CACHE / "fingerprint_var.csv")
     return obs, var
 
@@ -83,15 +83,15 @@ def cosine_sim(M):
     return U @ U.T
 
 
-# --------------------------------------------------------- selección del panel
+# --------------------------------------------------------- panel selection
 def build_panel(obs, n_cap):
-    """Panel balanceado: global + context-specific + promovidos + demotados."""
+    """Balanced panel: global + context-specific + promoted + demoted."""
     classes = _read("regulator_classes.csv")
     hub = _read("hub_ranking_bayes.csv")
     repro = _read("hub_ranking_bayes_reproducibility_aware.csv")
     audit = _read("reproducibility_audit.csv")
     if classes is None or hub is None:
-        raise SystemExit("Faltan regulator_classes.csv / hub_ranking_bayes.csv (corre `make audit`).")
+        raise SystemExit("Missing regulator_classes.csv / hub_ranking_bayes.csv (run `make audit`).")
 
     hub = hub.rename(columns={"target_contrast_gene_name": "gene"})
     regpower = hub.set_index("gene")["regpower_eb_mean"]
@@ -108,12 +108,12 @@ def build_panel(obs, n_cap):
     for g in by_class("condition-specific", 75):
         picks.setdefault(g, "context-specific")
 
-    # promovidos / demotados: primero las etiquetas explícitas de la auditoría,
-    # luego los mayores rank_shift del ranking reproducibility-aware
+    # promoted / demoted: first the explicit audit labels,
+    # then the largest rank_shift from the reproducibility-aware ranking
     if audit is not None:
-        for g in audit.loc[audit.status == "promovido", "gene"]:
+        for g in audit.loc[audit.status == "promoted", "gene"]:
             picks.setdefault(g, "promoted")
-        for g in audit.loc[audit.status == "demotado", "gene"]:
+        for g in audit.loc[audit.status == "demoted", "gene"]:
             picks.setdefault(g, "demoted")
     if repro is not None and "rank_shift" in repro.columns:
         rs = repro.set_index("gene")["rank_shift"]
@@ -122,7 +122,7 @@ def build_panel(obs, n_cap):
         for g in rs.sort_values().head(25).index:
             picks.setdefault(g, "demoted")
 
-    # (gene, condición) — condición pico = max n_downstream entre KD significativos en obs
+    # (gene, condition) — peak condition = max n_downstream among significant KD in obs
     sig = obs[obs["ontarget_significant"].astype(str).str.lower().eq("true")]
     peak = (sig.sort_values("n_downstream", ascending=False)
                .drop_duplicates("target_contrast_gene_name")
@@ -137,33 +137,33 @@ def build_panel(obs, n_cap):
                      "regpower_eb_mean": float(regpower.get(g, np.nan)),
                      "n_downstream": int(r["n_downstream"])})
     panel = pd.DataFrame(rows).drop_duplicates("gene")
-    # cap: prioriza cobertura balanceada por fuente
+    # cap: prioritize balanced coverage by source
     if len(panel) > n_cap:
         panel = (panel.sort_values(["source", "regpower_eb_mean"], ascending=[True, False])
                       .groupby("source", group_keys=False)
                       .head(int(np.ceil(n_cap / panel["source"].nunique())))
                       .head(n_cap))
     panel = panel.reset_index(drop=True)
-    print(f"panel: {len(panel)} reguladores · fuentes {panel['source'].value_counts().to_dict()}")
+    print(f"panel: {len(panel)} regulators · sources {panel['source'].value_counts().to_dict()}")
     return panel
 
 
-# ------------------------------------------------------------ lectura de datos
+# ------------------------------------------------------------ data reading
 def read_matrix(panel, matrix):
-    """Devuelve (M float32 [n_panel × n_genes]) para la métrica pedida."""
+    """Returns (M float32 [n_panel × n_genes]) for the requested metric."""
     rows = panel["row"].values
     if matrix == "log_fc" and (CACHE / "log_fc.f32.npy").exists():
         full = np.load(CACHE / "log_fc.f32.npy", mmap_mode="r")
         return np.asarray(full[rows, :], dtype=np.float32)
 
-    # slice remoto de layers/<matrix>, cacheado por hash del set de filas
+    # remote slice of layers/<matrix>, cached by hash of the row set
     key = hashlib.md5((matrix + ",".join(map(str, sorted(rows)))).encode()).hexdigest()[:10]
     cpath = CACHE / f"panel_{matrix}_{key}.npy"
     if cpath.exists():
-        print(f"  panel {matrix} desde cache {cpath.name}")
+        print(f"  panel {matrix} from cache {cpath.name}")
         return np.load(cpath)
     import h5py, fsspec  # noqa
-    print(f"  leyendo {len(rows)} filas de layers/{matrix} (slice remoto)…")
+    print(f"  reading {len(rows)} rows from layers/{matrix} (remote slice)…")
     f = fsspec.open(S3_URL, anon=True, default_cache_type="readahead").open()
     h5 = h5py.File(f, "r")
     lay = h5["layers"][matrix]
@@ -174,12 +174,12 @@ def read_matrix(panel, matrix):
     return M
 
 
-# --------------------------------------------------------------------- análisis
+# --------------------------------------------------------------------- analysis
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--n", type=int, default=200, help="tope de reguladores en el panel")
+    ap.add_argument("--n", type=int, default=200, help="cap on regulators in the panel")
     ap.add_argument("--matrix", choices=["zscore", "log_fc"], default="zscore")
-    ap.add_argument("--top-genes", type=int, default=2000, help="genes por varianza en el panel")
+    ap.add_argument("--top-genes", type=int, default=2000, help="genes by variance in the panel")
     ap.add_argument("--k-neighbors", type=int, default=8)
     ap.add_argument("--force", action="store_true")
     args = ap.parse_args()
@@ -191,19 +191,19 @@ def main():
     panel = build_panel(obs, args.n)
     M = read_matrix(panel, args.matrix)
     M = np.nan_to_num(M, nan=0.0, posinf=0.0, neginf=0.0)
-    print(f"matriz cruda: {M.shape} ({args.matrix})")
+    print(f"raw matrix: {M.shape} ({args.matrix})")
 
-    # genes (columnas): top por varianza en el panel
+    # genes (columns): top by variance in the panel
     v = M.var(axis=0)
     keep = np.argsort(v)[::-1][:args.top_genes]
     keep = keep[v[keep] > 0]
     Mg = M[:, keep]
     genes_v = genes_all[keep]
-    # estandarizar columnas (comparables entre genes) antes de PCA/similitud
+    # standardize columns (comparable across genes) before PCA/similarity
     mu, sd = Mg.mean(0), Mg.std(0)
     sd[sd == 0] = 1.0
     X = (Mg - mu) / sd
-    print(f"matriz estandarizada: {X.shape} (top-{args.top_genes} genes por varianza)")
+    print(f"standardized matrix: {X.shape} (top-{args.top_genes} genes by variance)")
 
     reg = panel["gene"].values
     cond = panel["condition"].values
@@ -219,8 +219,8 @@ def main():
     evr = pca.explained_variance_ratio_
     from scipy.stats import spearmanr
     pc1_ndown = spearmanr(np.abs(scores[:, 0]), ndown).correlation
-    print(f"varianza explicada PC1..5: {np.round(evr[:5], 3)}")
-    print(f"|PC1| vs n_downstream (spearman): {pc1_ndown:.3f}  (bajo = PC1 no es magnitud)")
+    print(f"explained variance PC1..5: {np.round(evr[:5], 3)}")
+    print(f"|PC1| vs n_downstream (spearman): {pc1_ndown:.3f}  (low = PC1 is not magnitude)")
 
     # ---- similitud + clustering ----
     S = cosine_sim(X)
@@ -250,7 +250,7 @@ def main():
                              for (a, b), s in edge_set.items()])
     edges_df = edges_df.sort_values("similarity", ascending=False)
 
-    # ---- validación por complejos (permutación) ----
+    # ---- complex validation (permutation) ----
     reg_set = set(reg)
     comp_recs = []
     for name, members in COMPLEXES.items():
@@ -286,7 +286,7 @@ def main():
     nn_df.to_csv(TAB / "fingerprint_neighbors.csv", index=False)
     edges_df.to_csv(TAB / "fingerprint_similarity_edges.csv", index=False)
 
-    # clusters: resumen por cluster (miembros, fuente dominante)
+    # clusters: per-cluster summary (members, dominant source)
     cl_recs = []
     for c in sorted(set(clusters)):
         mem = reg[clusters == c]
@@ -307,13 +307,13 @@ def main():
                                   "loading": round(float(comp[gi]), 4)})
     pd.DataFrame(load_recs).to_csv(TAB / "fingerprint_pc_loadings.csv", index=False)
 
-    # ---- figuras ----
+    # ---- figures ----
     _fig_pca_by(scores, evr, cond, "condition", COND_COLOR,
                 FIG / "20_fingerprint_pca_by_condition.png",
-                "PCA de huellas · color = condición", reg, COMPLEXES, idx_of, reg_set)
+                "Fingerprint PCA · color = condition", reg, COMPLEXES, idx_of, reg_set)
     _fig_pca_by(scores, evr, rclass, "regulator_class", CLASS_COLOR,
                 FIG / "21_fingerprint_pca_by_regulator_class.png",
-                "PCA de huellas · color = clase", reg, COMPLEXES, idx_of, reg_set)
+                "Fingerprint PCA · color = class", reg, COMPLEXES, idx_of, reg_set)
     _fig_heatmap(S, reg, clusters, source, FIG / "22_fingerprint_similarity_heatmap.png")
     _fig_network(scores, edges_df, reg, source, idx_of,
                  FIG / "23_fingerprint_neighbor_network.png")
@@ -328,10 +328,10 @@ def main():
         "complex_validation": comp_recs,
     }
     (TAB / "fingerprint_summary.json").write_text(json.dumps(summary, indent=2))
-    print("OK · tablas y figuras escritas")
+    print("OK · tables and figures written")
 
 
-# ------------------------------------------------------------------- figuras
+# ------------------------------------------------------------------- figures
 def _annotate_complexes(ax, scores, reg, complexes, idx_of, reg_set):
     ring = {"SAGA": "#d62728", "Mediator": "#1f77b4", "TCR": "#111"}
     for name, members in complexes.items():
@@ -353,7 +353,7 @@ def _fig_pca_by(scores, evr, labels, kind, cmap, path, title, reg, complexes, id
     _annotate_complexes(ax, scores, reg, complexes, idx_of, reg_set)
     ax.set_xlabel(f"PC1 ({evr[0]*100:.1f}%)")
     ax.set_ylabel(f"PC2 ({evr[1]*100:.1f}%)")
-    ax.set_title(title + "  (anillos = complejo conocido)")
+    ax.set_title(title + "  (rings = known complex)")
     ax.legend(title=kind, loc="best")
     fig.tight_layout(); fig.savefig(path, dpi=140); plt.close(fig)
 
@@ -363,14 +363,14 @@ def _fig_heatmap(S, reg, clusters, source, path):
     So = S[np.ix_(order, order)]
     fig, ax = plt.subplots(figsize=(11, 10))
     im = ax.imshow(So, cmap="RdBu_r", vmin=-1, vmax=1, aspect="auto")
-    ax.set_title("Similitud coseno entre huellas (ordenado por cluster)")
+    ax.set_title("Cosine similarity between fingerprints (ordered by cluster)")
     ax.set_xticks([]); ax.set_yticks([])
     fig.colorbar(im, ax=ax, fraction=0.046, label="cosine similarity")
     fig.tight_layout(); fig.savefig(path, dpi=140); plt.close(fig)
 
 
 def _fig_network(scores, edges_df, reg, source, idx_of, path):
-    # nodos en sus coords PCA; aristas = nearest neighbors (top similitudes)
+    # nodes at their PCA coords; edges = nearest neighbors (top similarities)
     fig, ax = plt.subplots(figsize=(11, 9))
     top = edges_df.head(400)
     for r in top.itertuples():
@@ -383,7 +383,7 @@ def _fig_network(scores, edges_df, reg, source, idx_of, path):
         m = source == s
         ax.scatter(scores[m, 0], scores[m, 1], s=36, color=SOURCE_COLOR.get(s, "#999"),
                    label=str(s), zorder=3, edgecolor="white", linewidth=0.3)
-    ax.set_title("Red de vecinos transcriptómicos (layout PCA · color = fuente del panel)")
+    ax.set_title("Transcriptomic neighbor network (PCA layout · color = panel source)")
     ax.set_xlabel("PC1"); ax.set_ylabel("PC2"); ax.legend(loc="best")
     fig.tight_layout(); fig.savefig(path, dpi=140); plt.close(fig)
 

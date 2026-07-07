@@ -1,108 +1,108 @@
 # Side analysis — transcriptional fingerprints / perturbation program similarity
 
-## Qué pregunta responde
+## What question it answers
 
-El ranking EB y las auditorías dicen **quién** es un regulador fuerte. Este análisis responde otra
-pregunta: **qué programa transcriptómico induce cada perturbación, y qué reguladores se parecen
-entre sí**. Pasa de una *lista de genes* a un *mapa de programas*.
+The EB ranking and the audits say **who** is a strong regulator. This analysis answers a different
+question: **what transcriptomic program each perturbation induces, and which regulators resemble
+each other**. It moves from a *list of genes* to a *map of programs*.
 
-La **huella** de una perturbación = su vector de efectos sobre los ~10k genes medidos. Dos
-reguladores con huellas parecidas actúan sobre el mismo programa. Sobre esa matriz se corre PCA,
-similitud coseno y clustering. No reemplaza el ranking core, no agrega modelos pesados, no descarga
-el h5ad completo.
+A perturbation's **fingerprint** = its vector of effects over the ~10k measured genes. Two
+regulators with similar fingerprints act on the same program. On that matrix we run PCA,
+cosine similarity, and clustering. It does not replace the core ranking, adds no heavy models, and
+does not download the full h5ad.
 
-## Datos y método
+## Data and method
 
-Matriz `layers/zscore` del h5ad remoto (densa, contigua): filas = perturbación×condición, columnas
-= genes medidos. Se lee **sólo el panel** (~200 filas) por slice remoto, cacheado en
-`data/cache/panel_zscore_*.npy`. (`--matrix log_fc` usa el cache local completo de 1.4 GB.)
+The `layers/zscore` matrix from the remote h5ad (dense, contiguous): rows = perturbation×condition,
+columns = measured genes. We read **only the panel** (~200 rows) by remote slice, cached in
+`data/cache/panel_zscore_*.npy`. (`--matrix log_fc` uses the full 1.4 GB local cache.)
 
-**Panel BALANCEADO** — clave para no sesgar el mapa. Si tomas sólo el top-EB, sale puro
-cromatina/SAGA/Mediador. En cambio:
+**BALANCED panel** — key to not biasing the map. If you take only the top-EB, you get pure
+chromatin/SAGA/Mediator. Instead:
 
-| fuente | n | criterio |
-|--------|---|----------|
-| global            | 75 | top por regpower EB, clase `global` |
-| context-specific  | 75 | top por regpower EB, clase `condition-specific` |
-| promoted          | 25 | promovidos por la auditoría de reproducibilidad (rank_shift↑) |
-| demoted           | 25 | demotados por la auditoría (rank_shift↓) |
+| source | n | criterion |
+|--------|---|-----------|
+| global            | 75 | top by EB regpower, class `global` |
+| context-specific  | 75 | top by EB regpower, class `condition-specific` |
+| promoted          | 25 | promoted by the reproducibility audit (rank_shift↑) |
+| demoted           | 25 | demoted by the audit (rank_shift↓) |
 
-Cada regulador entra en su condición pico. Columnas: **top-2000 genes por varianza** en el panel.
-Se **estandarizan las columnas** (z-score por gen) antes de PCA/similitud, para que genes
-comparables pesen igual.
+Each regulator enters in its peak condition. Columns: **top-2000 genes by variance** in the panel.
+Columns are **standardized** (z-score per gene) before PCA/similarity, so comparable genes carry
+equal weight.
 
-Ejecutar: `make fingerprints`  (o `python scripts/analyze_fingerprints.py --n 200 --matrix zscore --top-genes 2000`).
+Run: `make fingerprints`  (or `python scripts/analyze_fingerprints.py --n 200 --matrix zscore --top-genes 2000`).
 
-## Resultados
+## Results
 
-### 1. El espacio latente captura *programas*, no *magnitud*
+### 1. The latent space captures *programs*, not *magnitude*
 
-PCA sobre las huellas. Si PC1 sólo reordenara por "tamaño del efecto", el análisis no añadiría nada
-sobre el ranking. **No es el caso:**
+PCA over the fingerprints. If PC1 merely reordered by "effect size", the analysis would add nothing
+over the ranking. **That is not the case:**
 
-- `spearman(|PC1|, n_downstream) = 0.25` — correlación débil. PC1 **no** es magnitud.
-- PC1 (28.9% var) es el eje de **señalización TCR / activación proximal**; PC2 (7.4%) separa los
-  **coactivadores de cromatina** (SAGA/Mediador, arriba) del resto.
-- Los top-loadings son inmunológicamente coherentes (citoquinas efectoras, naive/memoria,
-  polarización Th, interferón).
+- `spearman(|PC1|, n_downstream) = 0.25` — weak correlation. PC1 is **not** magnitude.
+- PC1 (28.9% var) is the axis of **TCR signaling / proximal activation**; PC2 (7.4%) separates the
+  **chromatin coactivators** (SAGA/Mediator, top) from the rest.
+- The top loadings are immunologically coherent (effector cytokines, naive/memory,
+  Th polarization, interferon).
 
-→ **El ranking captura fuerza; el mapa latente captura la identidad del programa.** Complementarios.
+→ **The ranking captures strength; the latent map captures program identity.** Complementary.
 
-### 2. El espacio recupera estructura biológica conocida (validación por permutación)
+### 2. The space recovers known biological structure (permutation validation)
 
-¿Los miembros de un complejo tienen huellas más parecidas entre sí que gene-sets aleatorios del
-panel? (coseno intra-complejo vs null por permutación, N=5000):
+Do members of a complex have more similar fingerprints to each other than random gene-sets from the
+panel? (intra-complex cosine vs. permutation null, N=5000):
 
-| Complejo  | n | coseno intra | null | z | p |
+| Complex   | n | intra cosine | null | z | p |
 |-----------|---|--------------|------|-----|-------|
 | **TCR**       | 5 | **0.916** | 0.004 | **11.2** | 0.0002 |
 | **SAGA**      | 8 | **0.478** | 0.004 | **9.2**  | 0.0002 |
-| **Mediador**  | 7 | 0.196 | 0.007 | 3.2 | 0.013 |
+| **Mediator**  | 7 | 0.196 | 0.007 | 3.2 | 0.013 |
 
-Los tres son significativos. TCR es casi colineal (0.92): CD3E/ZAP70/LAT/LCK/PLCG1 inducen
-prácticamente la misma huella. SAGA muy cohesivo. Mediador más difuso pero significativo.
+All three are significant. TCR is nearly colinear (0.92): CD3E/ZAP70/LAT/LCK/PLCG1 induce
+practically the same fingerprint. SAGA is very cohesive. Mediator is more diffuse but significant.
 
-### 3. Vecinos transcriptómicos — la vista demoable
+### 3. Transcriptomic neighbors — the demoable view
 
-Nearest neighbors por similitud coseno de huella (`fingerprint_neighbors.csv`, endpoint
+Nearest neighbors by fingerprint cosine similarity (`fingerprint_neighbors.csv`, endpoint
 `/programs/neighbors/{gene}`):
 
-- **ZAP70** → LAT (0.95), CD3E (0.95), PLCG1 (0.95), LCK (0.84) — módulo TCR puro.
-- **TADA2B** → TAF6L (0.94), SUPT20H (0.92), TADA1 (0.88) — módulo SAGA puro.
-- **MED12** → MED19 (0.78), SUPT20H (0.75), TADA2B (0.75) — Mediador + SAGA (coactivadores).
-- **SGF29** → CCNC (0.66) — SAGA más cercano a un miembro de Mediador.
+- **ZAP70** → LAT (0.95), CD3E (0.95), PLCG1 (0.95), LCK (0.84) — pure TCR module.
+- **TADA2B** → TAF6L (0.94), SUPT20H (0.92), TADA1 (0.88) — pure SAGA module.
+- **MED12** → MED19 (0.78), SUPT20H (0.75), TADA2B (0.75) — Mediator + SAGA (coactivators).
+- **SGF29** → CCNC (0.66) — SAGA closest to a Mediator member.
 
-El atlas ya no sólo rankea reguladores: **organiza perturbaciones por la huella que inducen** y
-permite preguntar "¿a quién se parece este gen?".
+The atlas no longer just ranks regulators: it **organizes perturbations by the fingerprint they
+induce** and lets you ask "who does this gene resemble?".
 
-## Salidas
+## Outputs
 
-**Figuras** (`docs/figures/`): `20_fingerprint_pca_by_condition.png`,
-`21_fingerprint_pca_by_regulator_class.png` (principal), `22_fingerprint_similarity_heatmap.png`,
+**Figures** (`docs/figures/`): `20_fingerprint_pca_by_condition.png`,
+`21_fingerprint_pca_by_regulator_class.png` (main), `22_fingerprint_similarity_heatmap.png`,
 `23_fingerprint_neighbor_network.png`.
 
-**Tablas** (`docs/tables/`): `fingerprint_panel.csv`, `fingerprint_pca_scores.csv`,
+**Tables** (`docs/tables/`): `fingerprint_panel.csv`, `fingerprint_pca_scores.csv`,
 `fingerprint_neighbors.csv`, `fingerprint_similarity_edges.csv`, `fingerprint_clusters.csv`,
 `fingerprint_pc_loadings.csv`, `fingerprint_complex_validation.csv`, `fingerprint_summary.json`.
 
 **API** (`/programs/*`): `GET /programs/pca`, `GET /programs/neighbors/{gene}`,
-`GET /programs/clusters`. **UI**: pestaña **Programas** (scatter PCA + buscador de vecinos).
+`GET /programs/clusters`. **UI**: the **Programs** tab (PCA scatter + neighbor search).
 
-## Limitaciones (honestas)
+## Limitations (honest)
 
-- **Una huella por regulador (condición pico)** → el mapa mezcla condiciones. La figura por
-  condición ayuda a leer el efecto de contexto, pero un PCA separado por condición sería más limpio.
-- **zscore = log_fc/lfcSE** ya pondera por error, pero se estandariza por columna encima; es una
-  elección razonable, no la única.
-- **PCA/SVD lineal**, no UMAP: más transparente y defendible, pero no captura no-linealidades.
-- **Exploratorio**: es *perturbation program similarity*, **no** descubrimiento de vías causales ni
-  de programas celulares nuevos. Los complejos usados son anotación conocida, no descubrimiento.
-- **Panel de 200**, no los 33 983 contrastes: suficiente para el mapa, no exhaustivo.
+- **One fingerprint per regulator (peak condition)** → the map mixes conditions. The per-condition
+  figure helps read the context effect, but a separate PCA per condition would be cleaner.
+- **zscore = log_fc/lfcSE** already weights by error, but we standardize per column on top; it is a
+  reasonable choice, not the only one.
+- **Linear PCA/SVD**, not UMAP: more transparent and defensible, but does not capture nonlinearities.
+- **Exploratory**: it is *perturbation program similarity*, **not** causal pathway discovery nor
+  discovery of new cell programs. The complexes used are known annotation, not discovery.
+- **Panel of 200**, not all 33,983 contrasts: enough for the map, not exhaustive.
 
-## Veredicto
+## Verdict
 
-**Resultado fuerte.** Tres afirmaciones cuantificadas y defendibles: (1) la estructura latente es
-programa, no magnitud (|PC1|~n_downstream = 0.25); (2) el espacio recupera complejos conocidos con
-significancia por permutación (TCR z=11, SAGA z=9, Mediador z=3); (3) los vecinos transcriptómicos
-son biológicamente coherentes y navegables desde la UI. El atlas pasa de "ranking de reguladores" a
-"mapa de programas regulatorios".
+**Strong result.** Three quantified, defensible claims: (1) the latent structure is program, not
+magnitude (|PC1|~n_downstream = 0.25); (2) the space recovers known complexes with permutation
+significance (TCR z=11, SAGA z=9, Mediator z=3); (3) the transcriptomic neighbors are biologically
+coherent and navigable from the UI. The atlas moves from "regulator ranking" to "map of regulatory
+programs".

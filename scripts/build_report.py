@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Genera el reporte judge-facing consolidado y la figura de overview del pipeline.
+"""Generates the consolidated judge-facing report and the pipeline overview figure.
 
     python scripts/build_report.py
 
-Produce:
+Produces:
     docs/figures/00_pipeline_overview.png
-    docs/report.md   (consolida DATA_MODEL.md + EDA.md + MODELING.md + figuras + tabla top)
+    docs/report.md   (consolidates DATA_MODEL.md + EDA.md + MODELING.md + figures + top table)
 """
 from pathlib import Path
 import pandas as pd
@@ -40,24 +40,24 @@ def pipeline_overview():
         if label:
             ax.text((x0 + x1) / 2, y + 2.1, label, ha="center", fontsize=6.8, color=MUT, style="italic")
 
-    box(1, 10, 20, 14, "CSV suplementarias", AMBER, "DE_stats · sgRNA · samples\n~15 MB · local")
+    box(1, 10, 20, 14, "Supplementary CSVs", AMBER, "DE_stats · sgRNA · samples\n~15 MB · local")
     arrow(21, 29, 17, "features")
-    box(29, 10, 18, 14, "EDA 80/20", ACCENT, "distribución, hubs,\nQC · scripts/eda.py")
+    box(29, 10, 18, 14, "80/20 EDA", ACCENT, "distribution, hubs,\nQC · scripts/eda.py")
     arrow(47, 55, 17, "ranking")
-    box(55, 10, 20, 14, "Modelo 2 · EB", ACCENT, "reguladores robustos\nscripts/model_hubs.py")
-    arrow(75, 83, 17, "candidatos")
-    box(83, 4, 16, 26, "Modelo 1 (opcional)", VIOLET, "red de efectos\ncon incertidumbre\nh5ad · sin bajar")
+    box(55, 10, 20, 14, "Model 2 · EB", ACCENT, "robust regulators\nscripts/model_hubs.py")
+    arrow(75, 83, 17, "candidates")
+    box(83, 4, 16, 26, "Model 1 (optional)", VIOLET, "uncertainty-aware\neffect network\nh5ad · not downloaded")
 
-    ax.text(50, 30.5, "Pipeline — de CSV local a reguladores con incertidumbre",
+    ax.text(50, 30.5, "Pipeline — from local CSV to regulators with uncertainty",
             ha="center", fontsize=12, fontweight="bold", color=INK)
     fig.tight_layout()
     fig.savefig(FIG / "00_pipeline_overview.png", dpi=140, bbox_inches="tight")
     plt.close(fig)
-    print("  figura → docs/figures/00_pipeline_overview.png")
+    print("  figure → docs/figures/00_pipeline_overview.png")
 
 
 def df_to_md(df):
-    """Tabla markdown sin depender de `tabulate`."""
+    """Markdown table without depending on `tabulate`."""
     cols = list(df.columns)
     head = "| " + " | ".join(cols) + " |"
     sep = "| " + " | ".join("---" for _ in cols) + " |"
@@ -67,7 +67,7 @@ def df_to_md(df):
 
 
 def section(path):
-    """Devuelve el cuerpo de un .md sin su primer título H1 (para anidar)."""
+    """Returns the body of a .md without its first H1 title (for nesting)."""
     lines = (ROOT / "docs" / path).read_text().splitlines()
     out, skipped = [], False
     for ln in lines:
@@ -89,15 +89,15 @@ def build_report():
     if ep.exists():
         ed = pd.read_csv(ep)
         n, nreg = len(ed), ed["perturbed_gene"].nunique()
-        poc = " Se evaluó como **proof-of-concept** (ver `docs/EDGE_ANALYSIS.md`): coherente" \
-              " y biológicamente sensato, pero de cobertura mínima — se deja como bonus, no como" \
-              " resultado fuerte." if (ROOT / "docs" / "EDGE_ANALYSIS.md").exists() else ""
-        edges_line = (f"\nSe generó además una **red de efectos con incertidumbre** (bonus, Modelo 1) "
-                      f"con **{n:,} edges robustos** (`P(|efecto|>1.5×)>0.8` — probabilidad de que la "
-                      f"*magnitud* supere 1.5×, no de que exista una arista causal) de {nreg} reguladores en "
+        poc = " It was assessed as a **proof-of-concept** (see `docs/EDGE_ANALYSIS.md`): coherent" \
+              " and biologically sensible, but of minimal coverage — kept as a bonus, not a" \
+              " strong result." if (ROOT / "docs" / "EDGE_ANALYSIS.md").exists() else ""
+        edges_line = (f"\nWe also built an **uncertainty-aware effect network** (bonus, Model 1) "
+                      f"with **{n:,} robust edges** (`P(|effect|>1.5×)>0.8` — the probability that the "
+                      f"*magnitude* exceeds 1.5×, not that a causal edge exists) from {nreg} regulators in "
                       f"`docs/tables/robust_edges.csv`.{poc}\n")
 
-    # --- secciones de la auditoría (condicionales a que exista el audit) ---
+    # --- audit sections (conditional on the audit existing) ---
     audit_md = ""
     comp_p = TAB / "ranking_baseline_comparison.csv"
     gtab_p = TAB / "top_global_regulators.csv"
@@ -111,105 +111,104 @@ def build_report():
         glist = ", ".join(g_tab.head(6)["gene"])
         clist = ", ".join(c_tab.head(6)["gene"])
         audit_md = f"""
-## Naive hubs vs quality-aware regulators
+## Naive hubs vs. quality-aware regulators
 
-Rankear por `n_downstream` crudo premia hubs que no sobreviven a los controles de calidad.
-De los 30 hubs crudos top: **{n_drop} caen por el gate de KD** (sin knockdown on-target validado)
-y **{len(demoted)} se demotan por el shrinkage EB** por ser condition-specific (la señal vive en
-una sola condición). El ranking EB surface reguladores con efecto grande **y** estable.
+Ranking by raw `n_downstream` rewards hubs that don't survive the quality controls.
+Of the top 30 raw hubs: **{n_drop} drop at the KD gate** (no validated on-target knockdown)
+and **{len(demoted)} are demoted by EB shrinkage** for being condition-specific (the signal lives in
+a single condition). The EB ranking surfaces regulators with a large **and** stable effect.
 
 ![gate](figures/08_kd_gate_changes_ranking.png)
 
-La estabilidad se auditó con bootstrap (B=200) sobre las filas elegibles: la frecuencia con que
-cada gen cae en el top-30 (`stability_frequency`) está en `top_regulators_for_review.csv`. El
-ranking es moderadamente estable — conviene leerlo como *conjunto* de reguladores robustos, no
-como un orden exacto.
+Stability was audited with a bootstrap (B=200) over the eligible rows: how often each gene falls
+in the top-30 (`stability_frequency`) is in `top_regulators_for_review.csv`. The ranking is
+moderately stable — best read as a *set* of robust regulators, not an exact ordering.
 
 ![stability](figures/11_ranking_stability.png)
 
-## Global versus context-specific regulators
+## Global vs. context-specific regulators
 
-Separando por `condition_specificity = max/sum de n_downstream` entre condiciones con KD significativo:
+Splitting by `condition_specificity = max/sum of n_downstream` across conditions with significant KD:
 
-- **Globales** (efecto estable en ≥2 condiciones): {glist}… — maquinaria de cromatina/transcripción.
-- **Context-specific** (efecto concentrado en una condición): {clist}… — incluye señalización TCR
-  (ZAP70, LCK), activa solo bajo estímulo.
+- **Global** (stable effect in ≥2 conditions): {glist}… — chromatin/transcription machinery.
+- **Context-specific** (effect concentrated in one condition): {clist}… — includes TCR signaling
+  (ZAP70, LCK), active only under stimulation.
 
-Ambas clases son biología real; la distinción evita confundir un regulador universal con uno de contexto.
-Tablas: `top_global_regulators.csv`, `top_condition_specific_regulators.csv`.
+Both classes are real biology; the distinction avoids confusing a universal regulator with a
+context-dependent one. Tables: `top_global_regulators.csv`, `top_condition_specific_regulators.csv`.
 
 ![globalvs](figures/10_global_vs_context_specific.png)
 """
 
-    # --- auditoría de sensibilidad guide/donor-aware (metadata real, opcional) ---
+    # --- guide/donor-aware sensitivity audit (real metadata, optional) ---
     repro_p = TAB / "reproducibility_audit.csv"
     cov_p = TAB / "reproducibility_coverage.csv"
     if comp_p.exists() and repro_p.exists() and cov_p.exists():
         au = pd.read_csv(repro_p)
         cov = pd.read_csv(cov_p).iloc[0]
-        dem = au[au["status"] == "demotado"].sort_values("old_rank")
-        pro = au[au["status"] == "promovido"].sort_values("new_rank")
-        surv = au[au["status"] == "sobrevive"].sort_values("new_rank")
+        dem = au[au["status"] == "demoted"].sort_values("old_rank")
+        pro = au[au["status"] == "promoted"].sort_values("new_rank")
+        surv = au[au["status"] == "survives"].sort_values("new_rank")
         survlist = ", ".join(surv.head(5)["gene"])
-        # tabla interpretable demotados + promovidos
+        # interpretable table: demoted + promoted
         mv = pd.concat([dem, pro]).sort_values(["status", "old_rank"])
         mv = mv[["gene", "old_rank", "new_rank", "status", "guide_corr", "donor_corr", "reason"]]
         mv_tbl = df_to_md(mv)
         audit_md += f"""
-## Auditoría de sensibilidad: ¿el ranking sobrevive a la reproducibilidad real (guide/donor)?
+## Sensitivity audit: does the ranking survive real (guide/donor) reproducibility?
 
-El caveat del ranking core era usar `xcond_reproducibility` (proxy cross-condición). Lo auditamos con
-reproducibilidad **real** del `.obs` de `DE_stats.h5ad` (`scripts/extract_de_obs_metadata.py`, solo
-`.obs`, ~4 s, sin `.layers`): `guide_correlation_all` (concordancia entre las 2 guías) y
-`donor_correlation_hits_mean` (concordancia cross-donor), más penalización a targets de una sola guía.
+The core ranking's caveat was using `xcond_reproducibility` (a cross-condition proxy). We audit it with
+**real** reproducibility from the `.obs` of `DE_stats.h5ad` (`scripts/extract_de_obs_metadata.py`, `.obs`
+only, ~4 s, no `.layers`): `guide_correlation_all` (agreement between the 2 guides) and
+`donor_correlation_hits_mean` (cross-donor agreement), plus a penalty for single-guide targets.
 
-**No reestimamos el posterior EB ni es un modelo nuevo**: reponderamos el score EB
-(`reweighted_score = regpower_eb_mean · repro_weight`) como **análisis de sensibilidad** — qué
-reguladores sobreviven. En la práctica es más **guide-aware** que **donor-aware**: `guide_corr` cubre
-{cov.pct_guide_corr_available:.0f}% de los contrastes pero `donor_corr` solo **{cov.pct_donor_corr_available:.0f}%**
-(el análisis cross-donor se hizo en un subconjunto); donde falta, se usa un **peso neutral** (no penaliza
-por dato ausente). Del top-30 EB, **{len(dem)} se demotan** y **{len(pro)} se promueven**:
+**We do not re-estimate the EB posterior and it is not a new model**: we reweight the EB score
+(`reweighted_score = regpower_eb_mean · repro_weight`) as a **sensitivity analysis** — which
+regulators survive. In practice it is more **guide-aware** than **donor-aware**: `guide_corr` covers
+{cov.pct_guide_corr_available:.0f}% of contrasts but `donor_corr` only **{cov.pct_donor_corr_available:.0f}%**
+(the cross-donor analysis was done on a subset); where it's missing, a **neutral weight** is used (no
+penalty for absent data). Of the top-30 EB, **{len(dem)} are demoted** and **{len(pro)} are promoted**:
 
 {mv_tbl}
 
-- **Sobreviven** (efecto grande + reproducible): {survlist}… — SAGA + Mediador.
+- **Survivors** (large effect + reproducible): {survlist}… — SAGA + Mediator.
 
 ![reproshift](figures/19_reproducibility_aware_ranking_shift.png)
 
-**El ranking core sigue funcionando sin este archivo** — la auditoría vive aparte en
+**The core ranking still works without this file** — the audit lives separately in
 `hub_ranking_bayes_reproducibility_aware.csv` / `reproducibility_audit.csv`.
 """
 
-    md = f"""# Reporte — Genome-scale CD4+ T cell Perturb-seq
+    md = f"""# Report — Genome-scale CD4+ T cell Perturb-seq
 
-*Reporte consolidado para revisión. Reproducible con `make all` (solo CSV locales).*
+*Consolidated report for review. Reproducible with `make all` (local CSVs only).*
 
 ![pipeline](figures/00_pipeline_overview.png)
 
-## Pregunta
+## Question
 
-¿Qué genes son **reguladores robustos** de los programas de células T CD4+, separando
-señal real de ruido y priorizando por efecto **grande y reproducible**, no por conteos crudos?
+Which genes are **robust regulators** of CD4+ T cell programs — separating real
+signal from noise and prioritizing by a **large and reproducible** effect, not by raw counts?
 
-## Resumen ejecutivo
+## Executive summary
 
-- El efecto de las perturbaciones es **heavy-tailed**: mediana 2 DEGs, pero un 1.5% son hubs
-  con >1000. Se resume con percentiles y rankings, no con la media.
-- El **knockdown efectivo gatea la señal**: los contrastes con KD on-target significativo (62%)
-  concentran el **85%** de todos los trans-efectos.
-- Un modelo **empirical-Bayes** (pseudo-bayesiano) rankea reguladores por poder regulatorio
-  latente con incertidumbre. El top robusto es maquinaria de **cromatina/transcripción**
-  (complejo SAGA, Mediador, KDM1A, SETD2) — efecto grande **y** estable entre condiciones.
+- Perturbation effects are **heavy-tailed**: median 2 DEGs, but 1.5% are hubs
+  with >1000. Summarize with percentiles and rankings, not the mean.
+- **Effective knockdown gates the signal**: contrasts with a significant on-target KD (62%)
+  concentrate **85%** of all trans-effects.
+- An **empirical-Bayes** (pseudo-Bayesian) model ranks regulators by their latent regulatory
+  power with uncertainty. The robust top is **chromatin/transcription** machinery
+  (SAGA complex, Mediator, KDM1A, SETD2) — a large **and** stable effect across conditions.
 {edges_line}
-## Top reguladores (para revisión)
+## Top regulators (for review)
 
 {tbl}
 
-Tabla completa (30, con todas las columnas): `docs/tables/top_regulators_for_review.csv`.
+Full table (30, with all columns): `docs/tables/top_regulators_for_review.csv`.
 
 ![ranking](figures/07_hub_posterior_ranking.png)
 {audit_md}
-## Hallazgos del EDA
+## EDA findings
 
 ![degs](figures/01_distribution_n_total_de_genes.png)
 ![hubs](figures/03_top_hubs_by_condition.png)
@@ -218,28 +217,28 @@ Tabla completa (30, con todas las columnas): `docs/tables/top_regulators_for_rev
 
 ---
 
-## Anexo A — Modelo de datos
+## Appendix A — Data model
 
 {section("DATA_MODEL.md")}
 
 ---
 
-## Anexo B — EDA
+## Appendix B — EDA
 
 {section("EDA.md")}
 
 ---
 
-## Anexo C — Modelado
+## Appendix C — Modeling
 
 {section("MODELING.md")}
 """
     (ROOT / "docs" / "report.md").write_text(md)
-    print("  reporte → docs/report.md")
+    print("  report → docs/report.md")
 
 
 if __name__ == "__main__":
     print("== build_report ==")
     pipeline_overview()
     build_report()
-    print("✓ Reporte generado.")
+    print("✓ Report generated.")

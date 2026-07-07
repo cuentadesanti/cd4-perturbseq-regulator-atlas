@@ -48,20 +48,20 @@ class RegulatorProfile(BaseModel):
     regpower_eb_sd: Optional[float] = None
     p_top_1pct: Optional[float] = None
     expected_downstream: Optional[float] = None
-    # clase
+    # class
     regulator_class: Optional[str] = None
     condition_specificity: Optional[float] = None
     kd_significant_conditions: Optional[int] = None
     peak_condition: Optional[str] = None
-    # perfil por condición (n_downstream)
+    # per-condition profile (n_downstream)
     condition_profile: Optional[dict[str, int]] = None
-    # auditoría de calidad
+    # quality audit
     stability_frequency: Optional[float] = None
     median_rank: Optional[float] = None
     rank_iqr: Optional[float] = None
     dropped_by_kd_gate: Optional[bool] = None
     raw_rank: Optional[int] = None
-    # auditoría de reproducibilidad (opcional)
+    # reproducibility audit (optional)
     guide_corr: Optional[float] = None
     donor_corr: Optional[float] = None
     single_guide_frac: Optional[float] = None
@@ -72,8 +72,8 @@ class RegulatorProfile(BaseModel):
     donor_metadata: Optional[str] = None
     audit_status: Optional[str] = None
     audit_reason: Optional[str] = None
-    # edges (opcional)
+    # edges (optional)
     n_downstream_edges: Optional[int] = None
     top_downstream_edges: Optional[list[EdgeItem]] = None
-    # texto
+    # text
     interpretation: str
