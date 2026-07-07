@@ -48,6 +48,16 @@ fingerprint); SAGA is cohesive; Mediator is diffuse but significant. This is the
 — **not** the PCA. PC1 (28.9% var) merely confirms the axis is program *identity*, not magnitude
 (`spearman(|PC1|, n_downstream) = 0.25`).
 
+**Spectral sanity check (`make spectral` → `fingerprint_spectral_sanity.csv`, fig 25).** A second,
+independent-ish check: are the *assigned* program members (curated core **+** newly assigned neighbors,
+not just the curated members) more compact than random panel groups in the PC1–PC10 spectral
+embedding? By **cosine** (response direction — the metric that defines the programs) they clearly are:
+**SAGA z=9.0, Mediator z=2.8, TCR z=11.2** (5,000 permutations, all p≤0.01). By **raw Euclidean**
+distance they are *not* (TCR is even anti-compact, z=−1.1) — because raw PCA distance is dominated by
+effect *magnitude* (the high-variance PC1 axis), and a program's members span a wide range of effect
+sizes. Honest reading: **these are response-*shape* programs, not effect-*size* clusters** — coherent
+in what they do to the cell, not in how much.
+
 ### 2. Recognizable programs, with newly assigned neighbors
 
 The classifier is conservative: only **25 of 200** regulators are assigned a program; the rest stay
@@ -111,9 +121,11 @@ and lets you ask "what does this gene do, and who does it resemble?".
 **Tables** (`docs/tables/`): `fingerprint_findings.csv` (per regulator: program, nearest complex,
 neighbors, markers), `program_label_evidence.csv` (auditable label basis),
 `fingerprint_program_markers.csv`, `fingerprint_audit_coherence.csv`, `fingerprint_complex_validation.csv`,
-`fingerprint_pca_scores.csv`, `fingerprint_neighbors.csv`, `fingerprint_clusters.csv`, `fingerprint_summary.json`.
+`fingerprint_spectral_sanity.csv` (spectral compactness by metric), `fingerprint_pca_scores.csv`,
+`fingerprint_neighbors.csv`, `fingerprint_clusters.csv`, `fingerprint_summary.json`.
 
-**Figures** (`docs/figures/`): `24_fingerprint_pca_by_program.png` (main), `20`–`23` (PCA by
+**Figures** (`docs/figures/`): `24_fingerprint_pca_by_program.png` (main),
+`25_fingerprint_spectral_sanity.png` (spectral sanity check), `20`–`23` (PCA by
 condition/class, similarity heatmap, neighbor network).
 
 **API/UI** (`/programs/*`): `GET /programs/summary`, `/programs/findings`, `/programs/pca`,

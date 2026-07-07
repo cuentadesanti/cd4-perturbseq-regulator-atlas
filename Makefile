@@ -1,21 +1,22 @@
 PY := python3
 
-.PHONY: all eda model audit report spike edges eda-edges repro-meta fingerprints api clean pipeline help
+.PHONY: all eda model audit report spike edges eda-edges repro-meta fingerprints spectral api clean pipeline help
 
 help:
 	@echo "Targets:"
-	@echo "  make eda      - EDA 80/20 (figuras + tablas)          [solo CSV local]"
-	@echo "  make model    - Modelo 2 EB: ranking de reguladores    [solo CSV local]"
-	@echo "  make audit    - Regulator ranking audit (baselines, estabilidad, clases)"
-	@echo "  make report   - reporte consolidado + figura overview"
-	@echo "  make all      - pipeline completo verificado (run_pipeline.py)"
-	@echo "  make spike    - Modelo 1: spike de acceso remoto (OPCIONAL)"
-	@echo "  make edges    - Modelo 1: red de edges, bonus (OPCIONAL, remoto)"
-	@echo "  make eda-edges- EDA de la red de edges (usa robust_edges.csv si existe)"
-	@echo "  make repro-meta - extrae .obs de reproducibilidad del h5ad (OPCIONAL, remoto)"
-	@echo "  make fingerprints - side analysis: mapa de programas (PCA/similitud/clusters) [zscore remoto o log_fc cache]"
-	@echo "  make api      - Regulator Atlas API read-only (uvicorn :8000, Swagger en /docs)"
-	@echo "  make clean    - borra outputs generados (docs/figures, docs/tables, report)"
+	@echo "  make eda      - 80/20 EDA (figures + tables)            [local CSV only]"
+	@echo "  make model    - Model 2 EB: regulator ranking           [local CSV only]"
+	@echo "  make audit    - regulator ranking audit (baselines, stability, classes)"
+	@echo "  make report   - consolidated report + overview figure"
+	@echo "  make all      - full verified pipeline (run_pipeline.py)"
+	@echo "  make spike    - Model 1: remote-access spike (OPTIONAL)"
+	@echo "  make edges    - Model 1: effect network, bonus (OPTIONAL, remote)"
+	@echo "  make eda-edges- EDA of the effect network (uses robust_edges.csv if present)"
+	@echo "  make repro-meta - extract reproducibility .obs from the h5ad (OPTIONAL, remote)"
+	@echo "  make fingerprints - transcriptional programs (PCA/similarity/clusters) [remote zscore or log_fc cache]"
+	@echo "  make spectral - spectral sanity check on the program assignments (after fingerprints)"
+	@echo "  make api      - Regulator Atlas read-only API (uvicorn :8000, Swagger at /docs)"
+	@echo "  make clean    - remove generated outputs (docs/figures, docs/tables, report)"
 
 eda:
 	$(PY) scripts/eda.py
@@ -47,14 +48,18 @@ eda-edges:
 repro-meta:
 	$(PY) scripts/extract_de_obs_metadata.py
 
-# side analysis (NO entra en `make all`): transcriptional fingerprints.
-# --matrix zscore lee slice remoto; --matrix log_fc usa el cache local si existe.
+# transcriptional programs (NOT part of `make all`): fingerprint analysis.
+# --matrix zscore reads a remote slice; --matrix log_fc uses the local cache if present.
 fingerprints:
 	$(PY) scripts/analyze_fingerprints.py --n 200 --matrix zscore --top-genes 2000
+
+# spectral sanity check on the program assignments (needs `make fingerprints` first)
+spectral:
+	$(PY) scripts/spectral_sanity_check.py
 
 api:
 	$(PY) -m uvicorn api.main:app --reload --port 8000
 
 clean:
 	rm -f docs/figures/*.png docs/tables/*.csv docs/report.md
-	@echo "outputs generados eliminados (los CSV de entrada en data/ NO se tocan)"
+	@echo "generated outputs removed (input CSVs in data/ are NOT touched)"

@@ -1,0 +1,10 @@
+program,n_members,n_pcs,metric,mean_intra_distance,null_mean_distance,null_sd,z,p_perm,compact_vs_random
+SAGA/chromatin,9,10,cosine,0.1225,0.9746,0.0946,9.0,0.0002,yes
+SAGA/chromatin,9,10,euclidean_raw,32.1814,42.8274,10.0333,1.06,0.12857,ns
+SAGA/chromatin,9,10,euclidean_whitened,3.1144,4.1125,0.7683,1.3,0.08638,ns
+Mediator/transcription,3,10,cosine,0.2068,0.9691,0.2752,2.77,0.0106,yes
+Mediator/transcription,3,10,euclidean_raw,20.1895,43.311,18.2941,1.26,0.04359,yes
+Mediator/transcription,3,10,euclidean_whitened,2.1837,4.1008,1.3848,1.38,0.06559,ns
+TCR signaling,13,10,cosine,0.1621,0.9715,0.0724,11.18,0.0002,yes
+TCR signaling,13,10,euclidean_raw,51.6253,42.8084,8.1929,-1.08,0.84603,ns
+TCR signaling,13,10,euclidean_whitened,3.4391,4.1104,0.632,1.06,0.13897,ns
