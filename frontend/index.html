@@ -102,11 +102,29 @@
 
 <script>
 const $=s=>document.querySelector(s);
-let API=localStorage.getItem("atlas_api")||"http://localhost:8000";
+const _qp=new URLSearchParams(location.search).get("api");
+// si la UI se sirve desde la propia API (http://…), usa ese mismo origen (sin CORS)
+const _sameOrigin=location.protocol.startsWith("http")?location.origin:null;
+let API=_qp||_sameOrigin||localStorage.getItem("atlas_api")||"http://localhost:8000";
+if(_qp)localStorage.setItem("atlas_api",_qp);
 $("#apibase").value=API;
 const fmt=n=>n==null?"—":(typeof n==="number"?(Number.isInteger(n)?n.toLocaleString():n.toFixed(2)):n);
 const pct=n=>n==null?"—":(n*100).toFixed(0)+"%";
+// celda de correlación: si falta metadata, muestra "—" con tooltip
+const corr=n=>n==null?`<span class="muted" title="sin metadata cross-guide/donor → peso neutral">—</span>`:n.toFixed(2);
 async function api(path){const r=await fetch(API+path);if(!r.ok)throw new Error(r.status+" "+path);return r.json();}
+
+// ---- fuzzy matching de genes ----
+let GENES=null;
+async function loadGenes(){ if(GENES)return GENES; try{GENES=await api("/genes");}catch(e){GENES=[];} return GENES; }
+function lev(a,b){const m=a.length,n=b.length;if(!m)return n;if(!n)return m;
+  let p=Array.from({length:n+1},(_,i)=>i);
+  for(let i=1;i<=m;i++){let prev=p[0];p[0]=i;
+    for(let j=1;j<=n;j++){const t=p[j];p[j]=Math.min(p[j]+1,p[j-1]+1,prev+(a[i-1]===b[j-1]?0:1));prev=t;}}
+  return p[n];}
+function suggest(q){const genes=GENES||[];const qu=q.toUpperCase();
+  return genes.map(g=>[g,g.includes(qu)?0.5:lev(qu,g)]).filter(x=>x[1]<=Math.max(2,Math.floor(q.length/3)+1))
+    .sort((a,b)=>a[1]-b[1]).slice(0,5).map(x=>x[0]);}
 
 let SUMMARY=null;
 async function connect(){
@@ -174,7 +192,12 @@ async function showProfile(gene){
   if(!$("#profile")){await renderExplorer();}
   const box=$("#profile"); box.innerHTML=`<div class="panel muted">cargando ${gene}…</div>`;
   let p; try{ p=await api("/regulators/"+encodeURIComponent(gene.toUpperCase())); }
-  catch(e){ box.innerHTML=`<div class="panel err">No se encontró <b>${gene}</b> (¿pasó el gate de KD?).</div>`; return; }
+  catch(e){
+    await loadGenes(); const sug=suggest(gene);
+    const sugHtml=sug.length?`<div style="margin-top:10px">¿Quisiste decir: ${sug.map(g=>`<span class="chip sug" data-gene="${g}" style="cursor:pointer;border-color:var(--accent);color:var(--accent)">${g}</span>`).join(" ")}</div>`:"";
+    box.innerHTML=`<div class="panel err">No se encontró <b>${gene}</b>.${sugHtml}</div>`;
+    box.querySelectorAll(".sug").forEach(s=>s.addEventListener("click",()=>{$("#q").value=s.dataset.gene;showProfile(s.dataset.gene);}));
+    return; }
   const cond=p.condition_profile||{}; const mx=Math.max(1,...Object.values(cond));
   const order=["Rest","Stim8hr","Stim48hr"];
   const condBars=order.filter(c=>c in cond).map(c=>`<div class="barrow"><span class="muted">${c}</span>
@@ -291,11 +314,16 @@ async function showNeighbors(gene){
 
 /* helpers */
 function regTable(list){
-  return `<table><thead><tr><th>gen</th><th class="num">rank</th><th>clase</th><th class="num">EB</th><th class="num">estab.</th><th class="num">guide</th><th class="num">donor</th></tr></thead><tbody>${
+  return `<table><thead><tr><th>gen</th><th class="num">rank</th><th>clase</th>
+      <th class="num" title="poder regulatorio empirical-Bayes (log-rate)">Reg. power</th>
+      <th class="num" title="frecuencia de selección en el top-30 (bootstrap B=200)">estab.</th>
+      <th class="num" title="correlación cross-guide (reproducibilidad entre las 2 guías)">guide</th>
+      <th class="num" title="correlación cross-donor (reproducibilidad entre donantes)">donor</th></tr></thead><tbody>${
     list.map(r=>`<tr data-gene="${r.gene}"><td class="gn">${r.gene}</td><td class="num">${r.core_rank}</td>
       <td>${r.regulator_class?`<span class="cls ${r.regulator_class==="global"?"global":"cs"}">${r.regulator_class}</span>`:"—"}</td>
       <td class="num">${fmt(r.regpower_eb_mean)}</td><td class="num">${pct(r.stability_frequency)}</td>
-      <td class="num">${fmt(r.guide_corr)}</td><td class="num">${fmt(r.donor_corr)}</td></tr>`).join("")}</tbody></table>`;
+      <td class="num">${corr(r.guide_corr)}</td><td class="num">${corr(r.donor_corr)}</td></tr>`).join("")}</tbody></table>
+    <div class="muted" style="font-size:11px;margin-top:8px;font-family:var(--mono)">Reg. power = poder regulatorio EB · <b>—</b> en guide/donor = sin metadata (peso neutral, no penaliza)</div>`;
 }
 function wireRows(container){ container.querySelectorAll("tr[data-gene]").forEach(tr=>tr.addEventListener("click",()=>showProfile(tr.dataset.gene))); }
 

@@ -9,9 +9,12 @@ no descarga h5ad, no toca S3. `make all` sigue siendo la fuente de verdad.
 from __future__ import annotations
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
-from api.data_loader import get_store
+from api.data_loader import get_store, ROOT
 from api.schemas import Health, Summary, RegulatorSummary, RegulatorProfile
+
+FRONTEND = ROOT / "frontend" / "index.html"
 
 app = FastAPI(
     title="CD4 Perturb-seq Regulator Atlas",
@@ -24,6 +27,14 @@ app.add_middleware(
 )
 
 
+@app.get("/", include_in_schema=False)
+def index():
+    """Sirve la UI desde el mismo origen que la API (sin problemas de CORS/file://)."""
+    if FRONTEND.exists():
+        return FileResponse(FRONTEND)
+    return {"app": "CD4 Perturb-seq Regulator Atlas", "docs": "/docs"}
+
+
 @app.get("/health", response_model=Health, tags=["meta"])
 def health():
     s = get_store()
@@ -33,6 +44,12 @@ def health():
 @app.get("/summary", response_model=Summary, tags=["meta"])
 def summary():
     return get_store().summary()
+
+
+@app.get("/genes", tags=["meta"])
+def genes():
+    """Todos los símbolos de gen rankeados (para autocompletar / fuzzy en la UI)."""
+    return get_store().ranking["gene"].tolist()
 
 
 @app.get("/regulators", response_model=list[RegulatorSummary], tags=["regulators"])
