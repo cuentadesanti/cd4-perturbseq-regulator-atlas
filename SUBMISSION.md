@@ -35,27 +35,23 @@ reproducible analysis + product built on a genome-scale CRISPRi Perturb-seq data
 ## Project description
 *(what you built or investigated, what you found, and why it matters)*
 
-**The question.** In a genome-scale CRISPRi Perturb-seq screen of primary human CD4+ T cells
-(Marson Lab, 2025 — 4 donors × 3 conditions, 33,983 differential-expression contrasts), which genes
-are *robust regulators* of T cell programs? The raw signal is dominated by noise and by a handful of
-hubs, so we wanted to separate signal from noise **with uncertainty** and rank regulators by a
-**large and reproducible** effect — not by raw differentially-expressed-gene counts or `p < 0.1`.
+**What we built.** We turn a massive CD4+ T cell Perturb-seq screen (Marson Lab, 2025 — 4 donors × 3
+conditions, 33,983 differential-expression contrasts) into an atlas of **three explorable objects:
+robust regulators, reproducibility audits, and transcriptional programs.** It is memory- and
+compute-aware: the full dataset is 1.8 TB and the working laptop had ~10 GB free, so the entire core
+runs from the **15 MB supplementary CSV tables alone**, and the heavier objects stream `.h5ad` layers
+*by slice* from S3 without downloading them.
 
-**What we built.** A reproducible, memory- and compute-aware research product. The full dataset is
-1.8 TB and the working laptop had ~10 GB free, so the entire core runs from the **15 MB supplementary
-CSV tables alone**:
-1. An 80/20 EDA that characterizes the effect-size distribution and quality gates.
-2. An **empirical-Bayes regulator ranking** (fixed-effects negative-binomial GLM + normal-normal
-   shrinkage of a per-gene log-rate effect) that ranks regulators with posterior uncertainty.
-3. A **ranking audit** — baseline comparison, bootstrap stability, and a global-vs-context-specific
-   split — that shows *why* the quality gates matter.
-4. A **guide/donor-aware sensitivity audit** that reweights the ranking with real cross-guide and
-   cross-donor reproducibility extracted from just the `.obs` of the 17 GB `.h5ad` (no `.layers`).
-5. A bonus **uncertainty-aware effect network** streamed by slice from the remote 17 GB `.h5ad`
-   *without downloading it*, and a **transcriptional-fingerprint** side analysis (PCA + cosine
-   similarity) that maps perturbations to programs.
-6. A **Regulator Atlas** on top: a read-only FastAPI service + single-page UI to search a gene, see
-   its full profile, filter global vs. context-specific, and browse every audit.
+- **Robust regulators.** An **empirical-Bayes ranking** (fixed-effects negative-binomial GLM +
+  normal-normal shrinkage) ranks regulators with posterior uncertainty, gated on a validated knockdown.
+- **Reproducibility audits.** Baseline comparison, bootstrap stability, a global-vs-context-specific
+  split, and a **guide/donor-aware audit** that reweights the ranking with real cross-guide/cross-donor
+  reproducibility extracted from just the `.obs` of the 17 GB `.h5ad`.
+- **Transcriptional programs.** A regulator's rank is one number; its **fingerprint** — its downstream
+  effect vector — is its whole action on the cell. On a balanced panel of 200 top perturbations we
+  match each fingerprint to the curated SAGA/Mediator/TCR complexes and label the recognizable programs.
+- **Regulator Atlas.** A read-only FastAPI service + single-page UI: search a gene and see its rank,
+  audit survival, transcriptional program, transcriptomic neighbors, and defining response genes at once.
 
 **What we found.**
 - Effects are heavy-tailed: the median perturbation moves 2 genes and 15% move none, but 1.5% are
@@ -65,14 +61,19 @@ CSV tables alone**:
 - Robust regulators ≠ raw hubs. After the gates and shrinkage, the top is **chromatin/transcription
   machinery** — the SAGA complex (TADA1/TADA2B/SGF29/SUPT20H), Mediator (MED12/CCNC), KDM1A, SETD2 —
   a large *and* stable effect across conditions, above the Stim8hr-specific TCR-signaling hubs.
-- The fingerprint space independently recovers known biology: SAGA, Mediator, and TCR complexes are
-  each significantly cohesive by permutation test (TCR z=11, SAGA z=9, Mediator z=3), and PC1 is
-  program identity, not effect magnitude (|PC1| vs n_downstream Spearman = 0.25).
+- **Fingerprint similarity organizes the top perturbations into recognizable programs.** The three
+  curated complexes are each significantly cohesive by permutation test (**TCR z=11, SAGA z=9, Mediator
+  z=3**), and the latent axis is program *identity*, not magnitude (|PC1| vs. n_downstream = 0.25). 25
+  of 200 regulators map to a program — **TCR signaling (13), SAGA/chromatin (9), Mediator/transcription
+  (3)** — recovering each complex's core and adding new members, most strikingly the chromatin remodeler
+  **CHD7 joining the SAGA/chromatin program** (cosine 0.84). The reproducibility-promoted hits have
+  neighborhoods as tight as the top regulators (so they aren't noise) but map onto *none* of the
+  canonical complexes — the audit surfaces a distinct coherent set, not "more SAGA".
 
-**Why it matters.** It turns a 1.8 TB screen into a defensible, uncertainty-aware shortlist of
-regulators that a bench scientist can actually act on — reproducible on a laptop, honest about its
-limits (empirical-Bayes, not full MCMC; partial cross-donor coverage), and explorable through a UI
-rather than a static table.
+**Why it matters.** It answers not just *who is a strong regulator* but *what program each perturbation
+induces and who resembles whom* — turning a 1.8 TB screen into a defensible, uncertainty-aware atlas a
+bench scientist can act on. Reproducible on a laptop, explorable gene-by-gene, and honest about its
+scope (program similarity anchored to known complexes, empirical-Bayes rather than full MCMC).
 
 ---
 
@@ -90,9 +91,14 @@ Where it mattered most:
   the negative-binomial mean, then normal-normal shrinkage of a per-gene log-rate effect) and, just
   as importantly, insisted on **honest naming** — calling it pseudo-Bayesian rather than a full
   hierarchical model, and separating the sensitivity audit from the core posterior.
-- **Building the product.** Claude wrote the FastAPI service, the single-page Atlas UI, the audit
-  pipeline, and the figure-generation code, and kept the reproducibility contract intact (`make all`
-  is the source of truth; the API only serves versioned outputs).
+- **The programs analysis.** Claude built the transcriptional-program layer and, at a review gate,
+  caught that the first attempt (labeling agnostic clusters) merged SAGA/TCR/Mediator into one blob;
+  it pivoted to a transparent nearest-known-complex-centroid classifier, kept the labels conservative
+  (175/200 stay *mixed*), and reported the promoted-hit coherence result honestly even though it came
+  back *null* against the canonical complexes.
+- **Building the product.** Claude wrote the FastAPI service, the single-page Atlas UI, the audit and
+  program pipelines, and the figure-generation code, and kept the reproducibility contract intact
+  (`make all` is the source of truth; the API only serves versioned outputs).
 - **Verification & polish.** Claude re-checked every quantitative claim against the actual tables,
   and did a full-repo pass to make the submission judge-ready.
 
