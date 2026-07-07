@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Modelo 1 — SPIKE (experimento controlado, ESTRICTAMENTE OPCIONAL).
+"""Model 1 — SPIKE (controlled experiment, STRICTLY OPTIONAL).
 
-Objetivo: comprobar si podemos leer por *slice* filas concretas de log_fc/lfcSE del
-h5ad de 17 GB directamente desde S3, SIN descargar el archivo (solo hay ~9.8 GB de disco).
+Goal: check whether we can read specific rows of log_fc/lfcSE from the 17 GB h5ad
+by *slice* directly from S3, WITHOUT downloading the file (only ~9.8 GB of disk).
 
-NO asume nada sobre el layout: inspecciona chunks y MIDE bytes y tiempo por fila.
-Si las librerías faltan, o la lectura es lenta/frágil, reporta 'INVIABLE' y termina
-con éxito (exit 0) — el entregable oficial NO depende de esto.
+It assumes nothing about the layout: it inspects chunks and MEASURES bytes and time
+per row. If the libraries are missing, or the read is slow/fragile, it reports
+'NOT VIABLE' and exits successfully (exit 0) — the official deliverable does NOT depend on this.
 
     pip install h5py s3fs fsspec
     python scripts/model_edges_spike.py
@@ -15,43 +15,43 @@ import sys
 import time
 
 S3_URL = "s3://genome-scale-tcell-perturb-seq/marson2025_data/GWCD4i.DE_stats.h5ad"
-SLOW_SECONDS_PER_ROW = 20.0     # umbral: si una fila tarda más, se declara lento
+SLOW_SECONDS_PER_ROW = 20.0     # threshold: if a row takes longer, it is declared slow
 N_ROWS_TEST = 3
 
 
 def verdict(msg, viable):
     print("\n" + "=" * 64)
-    print(f"  VEREDICTO: {'VIABLE' if viable else 'INVIABLE'} — {msg}")
+    print(f"  VERDICT: {'VIABLE' if viable else 'NOT VIABLE'} — {msg}")
     print("=" * 64)
     if not viable:
-        print("  → El entregable oficial es Modelo 2 + documentación (no se ve afectado).")
-    sys.exit(0)   # nunca fatal: es opcional
+        print("  → The official deliverable is Model 2 + documentation (unaffected).")
+    sys.exit(0)   # never fatal: it is optional
 
 
 def main():
     try:
         import h5py, fsspec, s3fs  # noqa: F401
     except Exception as e:
-        verdict(f"faltan librerías ({type(e).__name__}: {e}). Instala: pip install h5py s3fs fsspec", False)
+        verdict(f"missing libraries ({type(e).__name__}: {e}). Install: pip install h5py s3fs fsspec", False)
 
-    print(f"== Modelo 1 · spike de acceso remoto ==\n  fuente: {S3_URL}")
+    print(f"== Model 1 · remote-access spike ==\n  source: {S3_URL}")
     import h5py, fsspec
     try:
         t0 = time.time()
         f = fsspec.open(S3_URL, anon=True).open()
         h5 = h5py.File(f, "r")
-        print(f"  h5ad abierto en {time.time()-t0:.1f}s (streaming, sin descargar)")
+        print(f"  h5ad opened in {time.time()-t0:.1f}s (streaming, no download)")
     except Exception as e:
-        verdict(f"no se pudo abrir el h5ad remoto ({type(e).__name__}: {e})", False)
+        verdict(f"could not open the remote h5ad ({type(e).__name__}: {e})", False)
 
-    # inspección del layout de los layers
+    # inspect the layers layout
     try:
         layers = h5["layers"]
         names = list(layers.keys())
-        print(f"  layers disponibles: {names}")
+        print(f"  available layers: {names}")
         need = [n for n in ("log_fc", "lfcSE") if n in names]
         if len(need) < 2:
-            verdict(f"faltan layers log_fc/lfcSE (hay {names})", False)
+            verdict(f"missing log_fc/lfcSE layers (have {names})", False)
         for n in need:
             d = layers[n]
             print(f"    {n:8s} shape={d.shape} dtype={d.dtype} chunks={d.chunks} "
@@ -59,14 +59,14 @@ def main():
         d0 = layers[need[0]]
         n_obs, n_vars = d0.shape
         row_bytes = n_vars * d0.dtype.itemsize
-        print(f"  matriz: {n_obs:,} obs × {n_vars:,} genes · "
-              f"~{row_bytes/1e6:.2f} MB por fila por layer")
+        print(f"  matrix: {n_obs:,} obs × {n_vars:,} genes · "
+              f"~{row_bytes/1e6:.2f} MB per row per layer")
         if d0.chunks and d0.chunks[0] > 64:
-            print(f"  [aviso] chunk de {d0.chunks[0]} filas: leer 1 fila puede arrastrar el bloque entero")
+            print(f"  [warning] chunk of {d0.chunks[0]} rows: reading 1 row may drag in the whole block")
     except Exception as e:
-        verdict(f"no se pudo inspeccionar los layers ({type(e).__name__}: {e})", False)
+        verdict(f"could not inspect the layers ({type(e).__name__}: {e})", False)
 
-    # medir lectura por slice de N filas
+    # measure per-slice read of N rows
     try:
         idx = sorted(set(int(i) for i in
                      [0, n_obs // 2, n_obs - 1][:N_ROWS_TEST]))
@@ -77,22 +77,22 @@ def main():
             b = layers[need[1]][i, :]
             dt = time.time() - t
             per_row.append(dt)
-            print(f"  fila {i:>6}: leída en {dt:5.1f}s · "
+            print(f"  row {i:>6}: read in {dt:5.1f}s · "
                   f"log_fc[:3]={a[:3].round(3)} lfcSE[:3]={b[:3].round(3)}")
         avg = sum(per_row) / len(per_row)
         total_mb = len(idx) * 2 * row_bytes / 1e6
-        print(f"  media {avg:.1f}s/fila · ~{total_mb:.1f} MB transferidos en total")
+        print(f"  mean {avg:.1f}s/row · ~{total_mb:.1f} MB transferred total")
         h5.close()
     except Exception as e:
-        verdict(f"la lectura por slice falló ({type(e).__name__}: {e})", False)
+        verdict(f"the per-slice read failed ({type(e).__name__}: {e})", False)
 
     if avg > SLOW_SECONDS_PER_ROW:
-        verdict(f"lectura lenta ({avg:.1f}s/fila > {SLOW_SECONDS_PER_ROW}s). "
-                f"Escalar a ~150 filas sería impráctico.", False)
+        verdict(f"slow read ({avg:.1f}s/row > {SLOW_SECONDS_PER_ROW}s). "
+                f"Scaling to ~150 rows would be impractical.", False)
     else:
         est = avg * 150
-        verdict(f"lectura por slice OK ({avg:.1f}s/fila). "
-                f"Escalar a 150 reguladores ≈ {est:.0f}s. Se puede correr model_edges.py.", True)
+        verdict(f"per-slice read OK ({avg:.1f}s/row). "
+                f"Scaling to 150 regulators ≈ {est:.0f}s. model_edges.py can be run.", True)
 
 
 if __name__ == "__main__":

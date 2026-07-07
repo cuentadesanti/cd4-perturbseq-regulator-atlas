@@ -1,15 +1,19 @@
-# Core (pipeline reproducible: EDA + Modelo 2 + reporte, solo CSV local)
+# Core (reproducible pipeline: EDA + Model 2 + report, local CSV only)
 pandas
 numpy
 scipy
 statsmodels
 matplotlib
 
-# Opcional — Modelo 1 (streaming del h5ad remoto sin descargarlo)
-# instala solo si vas a correr `make spike` / `make edges` / `make repro-meta`:
+# Optional — Model 1 (streaming the remote h5ad without downloading it)
+# install only if you will run `make spike` / `make edges` / `make repro-meta`:
 #   pip install h5py s3fs fsspec
 
-# Opcional — API read-only (Regulator Atlas)
-# instala solo si vas a correr la API:  uvicorn api.main:app --port 8000
+# Optional — side analysis (transcriptional fingerprints, `make fingerprints`)
+# install only if you will run the fingerprint analysis:
+#   pip install scikit-learn
+
+# Optional — read-only API (Regulator Atlas)
+# install only if you will run the API:  uvicorn api.main:app --port 8000
 fastapi
 uvicorn[standard]

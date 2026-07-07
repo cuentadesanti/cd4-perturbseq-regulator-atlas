@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Pipeline reproducible del core (solo CSV locales, sin descargas ni h5ad).
+"""Reproducible core pipeline (local CSVs only, no downloads, no h5ad).
 
     python scripts/run_pipeline.py
 
-1. verifica que existan los CSV de entrada
-2. corre EDA → Modelo 2 (EB) → reporte
-3. verifica que existan los outputs esperados
-4. imprime un resumen conciso de éxito
+1. checks that the input CSVs exist
+2. runs EDA → Model 2 (EB) → report
+3. checks that the expected outputs exist
+4. prints a concise success summary
 """
 import subprocess
 import sys
@@ -22,10 +22,10 @@ INPUTS = [
     "data/suppl_tables/sample_metadata.suppl_table.csv",
 ]
 STEPS = [
-    ("EDA 80/20", "scripts/eda.py"),
-    ("Modelo 2 · EB", "scripts/model_hubs.py"),
+    ("80/20 EDA", "scripts/eda.py"),
+    ("Model 2 · EB", "scripts/model_hubs.py"),
     ("Ranking audit", "scripts/audit_ranking.py"),
-    ("Reporte", "scripts/build_report.py"),
+    ("Report", "scripts/build_report.py"),
 ]
 OUTPUTS = [
     "docs/tables/hub_ranking_bayes.csv",
@@ -46,22 +46,22 @@ OUTPUTS = [
 
 
 def fail(msg):
-    print(f"\n✗ FALLO: {msg}")
+    print(f"\n✗ FAILED: {msg}")
     sys.exit(1)
 
 
 def main():
-    print("=" * 60 + "\n  PIPELINE — core reproducible (solo CSV local)\n" + "=" * 60)
+    print("=" * 60 + "\n  PIPELINE — reproducible core (local CSV only)\n" + "=" * 60)
 
-    print("\n[1/4] Verificando inputs…")
+    print("\n[1/4] Checking inputs…")
     missing = [p for p in INPUTS if not (ROOT / p).exists()]
     if missing:
-        fail("faltan CSV de entrada:\n   " + "\n   ".join(missing) +
-             "\n   → descárgalos con: scripts/download.sh tables")
+        fail("missing input CSVs:\n   " + "\n   ".join(missing) +
+             "\n   → download them with: scripts/download.sh tables")
     for p in INPUTS:
         print(f"   ✓ {p}")
 
-    print("\n[2/4] Ejecutando pasos…")
+    print("\n[2/4] Running steps…")
     t0 = time.time()
     for name, script in STEPS:
         print(f"   → {name} ({script})")
@@ -69,30 +69,30 @@ def main():
                            capture_output=True, text=True)
         if r.returncode != 0:
             print(r.stdout[-1500:]); print(r.stderr[-1500:])
-            fail(f"{script} devolvió código {r.returncode}")
+            fail(f"{script} returned code {r.returncode}")
     elapsed = time.time() - t0
 
-    print("\n[3/4] Verificando outputs…")
+    print("\n[3/4] Checking outputs…")
     missing = [p for p in OUTPUTS if not (ROOT / p).exists()]
     if missing:
-        fail("faltan outputs esperados:\n   " + "\n   ".join(missing))
+        fail("missing expected outputs:\n   " + "\n   ".join(missing))
     for p in OUTPUTS:
         kb = (ROOT / p).stat().st_size / 1024
         print(f"   ✓ {p:<48} {kb:7.1f} KB")
 
-    print("\n[4/4] Resumen")
+    print("\n[4/4] Summary")
     import pandas as pd
     rank = pd.read_csv(ROOT / "docs/tables/hub_ranking_bayes.csv")
     top3 = ", ".join(rank.head(3)["target_contrast_gene_name"])
-    print(f"   reguladores rankeados : {len(rank):,}")
+    print(f"   ranked regulators     : {len(rank):,}")
     print(f"   top 3 (EB)            : {top3}")
     edges = ROOT / "docs/tables/robust_edges.csv"
     if edges.exists():
         import pandas as pd
-        print(f"   edges bonus (Modelo 1): {len(pd.read_csv(edges)):,}  (docs/tables/robust_edges.csv)")
+        print(f"   bonus edges (Model 1) : {len(pd.read_csv(edges)):,}  (docs/tables/robust_edges.csv)")
     else:
-        print("   edges bonus (Modelo 1): no generados (opcional · make edges)")
-    print(f"\n✓ PIPELINE OK en {elapsed:.0f}s — reporte en docs/report.md")
+        print("   bonus edges (Model 1) : not generated (optional · make edges)")
+    print(f"\n✓ PIPELINE OK in {elapsed:.0f}s — report in docs/report.md")
 
 
 if __name__ == "__main__":

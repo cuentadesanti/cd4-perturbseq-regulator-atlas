@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Extrae SOLO el .obs de GWCD4i.DE_stats.h5ad (metadata de reproducibilidad).
+"""Extracts ONLY the .obs of GWCD4i.DE_stats.h5ad (reproducibility metadata).
 
-Cierra el caveat del ranking: reemplaza el proxy cross-condición por reproducibilidad
-REAL cross-guide/cross-donor. El .obs es pequeño (~34k filas de metadata); NO se leen
-los .layers de 17 GB. Remoto por S3 si no existe local; idempotente.
+Closes the ranking caveat: replaces the cross-condition proxy with REAL cross-guide/
+cross-donor reproducibility. The .obs is small (~34k metadata rows); the 17 GB .layers
+are NOT read. Remote via S3 if not local; idempotent.
 
     pip install h5py s3fs fsspec
     python scripts/extract_de_obs_metadata.py [--force]
 
-Salida: docs/tables/de_obs_reproducibility_metadata.csv
+Output: docs/tables/de_obs_reproducibility_metadata.csv
 """
 import argparse
 import sys
@@ -33,7 +33,7 @@ COLUMNS = [
 
 def read_col(grp, name, h5py):
     node = grp[name]
-    if isinstance(node, h5py.Group):                       # categórica de AnnData
+    if isinstance(node, h5py.Group):                       # AnnData categorical
         cats = [c.decode() if isinstance(c, bytes) else c for c in node["categories"][:]]
         codes = node["codes"][:]
         return np.array([cats[i] if i >= 0 else None for i in codes], dtype=object)
@@ -45,52 +45,52 @@ def read_col(grp, name, h5py):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--force", action="store_true", help="re-descargar aunque exista el CSV")
+    ap.add_argument("--force", action="store_true", help="re-download even if the CSV exists")
     args = ap.parse_args()
 
     if OUT.exists() and not args.force:
-        print(f"Ya existe {OUT.relative_to(ROOT)} — usa --force para re-descargar. (idempotente)")
+        print(f"{OUT.relative_to(ROOT)} already exists — use --force to re-download. (idempotent)")
         sys.exit(0)
 
     try:
         import h5py, fsspec, s3fs  # noqa: F401
     except Exception as e:
-        print(f"INVIABLE: faltan librerías ({e}). pip install h5py s3fs fsspec")
+        print(f"NOT VIABLE: missing libraries ({e}). pip install h5py s3fs fsspec")
         sys.exit(0)
     import h5py, fsspec
 
-    print(f"== Extrayendo .obs (metadata de reproducibilidad) ==\n  fuente: {S3_URL}")
+    print(f"== Extracting .obs (reproducibility metadata) ==\n  source: {S3_URL}")
     t0 = time.time()
     try:
         f = fsspec.open(S3_URL, anon=True).open()
         h5 = h5py.File(f, "r")
         obs = h5["obs"]
     except Exception as e:
-        print(f"INVIABLE: no se pudo abrir el h5ad remoto ({type(e).__name__}: {e})")
+        print(f"NOT VIABLE: could not open the remote h5ad ({type(e).__name__}: {e})")
         sys.exit(0)
 
     present = [c for c in COLUMNS if c in obs]
     missing = [c for c in COLUMNS if c not in obs]
     if missing:
-        print(f"  [aviso] columnas ausentes en .obs: {missing}")
+        print(f"  [warning] columns missing from .obs: {missing}")
     data = {}
     for c in present:
         t = time.time()
         data[c] = read_col(obs, c, h5py)
-        print(f"    {c:32s} leída en {time.time()-t:4.1f}s")
+        print(f"    {c:32s} read in {time.time()-t:4.1f}s")
     h5.close()
 
     df = pd.DataFrame(data)
     df.to_csv(OUT, index=False)
     dt = time.time() - t0
     size_kb = OUT.stat().st_size / 1024
-    print(f"\n  filas={len(df):,} · cols={len(present)} · {size_kb:.0f} KB · {dt:.1f}s (solo .obs, sin .layers)")
-    print(f"  VIABLE — tabla → {OUT.relative_to(ROOT)}")
-    # resumen de cobertura de las métricas clave
+    print(f"\n  rows={len(df):,} · cols={len(present)} · {size_kb:.0f} KB · {dt:.1f}s (.obs only, no .layers)")
+    print(f"  VIABLE — table → {OUT.relative_to(ROOT)}")
+    # coverage summary of the key metrics
     for c in ["single_guide_estimate", "guide_correlation_all", "donor_correlation_hits_mean"]:
         if c in df:
             nn = df[c].notna().sum()
-            print(f"    {c:32s} no-nulos: {nn:,}/{len(df):,} ({nn/len(df)*100:.0f}%)")
+            print(f"    {c:32s} non-null: {nn:,}/{len(df):,} ({nn/len(df)*100:.0f}%)")
 
 
 if __name__ == "__main__":

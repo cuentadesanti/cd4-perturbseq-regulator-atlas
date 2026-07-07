@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
-"""Modelo 1 — red de efectos con incertidumbre (EB normal-normal). OPCIONAL / bonus.
+"""Model 1 — uncertainty-aware effect network (normal-normal EB). OPTIONAL / bonus.
 
-Solo se ejecuta si el spike (model_edges_spike.py) declaró VIABLE el acceso remoto.
-Lee por *slice* desde S3 las filas de los reguladores candidatos (top del Modelo 2) —
-NO descarga el h5ad de 17 GB— y corre EB sobre log_fc/lfcSE para producir edges con
-probabilidad de efecto.
+Runs only if the spike (model_edges_spike.py) declared remote access VIABLE.
+Reads by *slice* from S3 the rows of the candidate regulators (top of Model 2) —
+it does NOT download the 17 GB h5ad — and runs EB over log_fc/lfcSE to produce edges
+with effect probability.
 
-Por defecto acotado a N=8 reguladores (~40s a 4.5s/fila medidos por el spike). Escala con --n.
+Capped by default at N=8 regulators (~40s at 4.5s/row measured by the spike). Scale with --n.
 
     pip install h5py s3fs fsspec
     python scripts/model_edges.py --n 8
 
-Salida: docs/tables/robust_edges.csv
+Output: docs/tables/robust_edges.csv
 """
 import argparse
 import sys
@@ -28,9 +28,9 @@ LOG2_1P5 = np.log2(1.5)
 
 
 def read_col(grp, name, h5py):
-    """Decodifica una columna de AnnData obs/var (categórica o dataset de strings)."""
+    """Decodes an AnnData obs/var column (categorical or string dataset)."""
     node = grp[name]
-    if isinstance(node, h5py.Group):                       # categórica
+    if isinstance(node, h5py.Group):                       # categorical
         cats = [c.decode() if isinstance(c, bytes) else c for c in node["categories"][:]]
         codes = node["codes"][:]
         return np.array([cats[i] if i >= 0 else None for i in codes], dtype=object)
@@ -40,21 +40,21 @@ def read_col(grp, name, h5py):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--n", type=int, default=8, help="nº de reguladores candidatos (filas a leer)")
+    ap.add_argument("--n", type=int, default=8, help="number of candidate regulators (rows to read)")
     args = ap.parse_args()
 
     hub = TAB / "hub_ranking_bayes.csv"
     if not hub.exists():
-        sys.exit("Falta docs/tables/hub_ranking_bayes.csv — corre antes: python scripts/model_hubs.py")
+        sys.exit("Missing docs/tables/hub_ranking_bayes.csv — run first: python scripts/model_hubs.py")
     ranking = pd.read_csv(hub)
 
     try:
         import h5py, fsspec, s3fs  # noqa: F401
     except Exception as e:
-        sys.exit(f"[opcional] faltan librerías ({e}). pip install h5py s3fs fsspec")
+        sys.exit(f"[optional] missing libraries ({e}). pip install h5py s3fs fsspec")
     import h5py, fsspec
 
-    # candidatos: peak condition por gen, solo KD significativo
+    # candidates: peak condition per gene, significant KD only
     de = pd.read_csv(ROOT / "data" / "suppl_tables" / "DE_stats.suppl_table.csv")
     de = de[de["ontarget_significant"].astype(bool)]
     peak = (de.sort_values("n_downstream", ascending=False)
@@ -62,7 +62,7 @@ def main():
               .set_index("target_contrast_gene_name"))
     cand_genes = [g for g in ranking["target_contrast_gene_name"] if g in peak.index][:args.n]
 
-    print(f"== Modelo 1 · EB sobre edges · {len(cand_genes)} reguladores ==")
+    print(f"== Model 1 · EB over edges · {len(cand_genes)} regulators ==")
     t0 = time.time()
     f = fsspec.open(S3_URL, anon=True).open()
     h5 = h5py.File(f, "r")
@@ -72,7 +72,7 @@ def main():
     var_names = read_col(var, "gene_name" if "gene_name" in var else var.attrs.get("_index", "_index"), h5py)
     row_of = {(g, c): i for i, (g, c) in enumerate(zip(gene_obs, cond_obs))}
     log_fc, lfcSE = h5["layers"]["log_fc"], h5["layers"]["lfcSE"]
-    print(f"  h5ad abierto + índices en {time.time()-t0:.1f}s (streaming)")
+    print(f"  h5ad opened + indexes in {time.time()-t0:.1f}s (streaming)")
 
     recs = []
     for g in cand_genes:
@@ -87,12 +87,12 @@ def main():
         recs.append((g, c, y, se))
     h5.close()
 
-    # tau2 por método de momentos sobre las edges candidatas (documentado: muestra sesgada a alta señal)
+    # tau2 by method of moments over the candidate edges (documented: sample biased toward high signal)
     allY = np.concatenate([r[2] for r in recs])
     allSE = np.concatenate([r[3] for r in recs])
     ok = np.isfinite(allY) & np.isfinite(allSE) & (allSE > 0)
     tau2 = max(float(np.var(allY[ok]) - np.median(allSE[ok] ** 2)), 1e-6)
-    print(f"  tau2 (prior, de edges candidatas) = {tau2:.4f}")
+    print(f"  tau2 (prior, from candidate edges) = {tau2:.4f}")
 
     rows = []
     for g, c, y, se in recs:
@@ -113,10 +113,10 @@ def main():
     edges = pd.DataFrame(rows).sort_values("p_abs_effect_gt_1p5x", ascending=False)
     out = TAB / "robust_edges.csv"
     edges.to_csv(out, index=False)
-    print(f"\n  edges robustos (P(|efecto|>1.5x)>0.8): {len(edges):,}")
-    print(f"  tabla → {out.relative_to(ROOT)}")
+    print(f"\n  robust edges (P(|effect|>1.5x)>0.8): {len(edges):,}")
+    print(f"  table → {out.relative_to(ROOT)}")
     print(edges.head(10).to_string(index=False))
-    print("\n✓ Modelo 1 (bonus) completo.")
+    print("\n✓ Model 1 (bonus) complete.")
 
 
 if __name__ == "__main__":

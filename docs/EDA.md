@@ -1,75 +1,75 @@
-# EDA 80/20 — CD4+ T cell Perturb-seq
+# 80/20 EDA — CD4+ T cell Perturb-seq
 
 ## Scope
 
-Análisis con solo las **tablas suplementarias** (~15 MB). **No** se cargó ningún `.h5ad`/`.h5mu` (1.8 TB).
+Analysis using only the **supplementary tables** (~15 MB). **No** `.h5ad`/`.h5mu` was loaded (1.8 TB).
 
-| Archivo | Filas | Uso |
+| File | Rows | Use |
 |---|---|---|
-| `DE_stats.suppl_table.csv` | 33,983 | tabla principal (la señal) |
-| `sgrna_library_metadata.suppl_table.csv` | 26,504 | librería de guías |
-| `sample_metadata.suppl_table.csv` | 12 | diseño experimental |
+| `DE_stats.suppl_table.csv` | 33,983 | main table (the signal) |
+| `sgrna_library_metadata.suppl_table.csv` | 26,504 | guide library |
+| `sample_metadata.suppl_table.csv` | 12 | experimental design |
 
-Regenerable: `python scripts/eda.py` → figuras en `docs/figures/`, tabla en `docs/tables/`.
+Reproducible: `python scripts/eda.py` → figures in `docs/figures/`, table in `docs/tables/`.
 
 ## Unit of analysis
 
-**1 fila = gen perturbado × condición de cultivo** (`target_contrast` × `culture_condition`).
+**1 row = perturbed gene × culture condition** (`target_contrast` × `culture_condition`).
 Rest / Stim8hr / Stim48hr.
 
 ## Key quality filters
 
-| Filtro | Disponible aquí | Fuente |
+| Filter | Available here | Source |
 |---|---|---|
-| `ontarget_significant` (KD efectivo, 10% FDR) | ✅ CSV | `DE_stats.suppl_table.csv` |
-| `offtarget_flag` (posible off-target) | ✅ CSV | idem |
-| reproducibilidad **cross-condición** (proxy) | ✅ derivable | min/max de `n_downstream` entre condiciones |
-| `single_guide_estimate` (2 guías concordantes) | ❌ | `DE_stats.h5ad` `.obs` |
+| `ontarget_significant` (effective KD, 10% FDR) | ✅ CSV | `DE_stats.suppl_table.csv` |
+| `offtarget_flag` (possible off-target) | ✅ CSV | same |
+| **cross-condition** reproducibility (proxy) | ✅ derivable | min/max of `n_downstream` across conditions |
+| `single_guide_estimate` (2 concordant guides) | ❌ | `DE_stats.h5ad` `.obs` |
 | `guide_correlation_all` (cross-guide) | ❌ | `DE_stats.h5ad` / `by_guide.h5mu` |
-| `donor_correlation_hits_mean` (cross-donante) | ❌ | `DE_stats.h5ad` / `by_donors.h5mu` |
+| `donor_correlation_hits_mean` (cross-donor) | ❌ | `DE_stats.h5ad` / `by_donors.h5mu` |
 
 ## Main findings
 
-1. **Los efectos de DE son heavy-tailed.** Mediana **2 DEGs**, media 60.5 (engañosa), 15.4% sin efecto,
-   1.5% son hubs (>1000 DEGs). → resume con **percentiles y rankings**, no media.
-2. **El knockdown gatea la mayor parte de la señal.** 62% de contrastes con KD on-target significativo;
-   estos concentran el **85%** de todos los trans-efectos. Filtrar por `ontarget_significant` sube mucho
-   la densidad de señal (no es prueba causal: puede haber KD real no detectado por baja expresión basal).
-3. **Las células estimuladas muestran efectos más amplios.** Media de DEGs: Rest 53.1 · Stim8hr 68.9 · Stim48hr 59.4.
-4. **Los top hubs son plausibles**, enriquecidos en señalización de células T (CD3E/D/G, LAT, ZAP70, PLCG1,
-   LCP2, VAV1) — sugiere que la pantalla captura señal biológica interpretable.
-5. **La librería tiene cobertura ~2 guías/gen** (12,440 de 12,654 genes) → replicación interna.
-6. **Reguladores robustos ≠ hubs crudos.** Al exigir estabilidad cross-condición + KD signif. + sin off-target,
-   suben reguladores de **cromatina/transcripción** consistentes en las 3 condiciones (TADA2B, TADA1, SGF29,
-   SUPT20H — complejo SAGA; ELAVL1, NFRKB), distintos del top crudo dominado por señalización TCR específica de Stim8hr.
+1. **DE effects are heavy-tailed.** Median **2 DEGs**, mean 60.5 (misleading), 15.4% with no effect,
+   1.5% are hubs (>1000 DEGs). → summarize with **percentiles and rankings**, not the mean.
+2. **Knockdown gates most of the signal.** 62% of contrasts have a significant on-target KD;
+   these concentrate **85%** of all trans-effects. Filtering by `ontarget_significant` sharply raises
+   signal density (not causal proof: a real KD may go undetected due to low baseline expression).
+3. **Stimulated cells show broader effects.** Mean DEGs: Rest 53.1 · Stim8hr 68.9 · Stim48hr 59.4.
+4. **Top hubs are plausible**, enriched in T cell signaling (CD3E/D/G, LAT, ZAP70, PLCG1,
+   LCP2, VAV1) — suggesting the screen captures interpretable biological signal.
+5. **The library covers ~2 guides/gene** (12,440 of 12,654 genes have exactly 2) → internal replication.
+6. **Robust regulators ≠ raw hubs.** Requiring cross-condition stability + significant KD + no off-target
+   surfaces **chromatin/transcription** regulators consistent across all 3 conditions (TADA2B, TADA1, SGF29,
+   SUPT20H — SAGA complex; ELAVL1, NFRKB), distinct from the raw top dominated by Stim8hr-specific TCR signaling.
 
-## Figuras
+## Figures
 
 `docs/figures/`
-- `01_distribution_n_total_de_genes.png` — cola larga
+- `01_distribution_n_total_de_genes.png` — long tail
 - `02_degs_by_condition.png`
 - `03_top_hubs_by_condition.png`
-- `04_ontarget_vs_downstream.png` — eje `kd_strength = −ontarget_effect_size`
+- `04_ontarget_vs_downstream.png` — axis `kd_strength = −ontarget_effect_size`
 - `05_guides_per_gene.png`
-- `06_reproducibility_vs_effects.png` — reproducibilidad cross-condición vs magnitud
+- `06_reproducibility_vs_effects.png` — cross-condition reproducibility vs. magnitude
 
-## Tabla accionable
+## Actionable table
 
-`docs/tables/top_robust_regulators.csv` (top 30). Score **solo con columnas del CSV**:
+`docs/tables/top_robust_regulators.csv` (top 30). Score using **CSV columns only**:
 
 ```
 robust_score = log1p(n_downstream)
              · ontarget_significant
-             · (0.6 si offtarget_flag else 1.0)
-             · (0.5 + 0.5 · reproducibilidad_cross_condición)
+             · (0.6 if offtarget_flag else 1.0)
+             · (0.5 + 0.5 · cross_condition_reproducibility)
              · (n_signif_conditions / 3)
 ```
 
 ## Practical next steps
 
-1. **Ranking robusto definitivo**: reforzar `robust_score` con `single_guide_estimate` +
-   `donor_correlation_hits_mean` desde `GWCD4i.DE_stats.h5ad` (17 GB).
-2. **Matriz downstream a nivel de gen**: cargar los `.layers` de `DE_stats.h5ad` (log_fc/zscore/padj)
-   para los reguladores top, ya filtrados.
-3. **Grafo regulatorio por condición**: construir la red regulador → downstream por condición y
-   comparar Rest vs Stim para identificar reguladores context-specific.
+1. **Definitive robust ranking**: strengthen `robust_score` with `single_guide_estimate` +
+   `donor_correlation_hits_mean` from `GWCD4i.DE_stats.h5ad` (17 GB).
+2. **Gene-level downstream matrix**: load the `.layers` of `DE_stats.h5ad` (log_fc/zscore/padj)
+   for the top regulators, already filtered.
+3. **Per-condition regulatory graph**: build the regulator → downstream network per condition and
+   compare Rest vs. Stim to identify context-specific regulators.

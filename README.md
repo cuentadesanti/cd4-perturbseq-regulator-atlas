@@ -1,140 +1,143 @@
 # Robust regulators of CD4+ T cell programs — Perturb-seq
 
-> Hackathon submission · genome-scale CRISPRi Perturb-seq en células T CD4+ primarias (Marson Lab, 2025)
+> Hackathon submission · genome-scale CRISPRi Perturb-seq in primary human CD4+ T cells (Marson Lab, 2025)
 
 ![pipeline](docs/figures/00_pipeline_overview.png)
 
-## Pregunta
+## The question
 
-¿Qué genes son **reguladores robustos** de los programas de células T CD4+? El reto: la señal
-de un screen genome-scale está dominada por ruido y por unos pocos hubs. Queremos **separar señal
-de ruido con incertidumbre** y priorizar reguladores por efecto **grande y reproducible**, no por
-conteos crudos ni `adj_p_value < 0.1`.
+Which genes are **robust regulators** of CD4+ T cell programs? The challenge: the signal from a
+genome-scale screen is dominated by noise and by a handful of hubs. We want to **separate signal
+from noise with uncertainty** and prioritize regulators by a **large and reproducible** effect —
+not by raw counts or `adj_p_value < 0.1`.
 
-## Qué hace este repo
+## What this repo does
 
-Un producto de investigación reproducible, **consciente de memoria y cómputo** (el dataset completo
-son 1.8 TB; el disco de trabajo tiene ~10 GB). Todo el core corre **solo con las tablas CSV
-suplementarias (~15 MB)**:
+A reproducible research product that is **memory- and compute-aware** (the full dataset is 1.8 TB;
+the working disk has ~10 GB free). The entire core runs **from the supplementary CSV tables alone
+(~15 MB)**:
 
-1. **Pipeline de descarga selectiva** desde el bucket público S3 (`scripts/download.sh`).
-2. **Modelo de datos** del dataset (`docs/DATA_MODEL.md` + [artifact interactivo](docs/data-model.html)).
-3. **EDA 80/20** (`scripts/eda.py`) — distribución de efectos, calidad de KD, hubs, reproducibilidad.
-4. **Modelo 2 · empirical-Bayes** (`scripts/model_hubs.py`) — ranking de reguladores con incertidumbre.
-5. **Modelo 1 · red de efectos con incertidumbre** (opcional, `scripts/model_edges.py`) — lee por *slice*
-   el `.h5ad` de 17 GB desde S3 **sin descargarlo**.
+1. **Selective download pipeline** from the public S3 bucket (`scripts/download.sh`).
+2. **Data model** of the dataset (`docs/DATA_MODEL.md` + [interactive artifact](docs/data-model.html)).
+3. **80/20 EDA** (`scripts/eda.py`) — effect-size distribution, knockdown quality, hubs, reproducibility.
+4. **Model 2 · empirical Bayes** (`scripts/model_hubs.py`) — regulator ranking with uncertainty.
+5. **Model 1 · uncertainty-aware effect network** (optional, `scripts/model_edges.py`) — reads the
+   17 GB `.h5ad` by *slice* from S3 **without downloading it**.
 
 ## Dataset
 
 **Primary Human CD4+ T Cell Perturb-seq** · [CZI Virtual Cells Platform](https://virtualcellmodels.cziscience.com/dataset/genome-scale-tcell-perturb-seq)
-· bucket público `s3://genome-scale-tcell-perturb-seq/marson2025_data/` · 4 donantes × 3 condiciones
-(Rest / Stim8hr / Stim48hr). El core usa 3 CSV (33,983 contrastes de DE, 26,504 guías, 12 muestras).
+· public bucket `s3://genome-scale-tcell-perturb-seq/marson2025_data/` · 4 donors × 3 conditions
+(Rest / Stim8hr / Stim48hr). The core uses 3 CSVs (33,983 DE contrasts, 26,504 guides, 12 samples).
 
-## Hallazgos principales
+## Key findings
 
-- **Efectos heavy-tailed**: perturbación mediana = 2 DEGs, 15% sin efecto, pero 1.5% son hubs (>1000 DEGs).
-  → resumir con percentiles y rankings, no con la media.
-- **El knockdown gatea la señal**: los contrastes con KD on-target significativo (62%) concentran el **85%**
-  de todos los trans-efectos. Filtrar por `ontarget_significant` es el primer paso obligado.
-- **Ranking robusto ≠ hubs crudos**: el modelo EB surface maquinaria de **cromatina/transcripción**
-  (complejo SAGA: TADA1/TADA2B/SGF29/SUPT20H · Mediador: MED12/CCNC · KDM1A, SETD2) — reguladores con
-  efecto grande **y** estable entre condiciones, por encima de los hubs de señalización TCR específicos de Stim8hr.
-- **Red de efectos con incertidumbre (bonus)**: ~2,470 edges robustos (`P(|efecto|>1.5×)>0.8`, es decir
-  probabilidad de que la *magnitud* del efecto supere 1.5×, no de que exista una arista causal) para los top
-  reguladores, extraídos del h5ad remoto sin descargarlo.
+- **Heavy-tailed effects**: the median perturbation yields 2 DEGs, 15% have no effect, but 1.5% are
+  hubs (>1000 DEGs). → summarize with percentiles and rankings, not the mean.
+- **Knockdown gates the signal**: contrasts with a significant on-target knockdown (62%) concentrate
+  **85%** of all trans-effects. Filtering by `ontarget_significant` is the mandatory first step.
+- **Robust ranking ≠ raw hubs**: the EB model surfaces **chromatin/transcription machinery**
+  (SAGA complex: TADA1/TADA2B/SGF29/SUPT20H · Mediator: MED12/CCNC · KDM1A, SETD2) — regulators with a
+  large **and** stable effect across conditions, ranked above the Stim8hr-specific TCR-signaling hubs.
+- **Uncertainty-aware effect network (bonus)**: ~2,470 robust edges (`P(|effect|>1.5×)>0.8`, i.e. the
+  probability that the effect *magnitude* exceeds 1.5×, not that a causal edge exists) for the top
+  regulators, extracted from the remote h5ad without downloading it.
 
-Detalle: [`docs/report.md`](docs/report.md) · [`docs/EDA.md`](docs/EDA.md) · [`docs/MODELING.md`](docs/MODELING.md).
+Detail: [`docs/report.md`](docs/report.md) · [`docs/EDA.md`](docs/EDA.md) · [`docs/MODELING.md`](docs/MODELING.md).
 
-## Validación del ranking
+## Validating the ranking
 
-Antes de creerle al ranking, lo auditamos (`scripts/audit_ranking.py`, sin deps nuevas).
+Before trusting the ranking, we audit it (`scripts/audit_ranking.py`, no new dependencies).
 
-**Naive hubs vs quality-aware regulators.** Rankear por `n_downstream` crudo premia hubs que no
-sobreviven a los controles: de los 30 hubs crudos top, **2 caen por el gate de KD** (sin knockdown
-validado) y **~9 se demotan** por ser condition-specific. El ranking EB surface reguladores con
-efecto grande **y** estable. La estabilidad se midió por bootstrap (B=200): es *moderada* —léelo
-como un conjunto de reguladores robustos, no como un orden exacto (`stability_frequency` por gen).
+**Naive hubs vs. quality-aware regulators.** Ranking by raw `n_downstream` rewards hubs that don't
+survive the controls: of the top 30 raw hubs, **2 fall out at the knockdown gate** (no validated
+knockdown) and **~15 are demoted** by EB shrinkage for being condition-specific. The EB ranking
+surfaces regulators with a large **and** stable effect. Stability was measured by bootstrap (B=200):
+it is *moderate* — read it as a set of robust regulators, not an exact ordering (`stability_frequency`
+per gene).
 
-**Global versus context-specific regulators.** Separando por
-`condition_specificity = max/sum de n_downstream`: los **globales** (SGF29, TADA2B, SUPT20H…) son
-maquinaria de cromatina/transcripción activa en todas las condiciones; los **context-specific**
-(ZAP70, LCK…) son señalización TCR, activa solo bajo estímulo. Ambas clases son biología real; la
-distinción evita confundir un regulador universal con uno de contexto. Ver
-`docs/tables/top_global_regulators.csv` y `top_condition_specific_regulators.csv`.
+**Global vs. context-specific regulators.** Splitting by
+`condition_specificity = max/sum of n_downstream`: the **global** ones (SGF29, TADA2B, SUPT20H…) are
+chromatin/transcription machinery active in all conditions; the **context-specific** ones (ZAP70,
+LCK…) are TCR signaling, active only under stimulation. Both classes are real biology; the
+distinction avoids confusing a universal regulator with a context-dependent one. See
+`docs/tables/top_global_regulators.csv` and `top_condition_specific_regulators.csv`.
 
-## Cómo reproducir
+## How to reproduce
 
 ```bash
-# 1. entorno
+# 1. environment
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-# 2. datos (solo las tablas, ~15 MB)
+# 2. data (tables only, ~15 MB)
 scripts/download.sh tables
 
-# 3. pipeline completo (EDA + modelo + reporte), verificado
+# 3. full pipeline (EDA + model + report), verified
 make all
 ```
 
 Targets: `make eda` · `make model` · `make report` · `make all` · `make clean`.
-Opcional (remoto, requiere `pip install h5py s3fs fsspec`): `make spike` · `make edges`.
+Optional (remote, requires `pip install h5py s3fs fsspec`): `make spike` · `make edges`.
 
 ## Outputs
 
-| Archivo | Qué es |
+| File | What it is |
 |---|---|
-| `docs/report.md` | reporte judge-facing consolidado |
-| `docs/tables/top_regulators_for_review.csv` | top 30 reguladores (judge-facing) |
-| `docs/tables/hub_ranking_bayes.csv` | ranking EB completo (todos los genes) |
-| `docs/tables/robust_edges.csv` | red de efectos con incertidumbre (bonus, Modelo 1) |
+| `docs/report.md` | consolidated judge-facing report |
+| `docs/tables/top_regulators_for_review.csv` | top 30 regulators (judge-facing) |
+| `docs/tables/hub_ranking_bayes.csv` | full EB ranking (all genes) |
+| `docs/tables/robust_edges.csv` | uncertainty-aware effect network (bonus, Model 1) |
 | `docs/figures/*.png` | EDA + ranking + overview |
-| `docs/data-model.html` | explorador interactivo (modelo de datos + EDA + estudio) |
+| `docs/data-model.html` | interactive explorer (data model + EDA + study) |
 
-## Producto: Regulator Atlas (API + UI)
+## Product: Regulator Atlas (API + UI)
 
-*El pipeline produce los artefactos; una API read-only los hace explorables.* La API **no** corre
-modelos, **no** descarga h5ad y **no** toca S3 — solo sirve los CSV versionados de `make all`.
+*The pipeline produces the artifacts; a read-only API makes them explorable.* The API does **not**
+run models, does **not** download the h5ad, and does **not** touch S3 — it only serves the versioned
+CSVs from `make all`.
 
 ```bash
-pip install -r requirements.txt      # incluye fastapi + uvicorn
-make all                             # genera las tablas que la API sirve
-make api                             # uvicorn :8000 (sirve API + UI en el mismo origen)
-open http://localhost:8000/          # la UI · Swagger en http://localhost:8000/docs
+pip install -r requirements.txt      # includes fastapi + uvicorn
+make all                             # generates the tables the API serves
+make api                             # uvicorn :8000 (serves API + UI on the same origin)
+open http://localhost:8000/          # the UI · Swagger at http://localhost:8000/docs
 ```
 
-La UI se sirve desde la propia API (mismo origen), así que **no hay que abrir el archivo** ni lidiar
-con CORS. Si el puerto 8000 está ocupado, usá otro (`--port 8010`) y abrí `http://localhost:8010/`.
+The UI is served by the API itself (same origin), so there's **no file to open** and no CORS to deal
+with. If port 8000 is taken, use another (`--port 8010`) and open `http://localhost:8010/`.
 
-Endpoints clave: `/summary`, `/regulators?q=&regulator_class=&sort_by=`, **`/regulators/{gene}`**
-(perfil completo: clase, perfil por condición, auditorías, top edges, interpretación),
-`/audit/reproducibility`, `/edges/downstream`. La UI tiene 4 pantallas: Overview, Explorar,
-Auditoría y Red de efectos. Detalle en [`api/README.md`](api/README.md).
+Key endpoints: `/summary`, `/regulators?q=&regulator_class=&sort_by=`, **`/regulators/{gene}`**
+(full profile: class, per-condition profile, audits, top edges, interpretation),
+`/audit/reproducibility`, `/edges/downstream`. The UI has 4 screens: Overview, Explore, Audit, and
+Effect network. Detail in [`api/README.md`](api/README.md).
 
-## Limitaciones
+## Limitations
 
-- **Nomenclatura honesta**: los modelos son **empirical-Bayes / pseudo-bayesianos**, no NB jerárquico
-  completo ni MCMC (sin PPL, sin random effects formales).
-- `xcond_reproducibility` es una **feature exploratoria** (estabilidad cross-condición). Se **audita** con
-  una **auditoría de sensibilidad guide/donor-aware** (`make repro-meta` → `scripts/extract_de_obs_metadata.py`,
-  extrae solo el `.obs`, sin `.layers`) que **repondera** el score EB con reproducibilidad **real** cross-guide
-  (`guide_correlation_all`) y cross-donor (`donor_correlation_hits_mean`) — es un **análisis de sensibilidad,
-  no un posterior nuevo**. Opcional, no reemplaza el core; ver *Auditoría de sensibilidad* en `docs/report.md`.
-  Cobertura honesta: cross-guide ~78% pero cross-donor solo ~19% de los contrastes → **peso neutral** donde
-  falta (un gen no se penaliza por no tener metadata de donante).
-- **Modelo 1 es opcional**: el acceso remoto por slice es viable (~4.5 s/fila, medido) pero latency-bound;
-  el entregable oficial se sostiene solo con el core local.
+- **Honest naming**: the models are **empirical-Bayes / pseudo-Bayesian**, not a full hierarchical NB
+  or MCMC (no PPL, no formal random effects).
+- `xcond_reproducibility` is an **exploratory feature** (cross-condition stability). It is **audited**
+  with a **guide/donor-aware sensitivity analysis** (`make repro-meta` →
+  `scripts/extract_de_obs_metadata.py`, which extracts only the `.obs`, no `.layers`) that
+  **reweights** the EB score with **real** cross-guide (`guide_correlation_all`) and cross-donor
+  (`donor_correlation_hits_mean`) reproducibility — it is a **sensitivity analysis, not a new
+  posterior**. Optional, and it does not replace the core; see *Sensitivity audit* in
+  `docs/report.md`. Honest coverage: cross-guide ~78% but cross-donor only ~19% of contrasts → a
+  **neutral weight** where it's missing (a gene is not penalized for lacking donor metadata).
+- **Model 1 is optional**: remote per-slice access is viable (~4.5 s/row, measured) but latency-bound;
+  the official deliverable stands on its own with the local core.
 
 ## Submission summary
 
-Producto reproducible que convierte una matriz de DE de 1.8 TB en un **ranking de reguladores robustos
-con incertidumbre**, ejecutable en una laptop con ~10 GB de disco usando solo 15 MB de datos. El core es
-**CSV-only**; cuando hay metadata `.obs` disponible, una **auditoría de sensibilidad guide/donor-aware**
-muestra qué reguladores sobreviven a chequeos de reproducibilidad real. Como bonus, una **red de efectos
-con incertidumbre** (uncertainty-aware effect network) leída en streaming del h5ad de 17 GB sin descargarlo.
-Y sobre todo eso, un **Regulator Atlas explorable**: API read-only (FastAPI) + UI para buscar un gen, ver su
-perfil, filtrar global vs context-specific y navegar las auditorías. `make all` reproduce el core;
-`make api` levanta el atlas. Ver `docs/report.md`.
+A reproducible product that turns a 1.8 TB DE matrix into a **ranking of robust regulators with
+uncertainty**, runnable on a laptop with ~10 GB of disk using only 15 MB of data. The core is
+**CSV-only**; when `.obs` metadata is available, a **guide/donor-aware sensitivity audit** shows which
+regulators survive real reproducibility checks. As a bonus, an **uncertainty-aware effect network**
+streamed from the 17 GB h5ad without downloading it. On top of that, an explorable **Regulator
+Atlas**: read-only API (FastAPI) + UI to search a gene, view its profile, filter global vs.
+context-specific, and browse the audits. `make all` reproduces the core; `make api` launches the
+atlas. See `docs/report.md`.
 
 ---
-Datos: CZI Virtual Cells Platform · Marson Lab 2025 · preprint biorxiv `10.64898/2025.12.23.696273`.
-Código de análisis original: [emdann/GWT_perturbseq_analysis_2025](https://github.com/emdann/GWT_perturbseq_analysis_2025).
+Data: CZI Virtual Cells Platform · Marson Lab 2025 · biorxiv preprint `10.64898/2025.12.23.696273`.
+Original analysis code: [emdann/GWT_perturbseq_analysis_2025](https://github.com/emdann/GWT_perturbseq_analysis_2025).

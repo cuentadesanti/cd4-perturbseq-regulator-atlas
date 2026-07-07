@@ -1,8 +1,8 @@
-"""Carga read-only de los outputs de `make all` en memoria.
+"""Read-only loading of the `make all` outputs into memory.
 
-Regla de oro: NO corre modelos, NO lee h5ad, NO toca S3. Solo sirve CSVs versionados
-generados offline por el pipeline. Si una tabla opcional falta, los campos se devuelven
-como null y la API sigue funcionando.
+Golden rule: does NOT run models, does NOT read h5ad, does NOT touch S3. It only serves
+versioned CSVs generated offline by the pipeline. If an optional table is missing, its fields
+are returned as null and the API keeps working.
 """
 from __future__ import annotations
 import math
@@ -34,20 +34,20 @@ def _read(path):
 
 
 class DataStore:
-    """Índices en memoria construidos al startup."""
+    """In-memory indexes built at startup."""
 
     def __init__(self):
         self.loaded: dict[str, bool] = {}
         self._load()
 
-    # ---- carga ----
+    # ---- load ----
     def _t(self, name, base=TABLES):
         df = _read(base / name)
         self.loaded[name] = df is not None
         return df
 
     def _load(self):
-        self.ranking = self._t("hub_ranking_bayes.csv")          # master (todos los genes)
+        self.ranking = self._t("hub_ranking_bayes.csv")          # master (all genes)
         self.review = self._t("top_regulators_for_review.csv")
         self.stability = self._t("hub_ranking_stability.csv")
         self.baseline = self._t("ranking_baseline_comparison.csv")
@@ -58,17 +58,17 @@ class DataStore:
         self.edges = self._t("robust_edges.csv")
         self.edge_summary = self._t("edge_summary_by_regulator.csv")
         self.downstream = self._t("top_downstream_genes.csv")
-        # side analysis: transcriptional fingerprints (opcional, `make fingerprints`)
+        # side analysis: transcriptional fingerprints (optional, `make fingerprints`)
         self.fp_pca = self._t("fingerprint_pca_scores.csv")
         self.fp_neighbors = self._t("fingerprint_neighbors.csv")
         self.fp_clusters = self._t("fingerprint_clusters.csv")
-        self.de = self._t("DE_stats.suppl_table.csv", base=DATA)  # para el perfil por condición
+        self.de = self._t("DE_stats.suppl_table.csv", base=DATA)  # for the per-condition profile
 
         if self.ranking is None:
             raise RuntimeError(
-                "Falta docs/tables/hub_ranking_bayes.csv — corre `make all` antes de la API.")
+                "Missing docs/tables/hub_ranking_bayes.csv — run `make all` before the API.")
 
-        # índices por gen
+        # per-gene indexes
         self.ranking = self.ranking.rename(columns={"target_contrast_gene_name": "gene"})
         self._idx = {name: self._index(df, key)
                      for name, df, key in [
@@ -79,19 +79,19 @@ class DataStore:
                          ("repro", self.repro, "gene"),
                          ("audit", self.audit, "gene"),
                      ]}
-        # perfil por condición desde DE_stats (n_downstream por gen×condición)
+        # per-condition profile from DE_stats (n_downstream per gene×condition)
         self.cond_profile = {}
         if self.de is not None:
             g = self.de.groupby("target_contrast_gene_name")
             for gene, sub in g:
                 self.cond_profile[gene] = {
                     r.culture_condition: int(r.n_downstream) for r in sub.itertuples()}
-        # edges por regulador
+        # edges per regulator
         self.edges_by_reg = {}
         if self.edges is not None:
             for gene, sub in self.edges.groupby("perturbed_gene"):
                 self.edges_by_reg[gene] = sub
-        # nearest neighbors por gen (side analysis)
+        # nearest neighbors per gene (side analysis)
         self.fp_neighbors_by_gene = {}
         if self.fp_neighbors is not None:
             for gene, sub in self.fp_neighbors.groupby("gene"):
@@ -107,7 +107,7 @@ class DataStore:
         return {row[key]: {k: _clean(v) for k, v in row.items()}
                 for row in df.to_dict("records")}
 
-    # ---- consultas ----
+    # ---- queries ----
     def summary(self):
         n_glob = n_cs = None
         if self.classes is not None:
@@ -263,11 +263,11 @@ class DataStore:
         if sf is not None:
             checks.append(f"top-30 in {sf*100:.0f}% of bootstraps")
         st = aud.get("status")
-        if st == "sobrevive":
+        if st == "survives":
             checks.append("survives guide/donor reproducibility")
-        elif st == "demotado":
+        elif st == "demoted":
             checks.append("demoted by reproducibility audit")
-        elif st == "promovido":
+        elif st == "promoted":
             checks.append("promoted by reproducibility audit")
         if checks:
             parts.append("; ".join(checks))

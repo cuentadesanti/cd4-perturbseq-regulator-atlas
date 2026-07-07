@@ -1,35 +1,35 @@
-# Análisis de edges (Modelo 1) — ¿resultado fuerte o bonus?
+# Edge analysis (Model 1) — strong result or bonus?
 
-## Qué se analizó
+## What was analyzed
 
-La red de efectos con incertidumbre `docs/tables/robust_edges.csv`: **2,470 edges** robustos
-(`P(|efecto|>1.5×)>0.8`) de **6 reguladores** × **2 condiciones**, leídos por slice del
-`DE_stats.h5ad` remoto. Se resumió por regulador y por gen downstream, con dirección y convergencia.
+The uncertainty-aware effect network `docs/tables/robust_edges.csv`: **2,470** robust edges
+(`P(|effect|>1.5×)>0.8`) from **6 regulators** × **2 conditions**, read by slice from the
+remote `DE_stats.h5ad`. Summarized per regulator and per downstream gene, with direction and convergence.
 
-## ¿Se ven útiles?
+## Do they look useful?
 
-**Sí como prueba de concepto, no como resultado fuerte.** Señales a favor:
+**Yes as a proof-of-concept, not as a strong result.** Signals in favor:
 
-- **Convergencia coherente**: 579 genes downstream son target de ≥2 reguladores. Los 6
-  reguladores son co-miembros del **complejo SAGA** (TADA1/TADA2B/SGF29/SUPT20H) → que compartan
-  targets es exactamente lo esperado, y **valida que el método recupera estructura biológica real**.
-- **Dirección interpretable**: 83% de los edges son de activación, consistente con
-  SAGA como coactivador de la transcripción.
-- La magnitud de los efectos es modesta y bien acotada (|θ| mediana ≈ 0.92).
+- **Coherent convergence**: 579 downstream genes are targeted by ≥2 regulators. All 6
+  regulators are co-members of the **SAGA complex** (TADA1/TADA2B/SGF29/SUPT20H) → sharing
+  targets is exactly what's expected, and **validates that the method recovers real biological structure**.
+- **Interpretable direction**: 83% of the edges are activating, consistent with
+  SAGA as a transcriptional coactivator.
+- Effect magnitudes are modest and well bounded (median |θ| ≈ 0.92).
 
-## ¿Por qué NO es un resultado fuerte (todavía)
+## Why it is NOT a strong result (yet)
 
-- **Cobertura mínima**: 6 de 7,913 reguladores (0.08%), **seleccionados por el ranking EB**
-  → muestra sesgada a un solo complejo, no representa el paisaje regulatorio.
-- **Condiciones incompletas**: solo Stim48hr, Stim8hr (la demo tomó la
-  condición pico por regulador; **falta Rest**).
-- **Latencia remota**: escalar a ~150 reguladores son ~11 min de lectura del h5ad (4.5 s/fila medidos).
-- **Semántica de la probabilidad**: `p_abs_effect_gt_1p5x` es **P(magnitud del efecto > 1.5×)**,
-  NO P(existe una arista causal). No hay control de FDR a nivel de red ni de sparsity (spike-and-slab).
+- **Minimal coverage**: 6 of 7,913 regulators (0.08%), **selected by the EB ranking**
+  → a sample biased toward a single complex, not representative of the regulatory landscape.
+- **Incomplete conditions**: only Stim48hr, Stim8hr (the demo took the
+  peak condition per regulator; **Rest is missing**).
+- **Remote latency**: scaling to ~150 regulators is ~11 min of h5ad reads (4.5 s/row measured).
+- **Probability semantics**: `p_abs_effect_gt_1p5x` is **P(effect magnitude > 1.5×)**,
+  NOT P(a causal edge exists). There is no network-level FDR control or sparsity (spike-and-slab).
 
-## Veredicto
+## Verdict
 
-Dejar como **bonus / proof-of-concept**: demuestra que el pipeline produce una red de efectos con
-incertidumbre biológicamente sensata sin descargar 1.8 TB, pero la cobertura y la semántica no
-sostienen todavía afirmaciones de red a escala. Para promoverlo a resultado fuerte: correr los ~150 top reguladores en
-las 3 condiciones y añadir P(edge) con prior sparse.
+Keep it as a **bonus / proof-of-concept**: it shows the pipeline produces a biologically sensible
+uncertainty-aware effect network without downloading 1.8 TB, but the coverage and semantics do not
+yet support network-scale claims. To promote it to a strong result: run the ~150 top regulators over
+all 3 conditions and add P(edge) with a sparse prior.

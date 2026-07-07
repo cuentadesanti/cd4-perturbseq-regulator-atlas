@@ -1,7 +1,7 @@
-"""CD4 Perturb-seq Regulator Atlas — API read-only sobre los outputs de `make all`.
+"""CD4 Perturb-seq Regulator Atlas — read-only API over the `make all` outputs.
 
-El pipeline produce los artefactos; esta API solo los hace explorables. No corre modelos,
-no descarga h5ad, no toca S3. `make all` sigue siendo la fuente de verdad.
+The pipeline produces the artifacts; this API only makes them explorable. It runs no models,
+downloads no h5ad, touches no S3. `make all` remains the source of truth.
 
     uvicorn api.main:app --reload --port 8000
     → http://localhost:8000/docs   (Swagger)
@@ -29,7 +29,7 @@ app.add_middleware(
 
 @app.get("/", include_in_schema=False)
 def index():
-    """Sirve la UI desde el mismo origen que la API (sin problemas de CORS/file://)."""
+    """Serves the UI from the same origin as the API (no CORS/file:// issues)."""
     if FRONTEND.exists():
         return FileResponse(FRONTEND)
     return {"app": "CD4 Perturb-seq Regulator Atlas", "docs": "/docs"}
@@ -48,13 +48,13 @@ def summary():
 
 @app.get("/genes", tags=["meta"])
 def genes():
-    """Todos los símbolos de gen rankeados (para autocompletar / fuzzy en la UI)."""
+    """All ranked gene symbols (for autocomplete / fuzzy search in the UI)."""
     return get_store().ranking["gene"].tolist()
 
 
 @app.get("/regulators", response_model=list[RegulatorSummary], tags=["regulators"])
 def regulators(
-    q: str | None = Query(None, description="búsqueda por símbolo de gen"),
+    q: str | None = Query(None, description="search by gene symbol"),
     regulator_class: str | None = Query(None, enum=["global", "condition-specific"]),
     limit: int = Query(50, ge=1, le=2000),
     sort_by: str = Query("core_rank", enum=["core_rank", "stability_frequency", "reweighted_score"]),
@@ -67,7 +67,7 @@ def regulators(
 def regulator(gene: str):
     p = get_store().profile(gene.upper())
     if p is None:
-        raise HTTPException(404, f"regulador '{gene}' no encontrado (¿pasó el gate de KD?)")
+        raise HTTPException(404, f"regulator '{gene}' not found (did it pass the KD gate?)")
     return p
 
 
@@ -102,26 +102,26 @@ def audit_kd_gate(limit: int = Query(50, ge=1, le=2000)):
 
 @app.get("/classes/{regulator_class}", tags=["regulators"])
 def regulators_by_class(regulator_class: str):
-    if regulator_class not in ("global", "context-specific"):
-        raise HTTPException(400, "regulator_class debe ser 'global' o 'context-specific'")
+    if regulator_class not in ("global", "condition-specific"):
+        raise HTTPException(400, "regulator_class must be 'global' or 'condition-specific'")
     return get_store().list_regulators(regulator_class=regulator_class, limit=2000)
 
 
 @app.get("/programs/pca", tags=["programs"])
 def programs_pca():
-    """Scores PCA del panel de huellas transcriptómicas (side analysis)."""
+    """PCA scores of the transcriptional fingerprint panel (side analysis)."""
     return get_store().programs_pca()
 
 
 @app.get("/programs/neighbors/{gene}", tags=["programs"])
 def programs_neighbors(gene: str):
-    """Reguladores transcriptómicamente similares (nearest neighbors por huella)."""
+    """Transcriptomically similar regulators (nearest neighbors by fingerprint)."""
     return get_store().programs_neighbors(gene.upper())
 
 
 @app.get("/programs/clusters", tags=["programs"])
 def programs_clusters():
-    """Clusters de perturbaciones por similitud de huella."""
+    """Perturbation clusters by fingerprint similarity."""
     return get_store().programs_clusters()
 
 

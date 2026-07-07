@@ -1,114 +1,113 @@
-# Reporte — Genome-scale CD4+ T cell Perturb-seq
+# Report — Genome-scale CD4+ T cell Perturb-seq
 
-*Reporte consolidado para revisión. Reproducible con `make all` (solo CSV locales).*
+*Consolidated report for review. Reproducible with `make all` (local CSVs only).*
 
 ![pipeline](figures/00_pipeline_overview.png)
 
-## Pregunta
+## Question
 
-¿Qué genes son **reguladores robustos** de los programas de células T CD4+, separando
-señal real de ruido y priorizando por efecto **grande y reproducible**, no por conteos crudos?
+Which genes are **robust regulators** of CD4+ T cell programs — separating real
+signal from noise and prioritizing by a **large and reproducible** effect, not by raw counts?
 
-## Resumen ejecutivo
+## Executive summary
 
-- El efecto de las perturbaciones es **heavy-tailed**: mediana 2 DEGs, pero un 1.5% son hubs
-  con >1000. Se resume con percentiles y rankings, no con la media.
-- El **knockdown efectivo gatea la señal**: los contrastes con KD on-target significativo (62%)
-  concentran el **85%** de todos los trans-efectos.
-- Un modelo **empirical-Bayes** (pseudo-bayesiano) rankea reguladores por poder regulatorio
-  latente con incertidumbre. El top robusto es maquinaria de **cromatina/transcripción**
-  (complejo SAGA, Mediador, KDM1A, SETD2) — efecto grande **y** estable entre condiciones.
+- Perturbation effects are **heavy-tailed**: median 2 DEGs, but 1.5% are hubs
+  with >1000. Summarize with percentiles and rankings, not the mean.
+- **Effective knockdown gates the signal**: contrasts with a significant on-target KD (62%)
+  concentrate **85%** of all trans-effects.
+- An **empirical-Bayes** (pseudo-Bayesian) model ranks regulators by their latent regulatory
+  power with uncertainty. The robust top is **chromatin/transcription** machinery
+  (SAGA complex, Mediator, KDM1A, SETD2) — a large **and** stable effect across conditions.
 
-Se generó además una **red de efectos con incertidumbre** (bonus, Modelo 1) con **2,470 edges robustos** (`P(|efecto|>1.5×)>0.8` — probabilidad de que la *magnitud* supere 1.5×, no de que exista una arista causal) de 6 reguladores en `docs/tables/robust_edges.csv`. Se evaluó como **proof-of-concept** (ver `docs/EDGE_ANALYSIS.md`): coherente y biológicamente sensato, pero de cobertura mínima — se deja como bonus, no como resultado fuerte.
+We also built an **uncertainty-aware effect network** (bonus, Model 1) with **2,470 robust edges** (`P(|effect|>1.5×)>0.8` — the probability that the *magnitude* exceeds 1.5×, not that a causal edge exists) from 6 regulators in `docs/tables/robust_edges.csv`. It was assessed as a **proof-of-concept** (see `docs/EDGE_ANALYSIS.md`): coherent and biologically sensible, but of minimal coverage — kept as a bonus, not a strong result.
 
-## Top reguladores (para revisión)
+## Top regulators (for review)
 
 | rank | gene | condition | regpower_eb_mean | p_top_1pct | observed_n_downstream | interpretation_note |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | SGF29 | Stim48hr | 2.5012 | 0.8236 | 4868 | KD sig 3/3 cond; repro cross-cond 0.71; sin off-target |
-| 2 | TADA2B | Stim8hr | 2.446 | 0.8071 | 5919 | KD sig 3/3 cond; repro cross-cond 0.79; posible off-target |
-| 3 | SENP5 | Stim8hr | 2.4291 | 0.8019 | 5171 | KD sig 3/3 cond; repro cross-cond 0.54; sin off-target |
-| 4 | SUPT20H | Stim8hr | 2.3911 | 0.7899 | 3947 | KD sig 3/3 cond; repro cross-cond 0.78; sin off-target |
-| 5 | TADA1 | Stim8hr | 2.3527 | 0.7773 | 3648 | KD sig 3/3 cond; repro cross-cond 0.81; sin off-target |
-| 6 | CCNC | Stim48hr | 2.2948 | 0.7576 | 4090 | KD sig 3/3 cond; repro cross-cond 0.56; sin off-target |
-| 7 | MED12 | Stim8hr | 2.2839 | 0.7538 | 4141 | KD sig 3/3 cond; repro cross-cond 0.49; sin off-target |
-| 8 | NFRKB | Rest | 2.265 | 0.747 | 3019 | KD sig 3/3 cond; repro cross-cond 0.83; sin off-target |
-| 9 | TAF6L | Stim8hr | 2.2397 | 0.7379 | 4638 | KD sig 3/3 cond; repro cross-cond 0.73; posible off-target |
-| 10 | ARNT | Stim48hr | 2.2236 | 0.7321 | 2946 | KD sig 3/3 cond; repro cross-cond 0.79; sin off-target |
-| 11 | ATP2A2 | Rest | 2.2224 | 0.7316 | 3518 | KD sig 3/3 cond; repro cross-cond 0.45; sin off-target |
-| 12 | TAF13 | Stim8hr | 2.1897 | 0.7194 | 3341 | KD sig 3/3 cond; repro cross-cond 0.63; sin off-target |
-| 13 | LEO1 | Rest | 2.1758 | 0.7142 | 3014 | KD sig 3/3 cond; repro cross-cond 0.59; sin off-target |
-| 14 | KDM1A | Stim48hr | 2.1629 | 0.7093 | 2912 | KD sig 3/3 cond; repro cross-cond 0.69; sin off-target |
-| 15 | ELOF1 | Stim48hr | 2.1495 | 0.7041 | 4257 | KD sig 3/3 cond; repro cross-cond 0.78; posible off-target |
+| 1 | SGF29 | Stim48hr | 2.5012 | 0.8236 | 4868 | KD sig 3/3 cond; cross-cond repro 0.71; no off-target |
+| 2 | TADA2B | Stim8hr | 2.446 | 0.8071 | 5919 | KD sig 3/3 cond; cross-cond repro 0.79; possible off-target |
+| 3 | SENP5 | Stim8hr | 2.4291 | 0.8019 | 5171 | KD sig 3/3 cond; cross-cond repro 0.54; no off-target |
+| 4 | SUPT20H | Stim8hr | 2.3911 | 0.7899 | 3947 | KD sig 3/3 cond; cross-cond repro 0.78; no off-target |
+| 5 | TADA1 | Stim8hr | 2.3527 | 0.7773 | 3648 | KD sig 3/3 cond; cross-cond repro 0.81; no off-target |
+| 6 | CCNC | Stim48hr | 2.2948 | 0.7576 | 4090 | KD sig 3/3 cond; cross-cond repro 0.56; no off-target |
+| 7 | MED12 | Stim8hr | 2.2839 | 0.7538 | 4141 | KD sig 3/3 cond; cross-cond repro 0.49; no off-target |
+| 8 | NFRKB | Rest | 2.265 | 0.747 | 3019 | KD sig 3/3 cond; cross-cond repro 0.83; no off-target |
+| 9 | TAF6L | Stim8hr | 2.2397 | 0.7379 | 4638 | KD sig 3/3 cond; cross-cond repro 0.73; possible off-target |
+| 10 | ARNT | Stim48hr | 2.2236 | 0.7321 | 2946 | KD sig 3/3 cond; cross-cond repro 0.79; no off-target |
+| 11 | ATP2A2 | Rest | 2.2224 | 0.7316 | 3518 | KD sig 3/3 cond; cross-cond repro 0.45; no off-target |
+| 12 | TAF13 | Stim8hr | 2.1897 | 0.7194 | 3341 | KD sig 3/3 cond; cross-cond repro 0.63; no off-target |
+| 13 | LEO1 | Rest | 2.1758 | 0.7142 | 3014 | KD sig 3/3 cond; cross-cond repro 0.59; no off-target |
+| 14 | KDM1A | Stim48hr | 2.1629 | 0.7093 | 2912 | KD sig 3/3 cond; cross-cond repro 0.69; no off-target |
+| 15 | ELOF1 | Stim48hr | 2.1495 | 0.7041 | 4257 | KD sig 3/3 cond; cross-cond repro 0.78; possible off-target |
 
-Tabla completa (30, con todas las columnas): `docs/tables/top_regulators_for_review.csv`.
+Full table (30, with all columns): `docs/tables/top_regulators_for_review.csv`.
 
 ![ranking](figures/07_hub_posterior_ranking.png)
 
-## Naive hubs vs quality-aware regulators
+## Naive hubs vs. quality-aware regulators
 
-Rankear por `n_downstream` crudo premia hubs que no sobreviven a los controles de calidad.
-De los 30 hubs crudos top: **2 caen por el gate de KD** (sin knockdown on-target validado)
-y **15 se demotan por el shrinkage EB** por ser condition-specific (la señal vive en
-una sola condición). El ranking EB surface reguladores con efecto grande **y** estable.
+Ranking by raw `n_downstream` rewards hubs that don't survive the quality controls.
+Of the top 30 raw hubs: **2 drop at the KD gate** (no validated on-target knockdown)
+and **15 are demoted by EB shrinkage** for being condition-specific (the signal lives in
+a single condition). The EB ranking surfaces regulators with a large **and** stable effect.
 
 ![gate](figures/08_kd_gate_changes_ranking.png)
 
-La estabilidad se auditó con bootstrap (B=200) sobre las filas elegibles: la frecuencia con que
-cada gen cae en el top-30 (`stability_frequency`) está en `top_regulators_for_review.csv`. El
-ranking es moderadamente estable — conviene leerlo como *conjunto* de reguladores robustos, no
-como un orden exacto.
+Stability was audited with a bootstrap (B=200) over the eligible rows: how often each gene falls
+in the top-30 (`stability_frequency`) is in `top_regulators_for_review.csv`. The ranking is
+moderately stable — best read as a *set* of robust regulators, not an exact ordering.
 
 ![stability](figures/11_ranking_stability.png)
 
-## Global versus context-specific regulators
+## Global vs. context-specific regulators
 
-Separando por `condition_specificity = max/sum de n_downstream` entre condiciones con KD significativo:
+Splitting by `condition_specificity = max/sum of n_downstream` across conditions with significant KD:
 
-- **Globales** (efecto estable en ≥2 condiciones): SGF29, TADA2B, SENP5, SUPT20H, TADA1, CCNC… — maquinaria de cromatina/transcripción.
-- **Context-specific** (efecto concentrado en una condición): NCKAP1L, DOP1B, POGLUT3, ZAP70, TFAM, LCK… — incluye señalización TCR
-  (ZAP70, LCK), activa solo bajo estímulo.
+- **Global** (stable effect in ≥2 conditions): SGF29, TADA2B, SENP5, SUPT20H, TADA1, CCNC… — chromatin/transcription machinery.
+- **Context-specific** (effect concentrated in one condition): NCKAP1L, DOP1B, POGLUT3, ZAP70, TFAM, LCK… — includes TCR signaling
+  (ZAP70, LCK), active only under stimulation.
 
-Ambas clases son biología real; la distinción evita confundir un regulador universal con uno de contexto.
-Tablas: `top_global_regulators.csv`, `top_condition_specific_regulators.csv`.
+Both classes are real biology; the distinction avoids confusing a universal regulator with a
+context-dependent one. Tables: `top_global_regulators.csv`, `top_condition_specific_regulators.csv`.
 
 ![globalvs](figures/10_global_vs_context_specific.png)
 
-## Auditoría de sensibilidad: ¿el ranking sobrevive a la reproducibilidad real (guide/donor)?
+## Sensitivity audit: does the ranking survive real (guide/donor) reproducibility?
 
-El caveat del ranking core era usar `xcond_reproducibility` (proxy cross-condición). Lo auditamos con
-reproducibilidad **real** del `.obs` de `DE_stats.h5ad` (`scripts/extract_de_obs_metadata.py`, solo
-`.obs`, ~4 s, sin `.layers`): `guide_correlation_all` (concordancia entre las 2 guías) y
-`donor_correlation_hits_mean` (concordancia cross-donor), más penalización a targets de una sola guía.
+The core ranking's caveat was using `xcond_reproducibility` (a cross-condition proxy). We audit it with
+**real** reproducibility from the `.obs` of `DE_stats.h5ad` (`scripts/extract_de_obs_metadata.py`, `.obs`
+only, ~4 s, no `.layers`): `guide_correlation_all` (agreement between the 2 guides) and
+`donor_correlation_hits_mean` (cross-donor agreement), plus a penalty for single-guide targets.
 
-**No reestimamos el posterior EB ni es un modelo nuevo**: reponderamos el score EB
-(`reweighted_score = regpower_eb_mean · repro_weight`) como **análisis de sensibilidad** — qué
-reguladores sobreviven. En la práctica es más **guide-aware** que **donor-aware**: `guide_corr` cubre
-78% de los contrastes pero `donor_corr` solo **19%**
-(el análisis cross-donor se hizo en un subconjunto); donde falta, se usa un **peso neutral** (no penaliza
-por dato ausente). Del top-30 EB, **5 se demotan** y **5 se promueven**:
+**We do not re-estimate the EB posterior and it is not a new model**: we reweight the EB score
+(`reweighted_score = regpower_eb_mean · repro_weight`) as a **sensitivity analysis** — which
+regulators survive. In practice it is more **guide-aware** than **donor-aware**: `guide_corr` covers
+78% of contrasts but `donor_corr` only **19%**
+(the cross-donor analysis was done on a subset); where it's missing, a **neutral weight** is used (no
+penalty for absent data). Of the top-30 EB, **5 are demoted** and **5 are promoted**:
 
 | gene | old_rank | new_rank | status | guide_corr | donor_corr | reason |
 | --- | --- | --- | --- | --- | --- | --- |
-| CCNC | 6 | 45 | demotado | 0.185 | 0.582 | demoted: baja correlación cross-guide |
-| ELOF1 | 15 | 33 | demotado | 0.283 | 0.687 | demoted: baja correlación cross-guide |
-| ELOB | 17 | 43 | demotado | 0.242 | 0.643 | demoted: baja correlación cross-guide |
-| EIF4G2 | 23 | 31 | demotado | 0.313 | 0.71 | demoted: reproducibilidad más baja que sus pares |
-| SMG1 | 24 | 288 | demotado | 0.053 | 0.445 | demoted: single-guide (sin chequeo cross-guide) |
-| CPSF6 | 31 | 16 | promovido | nan | 0.766 | promoted: reproducibilidad guide/donor alta (subvalorada por el core) |
-| WAC | 35 | 25 | promovido | 0.363 | 0.816 | promoted: reproducibilidad guide/donor alta (subvalorada por el core) |
-| SETDB1 | 37 | 14 | promovido | 0.573 | 0.878 | promoted: reproducibilidad guide/donor alta (subvalorada por el core) |
-| WDR82 | 38 | 22 | promovido | 0.426 | 0.849 | promoted: reproducibilidad guide/donor alta (subvalorada por el core) |
-| MED24 | 49 | 30 | promovido | 0.42 | 0.829 | promoted: reproducibilidad guide/donor alta (subvalorada por el core) |
+| CCNC | 6 | 45 | demoted | 0.185 | 0.582 | demoted: low cross-guide correlation |
+| ELOF1 | 15 | 33 | demoted | 0.283 | 0.687 | demoted: low cross-guide correlation |
+| ELOB | 17 | 43 | demoted | 0.242 | 0.643 | demoted: low cross-guide correlation |
+| EIF4G2 | 23 | 31 | demoted | 0.313 | 0.71 | demoted: lower reproducibility than its peers |
+| SMG1 | 24 | 288 | demoted | 0.053 | 0.445 | demoted: single-guide (no cross-guide check) |
+| CPSF6 | 31 | 16 | promoted | nan | 0.766 | promoted: high guide/donor reproducibility (undervalued by the core) |
+| WAC | 35 | 25 | promoted | 0.363 | 0.816 | promoted: high guide/donor reproducibility (undervalued by the core) |
+| SETDB1 | 37 | 14 | promoted | 0.573 | 0.878 | promoted: high guide/donor reproducibility (undervalued by the core) |
+| WDR82 | 38 | 22 | promoted | 0.426 | 0.849 | promoted: high guide/donor reproducibility (undervalued by the core) |
+| MED24 | 49 | 30 | promoted | 0.42 | 0.829 | promoted: high guide/donor reproducibility (undervalued by the core) |
 
-- **Sobreviven** (efecto grande + reproducible): TADA2B, SGF29, MED12, TAF6L, TADA1… — SAGA + Mediador.
+- **Survivors** (large effect + reproducible): TADA2B, SGF29, MED12, TAF6L, TADA1… — SAGA + Mediator.
 
 ![reproshift](figures/19_reproducibility_aware_ranking_shift.png)
 
-**El ranking core sigue funcionando sin este archivo** — la auditoría vive aparte en
+**The core ranking still works without this file** — the audit lives separately in
 `hub_ranking_bayes_reproducibility_aware.csv` / `reproducibility_audit.csv`.
 
-## Hallazgos del EDA
+## EDA findings
 
 ![degs](figures/01_distribution_n_total_de_genes.png)
 ![hubs](figures/03_top_hubs_by_condition.png)
@@ -117,38 +116,38 @@ por dato ausente). Del top-30 EB, **5 se demotan** y **5 se promueven**:
 
 ---
 
-## Anexo A — Modelo de datos
+## Appendix A — Data model
 
-El dataset es un **esquema en estrella** cuyo eje es la tripleta
-**(guía sgRNA → gen perturbado) × condición de cultivo × donante**.
-La expresión se agrega en cascada: **célula → pseudobulk → estadísticos de DE**.
+The dataset is a **star schema** whose axis is the triple
+**(sgRNA guide → perturbed gene) × culture condition × donor**.
+Expression is aggregated in a cascade: **cell → pseudobulk → DE statistics**.
 
-## Diagrama ER
+## ER diagram
 
 ```mermaid
 erDiagram
-    DONOR ||--o{ SAMPLE : "tiene"
-    SAMPLE ||--o{ CELL : "contiene (lane/library)"
-    GENE ||--o{ SGRNA : "es diana de"
-    SGRNA ||--o{ CELL : "detectada en (guide_id)"
+    DONOR ||--o{ SAMPLE : "has"
+    SAMPLE ||--o{ CELL : "contains (lane/library)"
+    GENE ||--o{ SGRNA : "is target of"
+    SGRNA ||--o{ CELL : "detected in (guide_id)"
     GENE ||--o{ CELL : "perturbed_gene_id"
 
-    SGRNA ||--o{ PSEUDOBULK : "agrega"
-    DONOR ||--o{ PSEUDOBULK : "agrega"
-    CELL }o--|| PSEUDOBULK : "agregada por (guide,donor,cond)"
+    SGRNA ||--o{ PSEUDOBULK : "aggregates"
+    DONOR ||--o{ PSEUDOBULK : "aggregates"
+    CELL }o--|| PSEUDOBULK : "aggregated by (guide,donor,cond)"
 
     GENE ||--o{ DE_RESULT : "target_contrast"
-    PSEUDOBULK ||--o{ DE_RESULT : "input a DESeq2"
-    DE_RESULT ||--o{ DE_VALUE : "por gen medido"
-    GENE ||--o{ DE_VALUE : "gen medido (var)"
+    PSEUDOBULK ||--o{ DE_RESULT : "input to DESeq2"
+    DE_RESULT ||--o{ DE_VALUE : "per measured gene"
+    GENE ||--o{ DE_VALUE : "measured gene (var)"
 
-    SGRNA ||--o{ DE_BY_GUIDE : "DE por guía"
-    DE_RESULT ||--o{ DE_BY_GUIDE : "desagrega"
-    DONOR ||--o{ DE_BY_DONOR : "par de donantes"
-    DE_RESULT ||--o{ DE_BY_DONOR : "desagrega"
+    SGRNA ||--o{ DE_BY_GUIDE : "DE per guide"
+    DE_RESULT ||--o{ DE_BY_GUIDE : "disaggregates"
+    DONOR ||--o{ DE_BY_DONOR : "donor pair"
+    DE_RESULT ||--o{ DE_BY_DONOR : "disaggregates"
 
-    SGRNA ||--o{ GUIDE_KD : "eficiencia KD"
-    GENE ||--o{ GUIDE_KD : "gen diana"
+    SGRNA ||--o{ GUIDE_KD : "KD efficiency"
+    GENE ||--o{ GUIDE_KD : "target gene"
 
     DONOR {
         string donor_id PK "CE0008162..."
@@ -166,7 +165,7 @@ erDiagram
         string donor_id FK
         string culture_condition "Rest|Stim8hr|Stim48hr"
         string x10xrun_id "R1|R2"
-        string library_id "= output cellranger"
+        string library_id "= cellranger output"
         string library_prep_kit
         string sequencing_platform
         date   harvest_date
@@ -175,7 +174,7 @@ erDiagram
     GENE {
         string gene_id PK "ENSG..."
         string gene_name
-        bool   mt "mitocondrial"
+        bool   mt "mitochondrial"
     }
 
     SGRNA {
@@ -184,16 +183,16 @@ erDiagram
         int    pos
         string strand
         string seq
-        string target_gene_id FK "diana curada"
+        string target_gene_id FK "curated target"
         string target_gene_name
-        string designed_target_gene_id "diana de diseño"
+        string designed_target_gene_id "designed target"
         string guide_type "targeting|non-targeting"
         int    distance_to_closest_target_tss
         bool   putative_bidirectional_promoter
     }
 
     CELL {
-        string barcode PK "obs_names del h5ad"
+        string barcode PK "obs_names of the h5ad"
         string lane_id FK "-> library/sample"
         string guide_id FK "-> SGRNA | 'multi-guide'"
         string perturbed_gene_id FK "-> GENE"
@@ -205,9 +204,9 @@ erDiagram
     }
 
     PSEUDOBULK {
-        string guide_id FK "PK compuesta"
-        string donor_id FK "PK compuesta"
-        string culture_condition "PK compuesta"
+        string guide_id FK "composite PK"
+        string donor_id FK "composite PK"
+        string culture_condition "composite PK"
         int    n_cells
         int    total_counts
         bool   keep_for_DE
@@ -215,22 +214,22 @@ erDiagram
     }
 
     DE_RESULT {
-        string target_contrast FK "gene_id, PK compuesta"
-        string culture_condition "PK compuesta"
+        string target_contrast FK "gene_id, composite PK"
+        string culture_condition "composite PK"
         string target_contrast_gene_name
         int    n_cells_target
         int    n_up_genes
         int    n_down_genes
-        int    n_downstream "trans-efectos"
+        int    n_downstream "trans-effects"
         float  ontarget_effect_size
         bool   ontarget_significant
-        int    n_guides "guías agregadas"
+        int    n_guides "aggregated guides"
     }
 
     DE_VALUE {
-        string target_contrast FK "PK compuesta"
-        string culture_condition FK "PK compuesta"
-        string gene_id FK "gen medido"
+        string target_contrast FK "composite PK"
+        string culture_condition FK "composite PK"
+        string gene_id FK "measured gene"
         float  log_fc
         float  p_value
         float  adj_p_value
@@ -240,7 +239,7 @@ erDiagram
     }
 
     DE_BY_GUIDE {
-        string guide_id FK "modalidad guide_1|guide_2"
+        string guide_id FK "modality guide_1|guide_2"
         string target_contrast FK
         string culture_condition FK
     }
@@ -252,8 +251,8 @@ erDiagram
     }
 
     GUIDE_KD {
-        string sgRNA FK "PK compuesta"
-        string culture_condition "PK compuesta"
+        string sgRNA FK "composite PK"
+        string culture_condition "composite PK"
         float  t_statistic
         float  adj_p_value
         bool   signif_knockdown
@@ -261,246 +260,246 @@ erDiagram
     }
 ```
 
-## Entidades y su origen físico
+## Entities and their physical origin
 
-| Entidad | Archivo(s) | Grano (1 fila =) |
+| Entity | File(s) | Grain (1 row =) |
 |---|---|---|
-| **DONOR** | `sample_metadata.suppl_table.csv` (desnormalizado) | un donante (4) |
-| **SAMPLE** | `sample_metadata.suppl_table.csv` | donante × condición × run (11) |
-| **GENE** | `.var` de cualquier h5ad (referencia) | un gen medido (~18k–36k) |
-| **SGRNA** | `sgrna_library_metadata.suppl_table.csv` | una guía (31.109) |
-| **CELL** | `D*_*.assigned_guide.h5ad` `.obs` | una célula |
-| **PSEUDOBULK** | `GWCD4i.pseudobulk_merged.h5ad` `.obs` | guía × donante × condición |
-| **DE_RESULT** | `GWCD4i.DE_stats.h5ad` `.obs` / `DE_stats.suppl_table.csv` | gen perturbado × condición (33.983) |
-| **DE_VALUE** | `GWCD4i.DE_stats.h5ad` `.layers` | (perturbación×condición) × gen medido |
-| **DE_BY_GUIDE** | `GWCD4i.DE_stats.by_guide.h5mu` | guía × condición |
-| **DE_BY_DONOR** | `GWCD4i.DE_stats.by_donors.h5mu` | par-de-donantes × perturbación × condición |
-| **GUIDE_KD** | `guide_kd_efficiency.suppl_table.csv` | guía × condición |
+| **DONOR** | `sample_metadata.suppl_table.csv` (denormalized) | one donor (4) |
+| **SAMPLE** | `sample_metadata.suppl_table.csv` | donor × condition × run (11) |
+| **GENE** | `.var` of any h5ad (reference) | one measured gene (~18k–36k) |
+| **SGRNA** | `sgrna_library_metadata.suppl_table.csv` | one guide (31,109) |
+| **CELL** | `D*_*.assigned_guide.h5ad` `.obs` | one cell |
+| **PSEUDOBULK** | `GWCD4i.pseudobulk_merged.h5ad` `.obs` | guide × donor × condition |
+| **DE_RESULT** | `GWCD4i.DE_stats.h5ad` `.obs` / `DE_stats.suppl_table.csv` | perturbed gene × condition (33,983) |
+| **DE_VALUE** | `GWCD4i.DE_stats.h5ad` `.layers` | (perturbation×condition) × measured gene |
+| **DE_BY_GUIDE** | `GWCD4i.DE_stats.by_guide.h5mu` | guide × condition |
+| **DE_BY_DONOR** | `GWCD4i.DE_stats.by_donors.h5mu` | donor-pair × perturbation × condition |
+| **GUIDE_KD** | `guide_kd_efficiency.suppl_table.csv` | guide × condition |
 
-## Claves y joins principales
+## Keys and main joins
 
-- **Gen** es la entidad de referencia central (`gene_id` = Ensembl `ENSG…`, `gene_name` = símbolo).
-  Aparece en dos roles: *gen perturbado* (diana de la guía) y *gen medido* (columna de la matriz de expresión / `.var`).
-- **SGRNA.target_gene_id → GENE.gene_id**: cada guía apunta a un gen (ojo: `designed_target_gene_id`
-  puede diferir de `target_gene_id` por curación post-hoc; hay ~1–2 guías por gen).
-- **CELL.guide_id → SGRNA.sgRNA** (valor especial `multi-guide` si se detectó más de una guía).
-  **CELL.lane_id → SAMPLE** (una lane 10x = un output de cellranger = una library).
-- **PSEUDOBULK** = agregación de CELL por la clave compuesta `(guide_id, donor_id, culture_condition)`.
-- **DE_RESULT** = agregación por `(target_contrast = gene_id, culture_condition)`; junta las `n_guides` guías del gen.
-  `DE_stats.suppl_table.csv` es exactamente el `.obs` de este objeto en forma tabular.
-- **DE_VALUE** (en `.layers`: `log_fc`, `zscore`, `adj_p_value`, …) es la relación N:N entre
-  **DE_RESULT** (obs) y **GENE** (var): para cada perturbación×condición, un vector sobre los genes medidos.
-- **DE_BY_GUIDE** y **DE_BY_DONOR** son la misma estructura que DE_RESULT pero desagregada
-  (por guía individual, o por par de donantes) — sirven para métricas de reproducibilidad
-  (`guide_correlation_*`, `donor_correlation_*`) que viven en `DE_RESULT.obs`.
+- **Gene** is the central reference entity (`gene_id` = Ensembl `ENSG…`, `gene_name` = symbol).
+  It appears in two roles: *perturbed gene* (the guide's target) and *measured gene* (a column of the expression matrix / `.var`).
+- **SGRNA.target_gene_id → GENE.gene_id**: each guide points to a gene (note: `designed_target_gene_id`
+  may differ from `target_gene_id` due to post-hoc curation; there are ~1–2 guides per gene).
+- **CELL.guide_id → SGRNA.sgRNA** (special value `multi-guide` if more than one guide was detected).
+  **CELL.lane_id → SAMPLE** (one 10x lane = one cellranger output = one library).
+- **PSEUDOBULK** = aggregation of CELL by the composite key `(guide_id, donor_id, culture_condition)`.
+- **DE_RESULT** = aggregation by `(target_contrast = gene_id, culture_condition)`; it joins the gene's `n_guides` guides.
+  `DE_stats.suppl_table.csv` is exactly the `.obs` of this object in tabular form.
+- **DE_VALUE** (in `.layers`: `log_fc`, `zscore`, `adj_p_value`, …) is the N:N relation between
+  **DE_RESULT** (obs) and **GENE** (var): for each perturbation×condition, a vector over the measured genes.
+- **DE_BY_GUIDE** and **DE_BY_DONOR** are the same structure as DE_RESULT but disaggregated
+  (by individual guide, or by donor pair) — they feed the reproducibility metrics
+  (`guide_correlation_*`, `donor_correlation_*`) that live in `DE_RESULT.obs`.
 
-### Nota sobre IDs de donante
-Las etiquetas cortas `D1..D4` (nombres de archivo cell-level) se resuelven al `donor_id`
-canónico `CE…` vía `sample_metadata` (`cell_sample_id` codifica `run_D#_condición`).
-Las modalidades de `DE_stats.by_donors.h5mu` usan los IDs `CE…` unidos por `_`.
+### Note on donor IDs
+The short labels `D1..D4` (cell-level file names) resolve to the canonical `donor_id`
+`CE…` via `sample_metadata` (`cell_sample_id` encodes `run_D#_condition`).
+The modalities of `DE_stats.by_donors.h5mu` use the `CE…` IDs joined by `_`.
 
 ---
 
-## Anexo B — EDA
+## Appendix B — EDA
 
 ## Scope
 
-Análisis con solo las **tablas suplementarias** (~15 MB). **No** se cargó ningún `.h5ad`/`.h5mu` (1.8 TB).
+Analysis using only the **supplementary tables** (~15 MB). **No** `.h5ad`/`.h5mu` was loaded (1.8 TB).
 
-| Archivo | Filas | Uso |
+| File | Rows | Use |
 |---|---|---|
-| `DE_stats.suppl_table.csv` | 33,983 | tabla principal (la señal) |
-| `sgrna_library_metadata.suppl_table.csv` | 26,504 | librería de guías |
-| `sample_metadata.suppl_table.csv` | 12 | diseño experimental |
+| `DE_stats.suppl_table.csv` | 33,983 | main table (the signal) |
+| `sgrna_library_metadata.suppl_table.csv` | 26,504 | guide library |
+| `sample_metadata.suppl_table.csv` | 12 | experimental design |
 
-Regenerable: `python scripts/eda.py` → figuras en `docs/figures/`, tabla en `docs/tables/`.
+Reproducible: `python scripts/eda.py` → figures in `docs/figures/`, table in `docs/tables/`.
 
 ## Unit of analysis
 
-**1 fila = gen perturbado × condición de cultivo** (`target_contrast` × `culture_condition`).
+**1 row = perturbed gene × culture condition** (`target_contrast` × `culture_condition`).
 Rest / Stim8hr / Stim48hr.
 
 ## Key quality filters
 
-| Filtro | Disponible aquí | Fuente |
+| Filter | Available here | Source |
 |---|---|---|
-| `ontarget_significant` (KD efectivo, 10% FDR) | ✅ CSV | `DE_stats.suppl_table.csv` |
-| `offtarget_flag` (posible off-target) | ✅ CSV | idem |
-| reproducibilidad **cross-condición** (proxy) | ✅ derivable | min/max de `n_downstream` entre condiciones |
-| `single_guide_estimate` (2 guías concordantes) | ❌ | `DE_stats.h5ad` `.obs` |
+| `ontarget_significant` (effective KD, 10% FDR) | ✅ CSV | `DE_stats.suppl_table.csv` |
+| `offtarget_flag` (possible off-target) | ✅ CSV | same |
+| **cross-condition** reproducibility (proxy) | ✅ derivable | min/max of `n_downstream` across conditions |
+| `single_guide_estimate` (2 concordant guides) | ❌ | `DE_stats.h5ad` `.obs` |
 | `guide_correlation_all` (cross-guide) | ❌ | `DE_stats.h5ad` / `by_guide.h5mu` |
-| `donor_correlation_hits_mean` (cross-donante) | ❌ | `DE_stats.h5ad` / `by_donors.h5mu` |
+| `donor_correlation_hits_mean` (cross-donor) | ❌ | `DE_stats.h5ad` / `by_donors.h5mu` |
 
 ## Main findings
 
-1. **Los efectos de DE son heavy-tailed.** Mediana **2 DEGs**, media 60.5 (engañosa), 15.4% sin efecto,
-   1.5% son hubs (>1000 DEGs). → resume con **percentiles y rankings**, no media.
-2. **El knockdown gatea la mayor parte de la señal.** 62% de contrastes con KD on-target significativo;
-   estos concentran el **85%** de todos los trans-efectos. Filtrar por `ontarget_significant` sube mucho
-   la densidad de señal (no es prueba causal: puede haber KD real no detectado por baja expresión basal).
-3. **Las células estimuladas muestran efectos más amplios.** Media de DEGs: Rest 53.1 · Stim8hr 68.9 · Stim48hr 59.4.
-4. **Los top hubs son plausibles**, enriquecidos en señalización de células T (CD3E/D/G, LAT, ZAP70, PLCG1,
-   LCP2, VAV1) — sugiere que la pantalla captura señal biológica interpretable.
-5. **La librería tiene cobertura ~2 guías/gen** (12,440 de 12,654 genes) → replicación interna.
-6. **Reguladores robustos ≠ hubs crudos.** Al exigir estabilidad cross-condición + KD signif. + sin off-target,
-   suben reguladores de **cromatina/transcripción** consistentes en las 3 condiciones (TADA2B, TADA1, SGF29,
-   SUPT20H — complejo SAGA; ELAVL1, NFRKB), distintos del top crudo dominado por señalización TCR específica de Stim8hr.
+1. **DE effects are heavy-tailed.** Median **2 DEGs**, mean 60.5 (misleading), 15.4% with no effect,
+   1.5% are hubs (>1000 DEGs). → summarize with **percentiles and rankings**, not the mean.
+2. **Knockdown gates most of the signal.** 62% of contrasts have a significant on-target KD;
+   these concentrate **85%** of all trans-effects. Filtering by `ontarget_significant` sharply raises
+   signal density (not causal proof: a real KD may go undetected due to low baseline expression).
+3. **Stimulated cells show broader effects.** Mean DEGs: Rest 53.1 · Stim8hr 68.9 · Stim48hr 59.4.
+4. **Top hubs are plausible**, enriched in T cell signaling (CD3E/D/G, LAT, ZAP70, PLCG1,
+   LCP2, VAV1) — suggesting the screen captures interpretable biological signal.
+5. **The library covers ~2 guides/gene** (12,440 of 12,654 genes have exactly 2) → internal replication.
+6. **Robust regulators ≠ raw hubs.** Requiring cross-condition stability + significant KD + no off-target
+   surfaces **chromatin/transcription** regulators consistent across all 3 conditions (TADA2B, TADA1, SGF29,
+   SUPT20H — SAGA complex; ELAVL1, NFRKB), distinct from the raw top dominated by Stim8hr-specific TCR signaling.
 
-## Figuras
+## Figures
 
 `docs/figures/`
-- `01_distribution_n_total_de_genes.png` — cola larga
+- `01_distribution_n_total_de_genes.png` — long tail
 - `02_degs_by_condition.png`
 - `03_top_hubs_by_condition.png`
-- `04_ontarget_vs_downstream.png` — eje `kd_strength = −ontarget_effect_size`
+- `04_ontarget_vs_downstream.png` — axis `kd_strength = −ontarget_effect_size`
 - `05_guides_per_gene.png`
-- `06_reproducibility_vs_effects.png` — reproducibilidad cross-condición vs magnitud
+- `06_reproducibility_vs_effects.png` — cross-condition reproducibility vs. magnitude
 
-## Tabla accionable
+## Actionable table
 
-`docs/tables/top_robust_regulators.csv` (top 30). Score **solo con columnas del CSV**:
+`docs/tables/top_robust_regulators.csv` (top 30). Score using **CSV columns only**:
 
 ```
 robust_score = log1p(n_downstream)
              · ontarget_significant
-             · (0.6 si offtarget_flag else 1.0)
-             · (0.5 + 0.5 · reproducibilidad_cross_condición)
+             · (0.6 if offtarget_flag else 1.0)
+             · (0.5 + 0.5 · cross_condition_reproducibility)
              · (n_signif_conditions / 3)
 ```
 
 ## Practical next steps
 
-1. **Ranking robusto definitivo**: reforzar `robust_score` con `single_guide_estimate` +
-   `donor_correlation_hits_mean` desde `GWCD4i.DE_stats.h5ad` (17 GB).
-2. **Matriz downstream a nivel de gen**: cargar los `.layers` de `DE_stats.h5ad` (log_fc/zscore/padj)
-   para los reguladores top, ya filtrados.
-3. **Grafo regulatorio por condición**: construir la red regulador → downstream por condición y
-   comparar Rest vs Stim para identificar reguladores context-specific.
+1. **Definitive robust ranking**: strengthen `robust_score` with `single_guide_estimate` +
+   `donor_correlation_hits_mean` from `GWCD4i.DE_stats.h5ad` (17 GB).
+2. **Gene-level downstream matrix**: load the `.layers` of `DE_stats.h5ad` (log_fc/zscore/padj)
+   for the top regulators, already filtered.
+3. **Per-condition regulatory graph**: build the regulator → downstream network per condition and
+   compare Rest vs. Stim to identify context-specific regulators.
 
 ---
 
-## Anexo C — Modelado
+## Appendix C — Modeling
 
-Dos modelos pequeños, **dependency-light** (solo `scipy` + `statsmodels`), que separan señal
-de ruido con incertidumbre en vez de rankear por conteos crudos y `adj_p_value < 0.1`.
+Two small, **dependency-light** models (only `scipy` + `statsmodels`) that separate signal
+from noise with uncertainty instead of ranking by raw counts and `adj_p_value < 0.1`.
 
-> **Nomenclatura honesta:** ambos son **empirical-Bayes / pseudo-bayesianos**. No hay PPL,
-> ni random effects formales, ni posterior conjunto muestreado por MCMC. Donde decimos
-> "posterior" es la aproximación normal del EB con parámetros de prior estimados de los datos.
+> **Honest naming:** both are **empirical-Bayes / pseudo-Bayesian**. There is no PPL,
+> no formal random effects, no jointly MCMC-sampled posterior. Where we say
+> "posterior" we mean the normal EB approximation with prior parameters estimated from the data.
 
 ---
 
-## Modelo 2 — ranking de reguladores (core, corre local)
+## Model 2 — regulator ranking (core, runs locally)
 
-**Script:** `scripts/model_hubs.py` · **Corre con:** `DE_stats.suppl_table.csv` (local, sin descargas).
-**Grano:** 1 fila = gen perturbado × condición.
+**Script:** `scripts/model_hubs.py` · **Runs on:** `DE_stats.suppl_table.csv` (local, no downloads).
+**Grain:** 1 row = perturbed gene × condition.
 
-### Especificación
+### Specification
 
-1. **Efectos fijos (media condicional).** GLM sobre `n_downstream`:
+1. **Fixed effects (conditional mean).** GLM on `n_downstream`:
 
    ```
    n_downstream ~ C(culture_condition) + ontarget_significant + offtarget_flag
    ```
 
-   Poisson y NB comparten el mismo modelo de media; como solo usamos la media ajustada `μᵢ`
-   (no inferencia sobre coeficientes) ajustamos por IRLS estable: Poisson GLM → `α` de NB por
-   método de momentos (`Var = μ + α·μ²`) → NB GLM con `α` fijo. Evita los problemas de
-   convergencia del NB por MLE completo.
+   Poisson and NB share the same mean model; since we only use the fitted mean `μᵢ`
+   (no inference on coefficients) we fit by stable IRLS: Poisson GLM → NB `α` by
+   method of moments (`Var = μ + α·μ²`) → NB GLM with fixed `α`. This avoids the
+   convergence problems of full NB MLE.
 
-2. **Shrinkage empirical-Bayes del efecto por gen.** Desviación log-rate respecto al baseline:
+2. **Empirical-Bayes shrinkage of the per-gene effect.** Log-rate deviation from the baseline:
 
    ```
    workᵢ = log(yᵢ + 0.5) − log(μᵢ + 0.5)
    ```
 
-   Por gen g:  `d_g = mean(work)`,  `s²_g = σ²_e / n_g`.
-   Prior `u_g ~ Normal(0, τ²)` con `τ²` por método de momentos (`Var(d_g) − mean(s²_g)`).
-   Posterior aproximado:
+   Per gene g:  `d_g = mean(work)`,  `s²_g = σ²_e / n_g`.
+   Prior `u_g ~ Normal(0, τ²)` with `τ²` by method of moments (`Var(d_g) − mean(s²_g)`).
+   Approximate posterior:
 
    ```
-   u_g | datos ~ Normal( shrink·d_g ,  shrink·s²_g ),   shrink = τ²/(τ²+s²_g)
+   u_g | data ~ Normal( shrink·d_g ,  shrink·s²_g ),   shrink = τ²/(τ²+s²_g)
    ```
 
-   Genes con pocas condiciones / poca señal se encogen hacia 0.
+   Genes with few conditions / little signal are shrunk toward 0.
 
-### Salidas
+### Outputs
 
-`docs/tables/hub_ranking_bayes.csv` (todos los genes) y `docs/tables/top_regulators_for_review.csv`
-(top 30, judge-facing). Columnas clave: `regpower_eb_mean/sd` (poder regulatorio log-rate),
-`p_top_1pct` (probabilidad EB de exceder el umbral empírico del top-1%, no "P de estar en el top 1%"),
-`expected_downstream`. Figura `07_hub_posterior_ranking.png`.
+`docs/tables/hub_ranking_bayes.csv` (all genes) and `docs/tables/top_regulators_for_review.csv`
+(top 30, judge-facing). Key columns: `regpower_eb_mean/sd` (log-rate regulatory power),
+`p_top_1pct` (EB probability of exceeding the empirical top-1% threshold, not "P of being in the top 1%"),
+`expected_downstream`. Figure `07_hub_posterior_ranking.png`.
 
-### Lectura del resultado
+### Reading the result
 
-El ranking robusto surface maquinaria de **cromatina/transcripción** consistente entre condiciones
-—complejo SAGA (TADA1/TADA2B/SGF29/SUPT20H/TAF6L), Mediador (MED12/CCNC), KDM1A, SETD2, CTBP1—
-por encima de los hubs de señalización TCR crudos que eran específicos de Stim8hr. Es decir: el
-shrinkage premia a los reguladores con efecto grande **y** estable.
+The robust ranking surfaces **chromatin/transcription** machinery consistent across conditions
+— SAGA complex (TADA1/TADA2B/SGF29/SUPT20H/TAF6L), Mediator (MED12/CCNC), KDM1A, SETD2, CTBP1 —
+above the raw TCR-signaling hubs that were Stim8hr-specific. In other words: the shrinkage
+rewards regulators with a large **and** stable effect.
 
 ### Caveats
 
-- `xcond_reproducibility` es una **feature exploratoria** (estabilidad cross-condición). **No**
-  sustituye la reproducibilidad cross-donor / cross-guide, que requiere `DE_stats.h5ad`.
-- El baseline de efectos fijos se trata como conocido (plug-in) → pseudo-bayesiano, no full-Bayes.
-- `single_guide_estimate` y `n_guides` NO están en el CSV; en la tabla de review del core aparecen como
-  `NA (requiere DE_stats.h5ad)` — sí están en la auditoría de sensibilidad de abajo.
+- `xcond_reproducibility` is an **exploratory feature** (cross-condition stability). It does **not**
+  replace cross-donor / cross-guide reproducibility, which requires `DE_stats.h5ad`.
+- The fixed-effects baseline is treated as known (plug-in) → pseudo-Bayesian, not full Bayes.
+- `single_guide_estimate` and `n_guides` are NOT in the CSV; in the core review table they appear as
+  `NA (requires DE_stats.h5ad)` — they are present in the sensitivity audit below.
 
-### Auditoría de sensibilidad guide/donor-aware (opcional)
+### Guide/donor-aware sensitivity audit (optional)
 
-Cuando existe `de_obs_reproducibility_metadata.csv` (extraído del `.obs` de `DE_stats.h5ad`,
-sin `.layers`), `model_hubs.py` corre una auditoría: **repondera** el score EB con reproducibilidad
-real (`reweighted_score = regpower_eb_mean · repro_weight`) y reporta qué reguladores sobreviven
-(`reproducibility_audit.csv`, fig 19).
+When `de_obs_reproducibility_metadata.csv` exists (extracted from the `.obs` of `DE_stats.h5ad`,
+without `.layers`), `model_hubs.py` runs an audit: it **reweights** the EB score with real
+reproducibility (`reweighted_score = regpower_eb_mean · repro_weight`) and reports which regulators
+survive (`reproducibility_audit.csv`, fig 19).
 
-- **Es un análisis de sensibilidad, no un posterior nuevo**: NO se reestima el modelo EB.
-- **Cobertura parcial**: `guide_correlation_all` ~78% de contrastes, `donor_correlation_hits_mean`
-  solo ~19% → en la práctica es más *guide-aware* que *donor-aware*. Donde falta la métrica se usa un
-  **peso neutral** (0.75), de modo que **un gen no se penaliza solo por no tener metadata de donante**.
-- El ranking **core no depende** de este archivo (`make all` corre sin él).
+- **It is a sensitivity analysis, not a new posterior**: the EB model is NOT re-estimated.
+- **Partial coverage**: `guide_correlation_all` ~78% of contrasts, `donor_correlation_hits_mean`
+  only ~19% → in practice more *guide-aware* than *donor-aware*. Where the metric is missing, a
+  **neutral weight** (0.75) is used, so **a gene is not penalized just for lacking donor metadata**.
+- The **core** ranking does **not depend** on this file (`make all` runs without it).
 
 ---
 
-## Modelo 1 — red de efectos con incertidumbre (ESTRICTAMENTE OPCIONAL)
+## Model 1 — uncertainty-aware effect network (STRICTLY OPTIONAL)
 
-**Scripts:** `scripts/model_edges_spike.py` (validación) y `scripts/model_edges.py` (escalado).
-**Regla:** si el spike remoto falla o es lento, el entregable oficial es el Modelo 2 + docs.
+**Scripts:** `scripts/model_edges_spike.py` (validation) and `scripts/model_edges.py` (scaling).
+**Rule:** if the remote spike fails or is slow, the official deliverable is Model 2 + docs.
 
 ### Idea
 
-EB normal-normal exacto sobre `log_fc` / `lfcSE` de los `.layers` del h5ad:
+Exact normal-normal EB on `log_fc` / `lfcSE` from the h5ad `.layers`:
 
 ```
-yᵢ | θᵢ ~ Normal(θᵢ, seᵢ²)          # observado
-θᵢ     ~ Normal(0, τ²)              # prior con shrinkage
+yᵢ | θᵢ ~ Normal(θᵢ, seᵢ²)          # observed
+θᵢ     ~ Normal(0, τ²)              # shrinkage prior
 θᵢ|yᵢ  ~ Normal(mᵢ, vᵢ),  vᵢ = 1/(1/τ² + 1/seᵢ²),  mᵢ = vᵢ·yᵢ/seᵢ²
 ```
 
-Salidas por edge: `theta_post_mean/sd`, `p_effect_positive`, `p_abs_effect_gt_1p5x`.
-**Regla de decisión** (más interpretable que FDR): `p_abs_effect_gt_1p5x > 0.8 AND ontarget_significant`.
+Per-edge outputs: `theta_post_mean/sd`, `p_effect_positive`, `p_abs_effect_gt_1p5x`.
+**Decision rule** (more interpretable than FDR): `p_abs_effect_gt_1p5x > 0.8 AND ontarget_significant`.
 
-### Estrategia consciente de memoria/cómputo
+### Memory/compute-aware strategy
 
-Disco: **9.8 GB libres < 17 GB** del h5ad → no se descarga. En vez de eso:
-- Solo se necesitan las edges de los **reguladores candidatos** (top del Modelo 2), no las ~350M.
-- `model_edges_spike.py` **mide** (no asume) el layout/chunking y el coste real de leer una fila
-  por slice desde S3 (`fsspec` anónimo + `h5py`). Si es viable, `model_edges.py` baja solo esas
-  filas y corre el EB vectorizado (segundos, ~15 MB de RAM).
-- `τ²` se estima de una muestra de filas, no de toda la matriz (aproximación documentada).
+Disk: **9.8 GB free < 17 GB** for the h5ad → not downloaded. Instead:
+- Only the edges of the **candidate regulators** (top of Model 2) are needed, not the ~350M.
+- `model_edges_spike.py` **measures** (does not assume) the layout/chunking and the real cost of
+  reading one row per slice from S3 (anonymous `fsspec` + `h5py`). If viable, `model_edges.py`
+  fetches only those rows and runs the vectorized EB (seconds, ~15 MB RAM).
+- `τ²` is estimated from a sample of rows, not the whole matrix (documented approximation).
 
-Ver el veredicto real del spike en `docs/report.md` (sección Modelo 1).
+See the real spike verdict in `docs/report.md` (Model 1 section).
 
 ---
 
-## Cómo correr
+## How to run
 
 ```bash
-make model          # Modelo 2 (core)
-make spike          # Modelo 1 spike (opcional, requiere: pip install h5py s3fs fsspec)
+make model          # Model 2 (core)
+make spike          # Model 1 spike (optional, requires: pip install h5py s3fs fsspec)
 ```
 
-## Next steps (no incluidos)
+## Next steps (not included)
 
-- Reforzar `regpower` con reproducibilidad cross-donor/cross-guide real desde `DE_stats.h5ad`.
-- Término condición-específico `γ_{p,c,g}` y prior spike-and-slab (`z ~ Bernoulli(π)`) para la red.
-- Full-Bayes (NumPyro/PyMC) si el EB deja de ser suficiente.
+- Strengthen `regpower` with real cross-donor/cross-guide reproducibility from `DE_stats.h5ad`.
+- A condition-specific term `γ_{p,c,g}` and a spike-and-slab prior (`z ~ Bernoulli(π)`) for the network.
+- Full Bayes (NumPyro/PyMC) if EB stops being sufficient.
