@@ -1,86 +1,94 @@
-# Genome-scale T cell Perturb-seq — hackathon
+# Robust regulators of CD4+ T cell programs — Perturb-seq
 
-Pipeline para trabajar con el dataset **Primary Human CD4+ T Cell Perturb-seq (Marson Lab, 2025)**
-publicado en la [CZI Virtual Cells Platform](https://virtualcellmodels.cziscience.com/dataset/genome-scale-tcell-perturb-seq).
+> Hackathon submission · genome-scale CRISPRi Perturb-seq en células T CD4+ primarias (Marson Lab, 2025)
 
-Perturb-seq de escala genómica en células T CD4+ primarias humanas: 4 donantes × 3 condiciones
-(Rest, Stim8hr, Stim48hr).
+![pipeline](docs/figures/00_pipeline_overview.png)
 
-## Fuente de datos
+## Pregunta
 
-Bucket S3 **público** (no requiere credenciales, se accede con `--no-sign-request`):
+¿Qué genes son **reguladores robustos** de los programas de células T CD4+? El reto: la señal
+de un screen genome-scale está dominada por ruido y por unos pocos hubs. Queremos **separar señal
+de ruido con incertidumbre** y priorizar reguladores por efecto **grande y reproducible**, no por
+conteos crudos ni `adj_p_value < 0.1`.
 
-```
-s3://genome-scale-tcell-perturb-seq/marson2025_data/
-```
+## Qué hace este repo
 
-- Código de análisis original: https://github.com/emdann/GWT_perturbseq_analysis_2025
-- Preprint: https://www.biorxiv.org/content/10.64898/2025.12.23.696273v1
-- Raw / cellranger: SRA `SRP643211` / GEO `GSE314342`
+Un producto de investigación reproducible, **consciente de memoria y cómputo** (el dataset completo
+son 1.8 TB; el disco de trabajo tiene ~10 GB). Todo el core corre **solo con las tablas CSV
+suplementarias (~15 MB)**:
 
-## ⚠️ Tamaño
+1. **Pipeline de descarga selectiva** desde el bucket público S3 (`scripts/download.sh`).
+2. **Modelo de datos** del dataset (`docs/DATA_MODEL.md` + [artifact interactivo](docs/data-model.html)).
+3. **EDA 80/20** (`scripts/eda.py`) — distribución de efectos, calidad de KD, hubs, reproducibilidad.
+4. **Modelo 2 · empirical-Bayes** (`scripts/model_hubs.py`) — ranking de reguladores con incertidumbre.
+5. **Modelo 1 · red probabilística de edges** (opcional, `scripts/model_edges.py`) — lee por *slice*
+   el `.h5ad` de 17 GB desde S3 **sin descargarlo**.
 
-| Grupo | Contenido | Tamaño aprox. |
-|-------|-----------|---------------|
-| `tables` | CSV suplementarias | ~15 MB |
-| `de` | `GWCD4i.DE_stats.*` (h5ad/h5mu) | ~63 GB |
-| `pseudobulk` | `GWCD4i.pseudobulk_merged.h5ad` | ~45 GB |
-| `cell` (c/u) | `D*_*.assigned_guide.h5ad` | ~120–170 GB por archivo |
-| **all** | **todo** | **~1.8 TB** |
+## Dataset
 
-Los 12 archivos cell-level suman ~1.7 TB. **No caben en una laptop.** Para el hackathon
-empieza por `tables` y, si necesitas expresión, `pseudobulk`.
+**Primary Human CD4+ T Cell Perturb-seq** · [CZI Virtual Cells Platform](https://virtualcellmodels.cziscience.com/dataset/genome-scale-tcell-perturb-seq)
+· bucket público `s3://genome-scale-tcell-perturb-seq/marson2025_data/` · 4 donantes × 3 condiciones
+(Rest / Stim8hr / Stim48hr). El core usa 3 CSV (33,983 contrastes de DE, 26,504 guías, 12 muestras).
 
-## Setup
+## Hallazgos principales
+
+- **Efectos heavy-tailed**: perturbación mediana = 2 DEGs, 15% sin efecto, pero 1.5% son hubs (>1000 DEGs).
+  → resumir con percentiles y rankings, no con la media.
+- **El knockdown gatea la señal**: los contrastes con KD on-target significativo (62%) concentran el **85%**
+  de todos los trans-efectos. Filtrar por `ontarget_significant` es el primer paso obligado.
+- **Ranking robusto ≠ hubs crudos**: el modelo EB surface maquinaria de **cromatina/transcripción**
+  (complejo SAGA: TADA1/TADA2B/SGF29/SUPT20H · Mediador: MED12/CCNC · KDM1A, SETD2) — reguladores con
+  efecto grande **y** estable entre condiciones, por encima de los hubs de señalización TCR específicos de Stim8hr.
+- **Red probabilística (bonus)**: ~2,470 edges robustos (`P(|efecto|>1.5×)>0.8`) para los top reguladores,
+  extraídos del h5ad remoto sin descargarlo.
+
+Detalle: [`docs/report.md`](docs/report.md) · [`docs/EDA.md`](docs/EDA.md) · [`docs/MODELING.md`](docs/MODELING.md).
+
+## Cómo reproducir
 
 ```bash
-# 1. AWS CLI (ya instalado en esta máquina vía Homebrew)
-aws --version
-
-# 2. Entorno Python
+# 1. entorno
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
+
+# 2. datos (solo las tablas, ~15 MB)
+scripts/download.sh tables
+
+# 3. pipeline completo (EDA + modelo + reporte), verificado
+make all
 ```
 
-## Descargar datos
+Targets: `make eda` · `make model` · `make report` · `make all` · `make clean`.
+Opcional (remoto, requiere `pip install h5py s3fs fsspec`): `make spike` · `make edges`.
 
-```bash
-scripts/download.sh ls                 # listar todo el bucket (sin descargar)
-scripts/download.sh tables             # solo tablas CSV (~15 MB) -- recomendado para arrancar
-scripts/download.sh pseudobulk         # matriz pseudobulk (~45 GB)
-scripts/download.sh de                 # resultados de DE (~63 GB)
-scripts/download.sh cell D1_Rest       # un archivo cell-level concreto (~140 GB)
-scripts/download.sh all                # TODO (~1.8 TB), pide confirmación
-```
+## Outputs
 
-Los datos se guardan en `./data/` (ignorado por git). Cambia el destino con `DEST=/ruta`.
+| Archivo | Qué es |
+|---|---|
+| `docs/report.md` | reporte judge-facing consolidado |
+| `docs/tables/top_regulators_for_review.csv` | top 30 reguladores (judge-facing) |
+| `docs/tables/hub_ranking_bayes.csv` | ranking EB completo (todos los genes) |
+| `docs/tables/robust_edges.csv` | red probabilística de edges (bonus, Modelo 1) |
+| `docs/figures/*.png` | EDA + ranking + overview |
+| `docs/data-model.html` | explorador interactivo del modelo de datos |
 
-## Inspeccionar
+## Limitaciones
 
-```bash
-python scripts/inspect.py data/GWCD4i.DE_stats.h5ad
-```
+- **Nomenclatura honesta**: los modelos son **empirical-Bayes / pseudo-bayesianos**, no NB jerárquico
+  completo ni MCMC (sin PPL, sin random effects formales).
+- `xcond_reproducibility` es una **feature exploratoria** (estabilidad cross-condición); **no** sustituye
+  la reproducibilidad cross-donor/cross-guide, que vive en `DE_stats.h5ad` (`single_guide_estimate`,
+  `donor_correlation_hits_mean`) — marcadas como `NA` en la tabla de review.
+- **Modelo 1 es opcional**: el acceso remoto por slice es viable (~4.5 s/fila, medido) pero latency-bound;
+  el entregable oficial se sostiene solo con el core local.
 
-## Estructura del repo
+## Submission summary
 
-```
-.
-├── data/            # datos descargados (git-ignored)
-├── metadata/        # notas / metadatos versionables
-├── notebooks/       # análisis exploratorio
-├── scripts/
-│   ├── download.sh  # descarga selectiva desde S3
-│   ├── list_data.sh # listar el bucket
-│   └── inspect.py   # inspección rápida de h5ad/h5mu
-├── requirements.txt
-└── README.md
-```
+Producto reproducible que convierte una matriz de DE de 1.8 TB en un **ranking de reguladores robustos
+con incertidumbre**, ejecutable en una laptop con ~10 GB de disco usando solo 15 MB de datos, más una
+**red regulatoria probabilística** opcional leída en streaming del h5ad de 17 GB sin descargarlo.
+`make all` reproduce todo el core; ver `docs/report.md`.
 
-## Esquema de los datos
-
-Ver descripción completa de columnas (`.obs`, `.var`, `.layers`) en el readme oficial del bucket:
-
-```bash
-aws s3 cp --no-sign-request \
-  s3://genome-scale-tcell-perturb-seq/marson2025_data/data_sharing_readme.md -
-```
+---
+Datos: CZI Virtual Cells Platform · Marson Lab 2025 · preprint biorxiv `10.64898/2025.12.23.696273`.
+Código de análisis original: [emdann/GWT_perturbseq_analysis_2025](https://github.com/emdann/GWT_perturbseq_analysis_2025).

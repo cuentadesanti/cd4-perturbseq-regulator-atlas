@@ -1,6 +1,10 @@
-anndata
-mudata
-scanpy
+# Core (pipeline reproducible: EDA + Modelo 2 + reporte, solo CSV local)
 pandas
 numpy
-h5py
+scipy
+statsmodels
+matplotlib
+
+# Opcional — Modelo 1 (streaming del h5ad remoto sin descargarlo)
+# instala solo si vas a correr `make spike` / `make edges`:
+#   pip install h5py s3fs fsspec
