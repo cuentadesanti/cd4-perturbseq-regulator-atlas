@@ -1,11 +1,12 @@
 PY := python3
 
-.PHONY: all eda model report spike clean pipeline help
+.PHONY: all eda model audit report spike clean pipeline help
 
 help:
 	@echo "Targets:"
 	@echo "  make eda      - EDA 80/20 (figuras + tablas)          [solo CSV local]"
 	@echo "  make model    - Modelo 2 EB: ranking de reguladores    [solo CSV local]"
+	@echo "  make audit    - Regulator ranking audit (baselines, estabilidad, clases)"
 	@echo "  make report   - reporte consolidado + figura overview"
 	@echo "  make all      - pipeline completo verificado (run_pipeline.py)"
 	@echo "  make spike    - Modelo 1: spike de acceso remoto (OPCIONAL)"
@@ -17,6 +18,9 @@ eda:
 
 model:
 	$(PY) scripts/model_hubs.py
+
+audit:
+	$(PY) scripts/audit_ranking.py
 
 report:
 	$(PY) scripts/build_report.py

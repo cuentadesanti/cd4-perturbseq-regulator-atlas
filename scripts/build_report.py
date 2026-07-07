@@ -92,6 +92,50 @@ def build_report():
                       f"con **{n:,} edges robustos** (`P(|efecto|>1.5×)>0.8`) en "
                       f"`docs/tables/robust_edges.csv`.\n")
 
+    # --- secciones de la auditoría (condicionales a que exista el audit) ---
+    audit_md = ""
+    comp_p = TAB / "ranking_baseline_comparison.csv"
+    gtab_p = TAB / "top_global_regulators.csv"
+    if comp_p.exists() and gtab_p.exists():
+        comp = pd.read_csv(comp_p)
+        top30 = comp.sort_values("raw_rank").head(30)
+        n_drop = int(top30["dropped_by_kd_gate"].sum())
+        demoted = top30[(~top30["dropped_by_kd_gate"]) & (top30["eb_rank"] > 30)]
+        g_tab = pd.read_csv(gtab_p)
+        c_tab = pd.read_csv(TAB / "top_condition_specific_regulators.csv")
+        glist = ", ".join(g_tab.head(6)["gene"])
+        clist = ", ".join(c_tab.head(6)["gene"])
+        audit_md = f"""
+## Naive hubs vs quality-aware regulators
+
+Rankear por `n_downstream` crudo premia hubs que no sobreviven a los controles de calidad.
+De los 30 hubs crudos top: **{n_drop} caen por el gate de KD** (sin knockdown on-target validado)
+y **{len(demoted)} se demotan por el shrinkage EB** por ser condition-specific (la señal vive en
+una sola condición). El ranking EB surface reguladores con efecto grande **y** estable.
+
+![gate](figures/08_kd_gate_changes_ranking.png)
+
+La estabilidad se auditó con bootstrap (B=200) sobre las filas elegibles: la frecuencia con que
+cada gen cae en el top-30 (`stability_frequency`) está en `top_regulators_for_review.csv`. El
+ranking es moderadamente estable — conviene leerlo como *conjunto* de reguladores robustos, no
+como un orden exacto.
+
+![stability](figures/11_ranking_stability.png)
+
+## Global versus context-specific regulators
+
+Separando por `condition_specificity = max/sum de n_downstream` entre condiciones con KD significativo:
+
+- **Globales** (efecto estable en ≥2 condiciones): {glist}… — maquinaria de cromatina/transcripción.
+- **Context-specific** (efecto concentrado en una condición): {clist}… — incluye señalización TCR
+  (ZAP70, LCK), activa solo bajo estímulo.
+
+Ambas clases son biología real; la distinción evita confundir un regulador universal con uno de contexto.
+Tablas: `top_global_regulators.csv`, `top_condition_specific_regulators.csv`.
+
+![globalvs](figures/10_global_vs_context_specific.png)
+"""
+
     md = f"""# Reporte — Genome-scale CD4+ T cell Perturb-seq
 
 *Reporte consolidado para revisión. Reproducible con `make all` (solo CSV locales).*
@@ -120,7 +164,7 @@ señal real de ruido y priorizando por efecto **grande y reproducible**, no por 
 Tabla completa (30, con todas las columnas): `docs/tables/top_regulators_for_review.csv`.
 
 ![ranking](figures/07_hub_posterior_ranking.png)
-
+{audit_md}
 ## Hallazgos del EDA
 
 ![degs](figures/01_distribution_n_total_de_genes.png)

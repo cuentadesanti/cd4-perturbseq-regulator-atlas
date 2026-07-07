@@ -24,13 +24,21 @@ INPUTS = [
 STEPS = [
     ("EDA 80/20", "scripts/eda.py"),
     ("Modelo 2 · EB", "scripts/model_hubs.py"),
+    ("Ranking audit", "scripts/audit_ranking.py"),
     ("Reporte", "scripts/build_report.py"),
 ]
 OUTPUTS = [
     "docs/tables/hub_ranking_bayes.csv",
     "docs/tables/top_regulators_for_review.csv",
     "docs/tables/top_robust_regulators.csv",
+    "docs/tables/ranking_baseline_comparison.csv",
+    "docs/tables/hub_ranking_stability.csv",
+    "docs/tables/top_global_regulators.csv",
+    "docs/tables/top_condition_specific_regulators.csv",
     "docs/figures/07_hub_posterior_ranking.png",
+    "docs/figures/08_kd_gate_changes_ranking.png",
+    "docs/figures/10_global_vs_context_specific.png",
+    "docs/figures/11_ranking_stability.png",
     "docs/figures/00_pipeline_overview.png",
     "docs/report.md",
 ]

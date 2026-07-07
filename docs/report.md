@@ -45,6 +45,35 @@ Tabla completa (30, con todas las columnas): `docs/tables/top_regulators_for_rev
 
 ![ranking](figures/07_hub_posterior_ranking.png)
 
+## Naive hubs vs quality-aware regulators
+
+Rankear por `n_downstream` crudo premia hubs que no sobreviven a los controles de calidad.
+De los 30 hubs crudos top: **2 caen por el gate de KD** (sin knockdown on-target validado)
+y **15 se demotan por el shrinkage EB** por ser condition-specific (la señal vive en
+una sola condición). El ranking EB surface reguladores con efecto grande **y** estable.
+
+![gate](figures/08_kd_gate_changes_ranking.png)
+
+La estabilidad se auditó con bootstrap (B=200) sobre las filas elegibles: la frecuencia con que
+cada gen cae en el top-30 (`stability_frequency`) está en `top_regulators_for_review.csv`. El
+ranking es moderadamente estable — conviene leerlo como *conjunto* de reguladores robustos, no
+como un orden exacto.
+
+![stability](figures/11_ranking_stability.png)
+
+## Global versus context-specific regulators
+
+Separando por `condition_specificity = max/sum de n_downstream` entre condiciones con KD significativo:
+
+- **Globales** (efecto estable en ≥2 condiciones): SGF29, TADA2B, SENP5, SUPT20H, TADA1, CCNC… — maquinaria de cromatina/transcripción.
+- **Context-specific** (efecto concentrado en una condición): NCKAP1L, DOP1B, POGLUT3, ZAP70, TFAM, LCK… — incluye señalización TCR
+  (ZAP70, LCK), activa solo bajo estímulo.
+
+Ambas clases son biología real; la distinción evita confundir un regulador universal con uno de contexto.
+Tablas: `top_global_regulators.csv`, `top_condition_specific_regulators.csv`.
+
+![globalvs](figures/10_global_vs_context_specific.png)
+
 ## Hallazgos del EDA
 
 ![degs](figures/01_distribution_n_total_de_genes.png)

@@ -44,6 +44,23 @@ suplementarias (~15 MB)**:
 
 Detalle: [`docs/report.md`](docs/report.md) · [`docs/EDA.md`](docs/EDA.md) · [`docs/MODELING.md`](docs/MODELING.md).
 
+## Validación del ranking
+
+Antes de creerle al ranking, lo auditamos (`scripts/audit_ranking.py`, sin deps nuevas).
+
+**Naive hubs vs quality-aware regulators.** Rankear por `n_downstream` crudo premia hubs que no
+sobreviven a los controles: de los 30 hubs crudos top, **2 caen por el gate de KD** (sin knockdown
+validado) y **~9 se demotan** por ser condition-specific. El ranking EB surface reguladores con
+efecto grande **y** estable. La estabilidad se midió por bootstrap (B=200): es *moderada* —léelo
+como un conjunto de reguladores robustos, no como un orden exacto (`stability_frequency` por gen).
+
+**Global versus context-specific regulators.** Separando por
+`condition_specificity = max/sum de n_downstream`: los **globales** (SGF29, TADA2B, SUPT20H…) son
+maquinaria de cromatina/transcripción activa en todas las condiciones; los **context-specific**
+(ZAP70, LCK…) son señalización TCR, activa solo bajo estímulo. Ambas clases son biología real; la
+distinción evita confundir un regulador universal con uno de contexto. Ver
+`docs/tables/top_global_regulators.csv` y `top_condition_specific_regulators.csv`.
+
 ## Cómo reproducir
 
 ```bash
