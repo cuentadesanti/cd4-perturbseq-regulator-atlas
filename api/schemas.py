@@ -75,5 +75,12 @@ class RegulatorProfile(BaseModel):
     # edges (optional)
     n_downstream_edges: Optional[int] = None
     top_downstream_edges: Optional[list[EdgeItem]] = None
+    # transcriptional program (only for panel regulators)
+    in_program_panel: Optional[bool] = None
+    program_label: Optional[str] = None
+    nearest_complex: Optional[str] = None
+    nearest_complex_cosine: Optional[float] = None
+    transcriptomic_neighbors: Optional[list[dict]] = None
+    program_markers: Optional[list[dict]] = None
     # text
     interpretation: str

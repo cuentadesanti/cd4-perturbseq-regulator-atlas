@@ -149,16 +149,21 @@ function render(v){ if(!SUMMARY)return; ({overview:renderOverview,explorer:rende
 /* ---- Overview ---- */
 async function renderOverview(){
   const s=SUMMARY;
+  let prog=null; try{ prog=await api("/programs/summary"); }catch(e){}
+  const progCard = (prog&&prog.available)
+    ? `<div class="card"><div class="n">${prog.programs.length}</div><div class="k">transcriptional programs</div></div>`
+    : `<div class="card"><div class="n">—</div><div class="k">transcriptional programs</div></div>`;
   $("#v-overview").innerHTML=`
     <div class="cards">
       <div class="card"><div class="n">${s.n_regulators.toLocaleString()}</div><div class="k">ranked regulators</div></div>
       <div class="card"><div class="n">${fmt(s.n_global)}</div><div class="k">global</div></div>
       <div class="card"><div class="n">${fmt(s.n_context_specific)}</div><div class="k">context-specific</div></div>
+      ${progCard}
       <div class="card"><div class="n">${s.edges_available?"yes":"no"}</div><div class="k">effect network (PoC)</div></div>
     </div>
     <div class="panel"><div class="sec">Top robust regulators</div>
       <div id="ov-top" class="muted">loading…</div></div>
-    <p class="lead" style="margin-top:14px">The pipeline (<span class="mono">make all</span>) produces the artifacts; this API makes them explorable. Nothing is computed live.</p>`;
+    <p class="lead" style="margin-top:14px">This atlas turns a 1.8&nbsp;TB CD4 Perturb-seq screen into three explorable objects — <b>robust regulators</b>, <b>reproducibility audits</b>, and <b>transcriptional programs</b>. The pipeline (<span class="mono">make all</span>) produces the artifacts; this API makes them explorable.</p>`;
   const list=await api("/regulators?limit=10");
   $("#ov-top").innerHTML=regTable(list);
   wireRows($("#ov-top"));
@@ -206,10 +211,20 @@ async function showProfile(gene){
     <td class="${e.direction}">${e.direction==="up"?"↑":"↓"} ${e.log_fc}</td>
     <td class="num">${e.p_abs_effect_gt_1p5x}</td><td class="muted">${e.condition}</td></tr>`).join("");
   const stt=p.audit_status; const sttc=stt==="demoted"?"dem":stt==="promoted"?"pro":"sur";
+  const labeled=p.program_label&&p.program_label!=="mixed";
+  const progChip=labeled?`<span class="chip" style="border-color:var(--violet);color:var(--violet)">${p.program_label}</span>`:"";
+  const progHtml=p.in_program_panel?`
+    <div class="sec" style="margin-top:20px">Transcriptional program</div>
+    <p class="lead" style="margin:0 0 8px">${labeled
+      ? `Maps to the <b>${p.program_label}</b> program — nearest <b>${p.nearest_complex}</b> centroid, cosine <b>${fmt(p.nearest_complex_cosine)}</b>.`
+      : `In the fingerprint panel but <b>unassigned</b> (mixed) — nearest complex ${p.nearest_complex} at cosine ${fmt(p.nearest_complex_cosine)} (below the labeling threshold).`}</p>
+    ${(p.transcriptomic_neighbors||[]).length?`<div style="margin-bottom:8px"><span class="muted" style="font-size:12px">transcriptomic neighbors · </span>${p.transcriptomic_neighbors.map(n=>`<span class="chip pgnb" data-gene="${n.neighbor}" style="cursor:pointer"><b>${n.neighbor}</b> ${n.similarity.toFixed(2)}</span>`).join(" ")}</div>`:""}
+    ${(p.program_markers||[]).length?`<div><span class="muted" style="font-size:12px">program response genes · </span>${p.program_markers.map(m=>`<span class="chip">${m.gene}${m.direction==="up"?" ↑":" ↓"}</span>`).join(" ")}</div>`:""}`:"";
   box.innerHTML=`<div class="panel">
     <div class="prof-head"><h2>${p.gene}</h2>
       <span class="rk">EB #${p.core_rank}</span>
       ${p.regulator_class?`<span class="cls ${p.regulator_class==="global"?"global":"cs"}">${p.regulator_class}</span>`:""}
+      ${progChip}
       ${stt?`<span class="stt ${sttc}">${stt}</span>`:""}</div>
     <p class="interp">${p.interpretation}</p>
     <div class="kv">
@@ -223,7 +238,9 @@ async function showProfile(gene){
     <div class="sec" style="margin-top:20px">Per-condition profile (n_downstream)</div>${condBars}
     ${edges?`<div class="sec" style="margin-top:20px">Top downstream edges (bonus)</div>
       <table><thead><tr><th>gene</th><th>effect (log₂FC)</th><th class="num">P(&gt;1.5×)</th><th>cond.</th></tr></thead><tbody>${edges}</tbody></table>`:""}
+    ${progHtml}
   </div>`;
+  box.querySelectorAll(".pgnb").forEach(c=>c.addEventListener("click",()=>showProfile(c.dataset.gene)));
 }
 
 /* ---- Audit ---- */
@@ -258,23 +275,27 @@ async function renderEdges(){
     <div class="sec" style="margin-top:18px">Convergent targets</div><div style="display:flex;flex-wrap:wrap;gap:6px">${conv}</div>`;
 }
 
-/* ---- Programas (transcriptional fingerprints) ---- */
+/* ---- Programs (transcriptional programs) ---- */
 const CPLX={SAGA:["TADA1","TADA2A","TADA2B","TADA3","SUPT20H","SGF29","TAF6L","TAF5L","USP22","ENY2","ATXN7L3","KAT2A"],
   Mediator:["MED12","MED13","MED14","MED23","MED24","CCNC","CDK8"],
   TCR:["ZAP70","LCK","LAT","LCP2","VAV1","ITK","CARD11","PLCG1"]};
 const cplxOf=g=>Object.keys(CPLX).find(k=>CPLX[k].includes(g));
-const COLBY={regulator_class:{global:"#4c8bf5","condition-specific":"#37b24d",NA:"#888"},
+const COLBY={program_label:{"SAGA/chromatin":"#d6412f","Mediator/transcription":"#2f5ed0","TCR signaling":"#37b24d",mixed:"#9aa3b2"},
+  regulator_class:{global:"#4c8bf5","condition-specific":"#37b24d",NA:"#888"},
   source:{global:"#4c8bf5","context-specific":"#37b24d",promoted:"#9775fa",demoted:"#b08968"},
   condition:{Rest:"#888",Stim8hr:"#f59f00",Stim48hr:"#e03131"}};
 let PCA_PTS=null;
 async function renderPrograms(){
-  $("#v-programs").innerHTML=`<div class="panel"><div class="sec">Map of transcriptomic programs · side analysis</div><div id="pg" class="muted">loading…</div></div>`;
+  $("#v-programs").innerHTML=`<div class="panel"><div class="sec">Transcriptional programs</div><div id="pg" class="muted">loading…</div></div>`;
   let d; try{ d=await api("/programs/pca"); }catch(e){ d={available:false}; }
   if(!d||!d.available){$("#pg").innerHTML=`<span class="muted">Not available (run <span class="mono">make fingerprints</span>).</span>`;return;}
+  let sm=null; try{ sm=await api("/programs/summary"); }catch(e){}
   PCA_PTS=d.points;
-  $("#pg").innerHTML=`<p class="lead">From "which regulators are strong" to "<b>what program each perturbation induces</b>". PCA over the transcriptional fingerprints (zscore) of a balanced panel. Rings = known complex. Exploratory, not causal discovery.</p>
+  const cv=(sm&&sm.complex_validation)||[];
+  const zline=cv.filter(c=>c.z!=null).map(c=>`${c.complex} z=${c.z}`).join(" · ");
+  $("#pg").innerHTML=`<p class="lead">Fingerprint <b>similarity</b> organizes top perturbations into <b>recognizable programs</b>. Each regulator's fingerprint (its downstream zscore vector) is matched to the curated SAGA / Mediator / TCR complexes; matches above threshold are labeled, the rest stay <i>mixed</i> (conservative). Permutation validation: <b>${zline||"—"}</b>. The PCA below is a view — the evidence is nearest-neighbor recovery + these z-scores + program markers.</p>
     <div class="filters"><label class="muted">color by</label>
-      <select id="colby"><option value="regulator_class">class</option><option value="source">panel source</option><option value="condition">condition</option></select>
+      <select id="colby"><option value="program_label">program</option><option value="regulator_class">class</option><option value="source">panel source</option><option value="condition">condition</option></select>
       <span id="leg" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"></span></div>
     <div id="scatter" style="margin-top:6px"></div>
     <div class="search" style="margin-top:14px"><input id="nq" placeholder="regulators similar to… (e.g. SGF29, ZAP70)" autocomplete="off"><button id="ngo">Find neighbors</button></div>

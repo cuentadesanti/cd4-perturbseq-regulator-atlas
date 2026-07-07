@@ -46,6 +46,14 @@ class DataStore:
         self.loaded[name] = df is not None
         return df
 
+    def _read_json(self, name, base=TABLES):
+        import json
+        p = base / name
+        try:
+            return json.loads(p.read_text()) if p.exists() else None
+        except Exception:
+            return None
+
     def _load(self):
         self.ranking = self._t("hub_ranking_bayes.csv")          # master (all genes)
         self.review = self._t("top_regulators_for_review.csv")
@@ -58,10 +66,16 @@ class DataStore:
         self.edges = self._t("robust_edges.csv")
         self.edge_summary = self._t("edge_summary_by_regulator.csv")
         self.downstream = self._t("top_downstream_genes.csv")
-        # side analysis: transcriptional fingerprints (optional, `make fingerprints`)
+        # transcriptional programs / fingerprints (optional, `make fingerprints`)
         self.fp_pca = self._t("fingerprint_pca_scores.csv")
         self.fp_neighbors = self._t("fingerprint_neighbors.csv")
         self.fp_clusters = self._t("fingerprint_clusters.csv")
+        self.fp_findings = self._t("fingerprint_findings.csv")
+        self.fp_program_markers = self._t("fingerprint_program_markers.csv")
+        self.fp_program_evidence = self._t("program_label_evidence.csv")
+        self.fp_complex_validation = self._t("fingerprint_complex_validation.csv")
+        self.fp_coherence = self._t("fingerprint_audit_coherence.csv")
+        self.fp_summary = self._read_json("fingerprint_summary.json")
         self.de = self._t("DE_stats.suppl_table.csv", base=DATA)  # for the per-condition profile
 
         if self.ranking is None:
@@ -78,6 +92,7 @@ class DataStore:
                          ("classes", self.classes, "gene"),
                          ("repro", self.repro, "gene"),
                          ("audit", self.audit, "gene"),
+                         ("findings", self.fp_findings, "gene"),
                      ]}
         # per-condition profile from DE_stats (n_downstream per gene×condition)
         self.cond_profile = {}
@@ -91,11 +106,16 @@ class DataStore:
         if self.edges is not None:
             for gene, sub in self.edges.groupby("perturbed_gene"):
                 self.edges_by_reg[gene] = sub
-        # nearest neighbors per gene (side analysis)
+        # nearest neighbors per gene (programs)
         self.fp_neighbors_by_gene = {}
         if self.fp_neighbors is not None:
             for gene, sub in self.fp_neighbors.groupby("gene"):
                 self.fp_neighbors_by_gene[gene] = _records(sub.sort_values("rank"))
+        # convergent downstream response genes per program
+        self.program_markers = {}
+        if self.fp_program_markers is not None:
+            for prog, sub in self.fp_program_markers.groupby("program"):
+                self.program_markers[prog] = _records(sub)
 
         self.conditions = (sorted(self.de["culture_condition"].unique().tolist())
                            if self.de is not None else ["Rest", "Stim8hr", "Stim48hr"])
@@ -126,12 +146,12 @@ class DataStore:
             "programs_available": self.fp_pca is not None,
         }
 
-    # ---- side analysis: transcriptional fingerprints ----
+    # ---- transcriptional programs / fingerprints ----
     def programs_pca(self):
         if self.fp_pca is None:
             return {"available": False, "points": []}
         cols = [c for c in ["gene", "condition", "source", "regulator_class", "cluster",
-                            "regpower_eb_mean", "n_downstream", "PC1", "PC2", "PC3"]
+                            "program_label", "regpower_eb_mean", "n_downstream", "PC1", "PC2", "PC3"]
                 if c in self.fp_pca.columns]
         return {"available": True, "points": _records(self.fp_pca[cols])}
 
@@ -146,6 +166,31 @@ class DataStore:
         if self.fp_clusters is None:
             return {"available": False, "clusters": []}
         return {"available": True, "clusters": _records(self.fp_clusters)}
+
+    def programs_findings(self):
+        if self.fp_findings is None:
+            return {"available": False, "rows": []}
+        return {"available": True, "rows": _records(self.fp_findings)}
+
+    def programs_summary(self):
+        """Program-level headline: labeled programs (members + markers), permutation
+        validation of the known complexes, and the promoted/demoted coherence result."""
+        if self.fp_pca is None:
+            return {"available": False}
+        evidence = _records(self.fp_program_evidence) if self.fp_program_evidence is not None else []
+        for e in evidence:
+            e["markers"] = self.program_markers.get(e.get("program_label"), [])
+        return {
+            "available": True,
+            "n_panel": int(len(self.fp_pca)),
+            "n_in_programs": int((self.fp_summary or {}).get("n_regulators_in_programs", 0)),
+            "programs": (self.fp_summary or {}).get("programs", []),
+            "program_evidence": evidence,
+            "complex_validation": (_records(self.fp_complex_validation)
+                                   if self.fp_complex_validation is not None else []),
+            "pc1_abs_vs_ndownstream_spearman": (self.fp_summary or {}).get("pc1_abs_vs_ndownstream_spearman"),
+            "audit_coherence": (self.fp_summary or {}).get("audit_coherence", {}),
+        }
 
     def list_regulators(self, q=None, regulator_class=None, limit=50,
                         sort_by="core_rank"):
@@ -209,7 +254,11 @@ class DataStore:
         base = self._idx["baseline"].get(gene, {})
         rep = self._idx["repro"].get(gene, {})
         aud = self._idx["audit"].get(gene, {})
+        fnd = self._idx["findings"].get(gene, {})
         edges = self.edges_for(gene, top=10)
+        prog = fnd.get("program_label")
+        prog_nb = self.fp_neighbors_by_gene.get(gene, [])[:5]
+        prog_markers = self.program_markers.get(prog, [])[:8] if prog and prog != "mixed" else []
 
         p = {
             "gene": gene,
@@ -240,12 +289,19 @@ class DataStore:
             "audit_reason": aud.get("reason"),
             "n_downstream_edges": len(edges) or (0 if self.edges is not None else None),
             "top_downstream_edges": edges or None,
-            "interpretation": self._interpret(gene, cls, stab, base, aud, rep),
+            # transcriptional program (only for panel regulators; None if not in the panel)
+            "in_program_panel": bool(fnd),
+            "program_label": prog,
+            "nearest_complex": fnd.get("nearest_complex"),
+            "nearest_complex_cosine": fnd.get("nearest_complex_cosine"),
+            "transcriptomic_neighbors": prog_nb or None,
+            "program_markers": prog_markers or None,
+            "interpretation": self._interpret(gene, cls, stab, base, aud, rep, fnd),
         }
         return p
 
     @staticmethod
-    def _interpret(gene, cls, stab, base, aud, rep):
+    def _interpret(gene, cls, stab, base, aud, rep, fnd=None):
         klass = cls.get("regulator_class")
         parts = []
         if klass == "global":
@@ -271,6 +327,12 @@ class DataStore:
             checks.append("promoted by reproducibility audit")
         if checks:
             parts.append("; ".join(checks))
+        prog = (fnd or {}).get("program_label")
+        if prog and prog != "mixed":
+            nc = (fnd or {}).get("nearest_complex")
+            cos = (fnd or {}).get("nearest_complex_cosine")
+            parts.append(f"Maps to the {prog} program by transcriptional fingerprint"
+                         + (f" (nearest {nc} centroid, cosine {cos})" if nc and cos is not None else ""))
         return ". ".join(parts) + "."
 
 

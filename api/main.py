@@ -121,8 +121,21 @@ def programs_neighbors(gene: str):
 
 @app.get("/programs/clusters", tags=["programs"])
 def programs_clusters():
-    """Perturbation clusters by fingerprint similarity."""
+    """Agnostic perturbation clusters by fingerprint similarity (structural)."""
     return get_store().programs_clusters()
+
+
+@app.get("/programs/summary", tags=["programs"])
+def programs_summary():
+    """Program-level headline: labeled programs (members + markers), permutation validation
+    of the known complexes (SAGA/Mediator/TCR), and the promoted/demoted coherence result."""
+    return get_store().programs_summary()
+
+
+@app.get("/programs/findings", tags=["programs"])
+def programs_findings():
+    """Consolidated per-regulator findings: program label, nearest complex, neighbors, markers."""
+    return get_store().programs_findings()
 
 
 @app.get("/edges/summary", tags=["edges"])
