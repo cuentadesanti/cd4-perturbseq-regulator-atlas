@@ -1,6 +1,6 @@
 PY := python3
 
-.PHONY: all eda model audit report spike clean pipeline help
+.PHONY: all eda model audit report spike edges eda-edges clean pipeline help
 
 help:
 	@echo "Targets:"
@@ -11,6 +11,7 @@ help:
 	@echo "  make all      - pipeline completo verificado (run_pipeline.py)"
 	@echo "  make spike    - Modelo 1: spike de acceso remoto (OPCIONAL)"
 	@echo "  make edges    - Modelo 1: red de edges, bonus (OPCIONAL, remoto)"
+	@echo "  make eda-edges- EDA de la red de edges (usa robust_edges.csv si existe)"
 	@echo "  make clean    - borra outputs generados (docs/figures, docs/tables, report)"
 
 eda:
@@ -36,6 +37,9 @@ spike:
 
 edges:
 	$(PY) scripts/model_edges.py --n 8
+
+eda-edges:
+	$(PY) scripts/eda_edges.py
 
 clean:
 	rm -f docs/figures/*.png docs/tables/*.csv docs/report.md

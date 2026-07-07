@@ -19,7 +19,7 @@ señal real de ruido y priorizando por efecto **grande y reproducible**, no por 
   latente con incertidumbre. El top robusto es maquinaria de **cromatina/transcripción**
   (complejo SAGA, Mediador, KDM1A, SETD2) — efecto grande **y** estable entre condiciones.
 
-Se generó además una **red probabilística de edges** (bonus, Modelo 1) con **2,470 edges robustos** (`P(|efecto|>1.5×)>0.8`) en `docs/tables/robust_edges.csv`.
+Se generó además una **red probabilística de edges** (bonus, Modelo 1) con **2,470 edges robustos** (`P(|efecto|>1.5×)>0.8`) de 6 reguladores en `docs/tables/robust_edges.csv`. Se evaluó como **proof-of-concept** (ver `docs/EDGE_ANALYSIS.md`): coherente y biológicamente sensato, pero de cobertura mínima — se deja como bonus, no como resultado fuerte.
 
 ## Top reguladores (para revisión)
 

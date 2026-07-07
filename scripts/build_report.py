@@ -87,10 +87,14 @@ def build_report():
     edges_line = ""
     ep = TAB / "robust_edges.csv"
     if ep.exists():
-        n = len(pd.read_csv(ep))
+        ed = pd.read_csv(ep)
+        n, nreg = len(ed), ed["perturbed_gene"].nunique()
+        poc = " Se evaluó como **proof-of-concept** (ver `docs/EDGE_ANALYSIS.md`): coherente" \
+              " y biológicamente sensato, pero de cobertura mínima — se deja como bonus, no como" \
+              " resultado fuerte." if (ROOT / "docs" / "EDGE_ANALYSIS.md").exists() else ""
         edges_line = (f"\nSe generó además una **red probabilística de edges** (bonus, Modelo 1) "
-                      f"con **{n:,} edges robustos** (`P(|efecto|>1.5×)>0.8`) en "
-                      f"`docs/tables/robust_edges.csv`.\n")
+                      f"con **{n:,} edges robustos** (`P(|efecto|>1.5×)>0.8`) de {nreg} reguladores en "
+                      f"`docs/tables/robust_edges.csv`.{poc}\n")
 
     # --- secciones de la auditoría (condicionales a que exista el audit) ---
     audit_md = ""
