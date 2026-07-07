@@ -1,0 +1,14 @@
+# Datos crudos: NO versionar (son de decenas de GB a TB)
+/data/
+*.h5ad
+*.h5mu
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
