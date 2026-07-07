@@ -400,7 +400,7 @@ def main():
     pca_df = panel.copy()
     pca_df["cluster"] = clusters
     pca_df["program_label"] = prog_label
-    for k in range(min(6, scores.shape[1])):
+    for k in range(min(10, scores.shape[1])):   # PC1..PC10 (used by spectral_sanity_check.py)
         pca_df[f"PC{k+1}"] = np.round(scores[:, k], 4)
     pca_df.to_csv(TAB / "fingerprint_pca_scores.csv", index=False)
     panel.to_csv(TAB / "fingerprint_panel.csv", index=False)
