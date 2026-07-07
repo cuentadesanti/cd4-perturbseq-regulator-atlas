@@ -38,26 +38,29 @@ Open two things: the browser at `http://localhost:8000/` and `docs/report.md` (o
 > a new model. The SAGA and Mediator regulators survive; a few single-guide hits get demoted. Honest,
 > and defensible."
 
-### 1:45–2:40 — The product: Regulator Atlas  ·  *show: the live UI at localhost:8000*
-> "All of that becomes an explorable atlas."
-- *Overview tab:* "7,913 ranked regulators, global versus context-specific."
-- *Explore → search `SGF29`:* "Search a gene and you get its full profile — regulatory power,
-  bootstrap stability, per-condition effect, and whether it survived every audit."
-- *Explore → search `ZAP70`:* "Or a context-specific TCR regulator — active only under stimulation."
-- *Audit tab:* "The reproducibility audit, transparent, row by row."
-- *Programs tab → neighbors of `SGF29`:* "And a fingerprint map: it independently recovers the SAGA,
-  Mediator, and TCR complexes as statistically cohesive groups — biology the model was never told
-  about."
+### 1:45–2:15 — The headline: transcriptional programs  ·  *show: Programs tab, PCA colored by program, then the CHD7 profile*
+> "But a rank is one number. A regulator's *fingerprint* — what the perturbation actually does to the
+> cell — is the real gold. So we matched each perturbation's fingerprint to the known SAGA, Mediator and
+> TCR complexes. The result: fingerprint similarity organizes the top perturbations into recognizable
+> programs. The complexes come back as statistically cohesive groups — TCR at z eleven, SAGA at z nine —
+> biology the model was never told about. And it surfaces *candidates*: search CHD7 — a chromatin
+> remodeler — and the atlas assigns it to the SAGA/chromatin program by fingerprint similarity, next to
+> TADA2B and SUPT20H. Not a claim that CHD7 is in the complex — a program-level hypothesis worth testing."
 
-### 2:40–2:55 — Close  ·  *show: README "Submission summary" or the pipeline overview figure*
-> "So: a 1.8-terabyte screen turned into a laptop-reproducible, uncertainty-aware shortlist of robust
-> regulators — and a UI to explore it. `make all` reproduces the science; `make api` launches the
-> atlas. Thanks for watching."
+### 2:15–2:45 — One gene, the whole atlas  ·  *show: Explore → search a gene profile*
+> "That's the atlas moment: search any gene and one view answers everything — its rank, whether it
+> survived the reproducibility audits, which transcriptional program it belongs to, its closest
+> transcriptomic neighbors, and the genes that define its program. Rank, audit, and program in one place."
+
+### 2:45–2:55 — Close  ·  *show: Overview cards / pipeline figure*
+> "A 1.8-terabyte screen, turned into three explorable objects — robust regulators, reproducibility
+> audits, and transcriptional programs — reproducible on a laptop. `make all` reproduces the core;
+> `make fingerprints` builds the programs; `make api` launches the atlas. Thanks for watching."
 
 ---
 
 **Recording tips**
-- Keep the terminal font large; pre-run `make all` once so the on-camera run is fast and clean.
+- Keep the terminal font large; pre-run `make all` + `make fingerprints` once so the on-camera runs are fast.
 - For the UI, use a maximized browser window and move deliberately — hover, click, pause a beat on
-  each screen so a judge can read it.
-- If you run long, the two cuttable sections are 1:20–1:45 (reproducibility) and the `ZAP70` beat.
+  each screen so a judge can read it. The CHD7 → SAGA moment is the one to land.
+- If you run long, the cuttable section is 1:20–1:45 (reproducibility); keep the Programs beat.

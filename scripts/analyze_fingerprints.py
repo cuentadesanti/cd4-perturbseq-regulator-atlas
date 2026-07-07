@@ -276,9 +276,130 @@ def main():
         print(f"  [{name}] n={len(present)} intra={obs_mean:.3f} null={null.mean():.3f} "
               f"z={z:.2f} p={p_perm:.4f}")
 
+    # ---- program assignment: nearest known-complex centroid per regulator ----
+    # Programs are ANCHORED to the permutation-validated complexes (SAGA/Mediator/TCR): each
+    # regulator is assigned to the complex whose leave-one-out fingerprint centroid it most
+    # resembles, IF cosine >= PROGRAM_COS_MIN and it beats the 2nd-best complex by >= MARGIN_MIN;
+    # otherwise "mixed". This uses the same standardized space X as the validated cosine
+    # similarity, and does NOT rely on the agnostic flat clustering (which merges the activation
+    # programs into one blob). It is a nearest-prototype classifier against curated complexes —
+    # transparent, conservative, and auditable via program_label_evidence.csv. "mixed" is expected
+    # for the majority (we only have prototypes for 3 complexes).
+    PROGRAM_OF = {"SAGA": "SAGA/chromatin", "Mediator": "Mediator/transcription", "TCR": "TCR signaling"}
+    PROGRAM_COS_MIN, MARGIN_MIN, MARKER_CONSIST_MIN, K_MARK = 0.45, 0.05, 0.70, 12
+
+    def _cos(a, b):
+        na, nb = np.linalg.norm(a), np.linalg.norm(b)
+        return float(a @ b / (na * nb)) if na > 0 and nb > 0 else 0.0
+
+    complex_members = {n: [g for g in mem if g in reg_set] for n, mem in COMPLEXES.items()}
+    complex_members = {n: m for n, m in complex_members.items() if len(m) >= 2}
+    complex_member_set = set().union(*complex_members.values()) if complex_members else set()
+
+    prog_label, near_complex, near_cos, near_margin = [], [], [], []
+    for i, g in enumerate(reg):
+        cosd = {}
+        for n, mem in complex_members.items():
+            idxs = [idx_of[m] for m in mem if m != g]     # leave-one-out for members
+            cosd[n] = _cos(X[i], X[idxs].mean(0)) if idxs else -1.0
+        ranked = sorted(cosd.items(), key=lambda kv: -kv[1])
+        best, bestc = ranked[0]
+        margin = bestc - (ranked[1][1] if len(ranked) > 1 else -1.0)
+        near_complex.append(best); near_cos.append(round(bestc, 3)); near_margin.append(round(margin, 3))
+        prog_label.append(PROGRAM_OF[best] if (bestc >= PROGRAM_COS_MIN and margin >= MARGIN_MIN) else "mixed")
+    prog_label = np.array(prog_label, dtype=object)
+
+    # ---- program fingerprint markers: convergent downstream RESPONSE genes per program ----
+    # SEMANTICS: genes whose perturbation-RESPONSE z-scores (raw zscore Mg, relative to the panel)
+    # are consistently high/low across the program's regulators — NOT baseline cell-type expression.
+    prog_markers = {}
+    for p in PROGRAM_OF.values():
+        mask = prog_label == p
+        if mask.sum() < 2:
+            prog_markers[p] = []
+            continue
+        mg = Mg[mask].mean(0)
+        consist = (np.sign(Mg[mask]) == np.sign(mg)).mean(0)
+        cand = [(genes_v[gi], float(mg[gi]), float(consist[gi])) for gi in range(len(genes_v))
+                if consist[gi] >= MARKER_CONSIST_MIN and mg[gi] != 0]
+        cand.sort(key=lambda t: -abs(t[1]))
+        prog_markers[p] = [t for t in cand if t[1] > 0][:K_MARK] + [t for t in cand if t[1] < 0][:K_MARK]
+    pd.DataFrame([{"program": p, "direction": "up" if z > 0 else "down", "gene": g,
+                   "mean_z": round(z, 3), "consistency": round(cons, 3)}
+                  for p, ms in prog_markers.items() for g, z, cons in ms]
+                 ).to_csv(TAB / "fingerprint_program_markers.csv", index=False)
+
+    # ---- auditable label evidence (per program) ----
+    # `assigned_neighbors` = non-curated genes PLACED in a program by fingerprint similarity —
+    # candidate program neighbors, NOT a claim of physical complex membership.
+    ev_rows = []
+    for cx, p in PROGRAM_OF.items():
+        mask = prog_label == p
+        members_here = [reg[i] for i in range(len(reg)) if mask[i]]
+        known = [g for g in members_here if g in complex_members.get(cx, [])]
+        assigned = [g for g in members_here if g not in complex_member_set]
+        cos_here = [near_cos[i] for i in range(len(reg)) if mask[i]]
+        ev_rows.append({
+            "program_label": p, "anchor_complex": cx, "n_regulators": int(mask.sum()),
+            "n_known_complex_members": len(known), "known_members": ";".join(known),
+            "assigned_neighbors": ";".join(assigned[:15]),
+            "mean_centroid_cosine": round(float(np.mean(cos_here)), 3) if cos_here else None,
+            "top_marker_genes": ";".join(f"{g}{'+' if z > 0 else '-'}" for g, z, _ in prog_markers[p][:8])})
+    nmix = int((prog_label == "mixed").sum())
+    ev_rows.append({"program_label": "mixed", "anchor_complex": "-", "n_regulators": nmix,
+                    "n_known_complex_members": int(sum(prog_label[i] == "mixed" and reg[i] in complex_member_set
+                                                       for i in range(len(reg)))),
+                    "known_members": "", "assigned_neighbors": "", "mean_centroid_cosine": None,
+                    "top_marker_genes": ""})
+    pd.DataFrame(ev_rows).to_csv(TAB / "program_label_evidence.csv", index=False)
+    progs = sorted(set(p for p in prog_label if p != "mixed"))
+    n_lab = int((prog_label != "mixed").sum())
+    print("  programs: " + ", ".join(f"{p}({int((prog_label == p).sum())})" for p in progs)
+          + f" · mixed={nmix}")
+
+    # ---- promoted/demoted neighborhood coherence (reported honestly, vs global reference) ----
+    coh_rows = []
+    for i, g in enumerate(reg):
+        order = [j for j in np.argsort(S[i])[::-1] if j != i][:args.k_neighbors]
+        top = order[0]
+        coh_rows.append({
+            "gene": g, "source": source[i], "regulator_class": rclass[i], "program_label": prog_label[i],
+            "mean_knn_sim": round(float(np.mean([S[i, j] for j in order])), 3),
+            "top_neighbor": reg[top], "top_neighbor_source": source[top],
+            "top_neighbor_is_known_complex": bool(reg[top] in complex_member_set),
+            "in_program": bool(prog_label[i] != "mixed")})
+    coh_df = pd.DataFrame(coh_rows)
+    coh_df.to_csv(TAB / "fingerprint_audit_coherence.csv", index=False)
+
+    def _agg(src):
+        d = coh_df[coh_df.source == src]
+        return {} if d.empty else {"n": int(len(d)),
+                                    "mean_knn_sim": round(float(d.mean_knn_sim.mean()), 3),
+                                    "pct_in_program": round(float(d.in_program.mean()) * 100)}
+    coherence_summary = {s: _agg(s) for s in ("global", "context-specific", "promoted", "demoted")}
+    print("  coherence (mean_knn_sim · %in-program): "
+          + " · ".join(f"{s}={coherence_summary[s]}" for s in coherence_summary if coherence_summary[s]))
+
+    # ---- consolidated findings (one row per panel regulator) ----
+    nn_by_gene = {}
+    for r in nn_recs:
+        nn_by_gene.setdefault(r["gene"], []).append((r["neighbor"], r["similarity"]))
+    find_rows = []
+    for i, g in enumerate(reg):
+        p = prog_label[i]
+        marks = prog_markers.get(p, [])[:6] if p != "mixed" else []
+        find_rows.append({
+            "gene": g, "condition": cond[i], "regulator_class": rclass[i], "source": source[i],
+            "program_label": p, "nearest_complex": near_complex[i], "nearest_complex_cosine": near_cos[i],
+            "margin_over_next": near_margin[i],
+            "nearest_neighbors": ";".join(f"{n}:{s:.2f}" for n, s in nn_by_gene.get(g, [])[:3]),
+            "program_markers": ";".join(f"{gn}{'+' if z > 0 else '-'}" for gn, z, _ in marks)})
+    pd.DataFrame(find_rows).to_csv(TAB / "fingerprint_findings.csv", index=False)
+
     # ---- tablas ----
     pca_df = panel.copy()
     pca_df["cluster"] = clusters
+    pca_df["program_label"] = prog_label
     for k in range(min(6, scores.shape[1])):
         pca_df[f"PC{k+1}"] = np.round(scores[:, k], 4)
     pca_df.to_csv(TAB / "fingerprint_pca_scores.csv", index=False)
@@ -286,7 +407,7 @@ def main():
     nn_df.to_csv(TAB / "fingerprint_neighbors.csv", index=False)
     edges_df.to_csv(TAB / "fingerprint_similarity_edges.csv", index=False)
 
-    # clusters: per-cluster summary (members, dominant source)
+    # clusters: agnostic structural summary (members, dominant panel source)
     cl_recs = []
     for c in sorted(set(clusters)):
         mem = reg[clusters == c]
@@ -317,6 +438,12 @@ def main():
     _fig_heatmap(S, reg, clusters, source, FIG / "22_fingerprint_similarity_heatmap.png")
     _fig_network(scores, edges_df, reg, source, idx_of,
                  FIG / "23_fingerprint_neighbor_network.png")
+    PROGRAM_COLOR = {"SAGA/chromatin": "#d62728", "Mediator/transcription": "#1f77b4",
+                     "TCR signaling": "#2ca02c", "mixed": "#c7c7c7"}
+    _fig_pca_by(scores, evr, prog_label, "program", PROGRAM_COLOR,
+                FIG / "24_fingerprint_pca_by_program.png",
+                "Fingerprint similarity organizes perturbations into programs",
+                reg, COMPLEXES, idx_of, reg_set)
 
     summary = {
         "matrix": args.matrix, "n_regulators": int(len(reg)),
@@ -325,7 +452,10 @@ def main():
         "evr_pc1_5": [round(float(x), 4) for x in evr[:5]],
         "pc1_abs_vs_ndownstream_spearman": round(float(pc1_ndown), 3),
         "n_clusters": int(len(set(clusters))),
+        "n_regulators_in_programs": int(n_lab),
+        "programs": progs,
         "complex_validation": comp_recs,
+        "audit_coherence": coherence_summary,
     }
     (TAB / "fingerprint_summary.json").write_text(json.dumps(summary, indent=2))
     print("OK · tables and figures written")

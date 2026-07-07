@@ -13,16 +13,22 @@ not by raw counts or `adj_p_value < 0.1`.
 
 ## What this repo does
 
-A reproducible research product that is **memory- and compute-aware** (the full dataset is 1.8 TB;
-the working disk has ~10 GB free). The entire core runs **from the supplementary CSV tables alone
+This project turns a massive CD4+ T cell Perturb-seq screen into **three explorable objects: robust
+regulators, reproducibility audits, and transcriptional programs.** The CSV-only core identifies
+quality-aware regulators; optional h5ad slicing maps selected perturbations into transcriptomic
+fingerprint neighborhoods. It is **memory- and compute-aware** (the full dataset is 1.8 TB; the
+working disk has ~10 GB free) — the entire core runs **from the supplementary CSV tables alone
 (~15 MB)**:
 
 1. **Selective download pipeline** from the public S3 bucket (`scripts/download.sh`).
 2. **Data model** of the dataset (`docs/DATA_MODEL.md` + [interactive artifact](docs/data-model.html)).
 3. **80/20 EDA** (`scripts/eda.py`) — effect-size distribution, knockdown quality, hubs, reproducibility.
 4. **Model 2 · empirical Bayes** (`scripts/model_hubs.py`) — regulator ranking with uncertainty.
-5. **Model 1 · uncertainty-aware effect network** (optional, `scripts/model_edges.py`) — reads the
-   17 GB `.h5ad` by *slice* from S3 **without downloading it**.
+5. **Ranking audits** (`scripts/audit_ranking.py`) — baselines, bootstrap stability, global vs.
+   context-specific, and a guide/donor-aware reproducibility audit.
+6. **Transcriptional programs** (`scripts/analyze_fingerprints.py`) — organizes top perturbations by
+   the fingerprint they induce, reading `.h5ad` layers *by slice* from S3 **without downloading it**.
+7. **Model 1 · uncertainty-aware effect network** (optional, `scripts/model_edges.py`, bonus).
 
 ## Dataset
 
@@ -39,6 +45,12 @@ the working disk has ~10 GB free). The entire core runs **from the supplementary
 - **Robust ranking ≠ raw hubs**: the EB model surfaces **chromatin/transcription machinery**
   (SAGA complex: TADA1/TADA2B/SGF29/SUPT20H · Mediator: MED12/CCNC · KDM1A, SETD2) — regulators with a
   large **and** stable effect across conditions, ranked above the Stim8hr-specific TCR-signaling hubs.
+- **Fingerprint similarity organizes perturbations into recognizable programs**: matching each
+  regulator's downstream fingerprint to the curated complexes recovers **TCR signaling, SAGA/chromatin,
+  and Mediator/transcription** (permutation-validated at z=11, z=9, z=3) and surfaces candidate
+  neighbors — e.g. the chromatin remodeler **CHD7 is assigned to the SAGA/chromatin program** by
+  fingerprint similarity (cosine 0.84; a related perturbation response, not a complex-membership claim).
+  The latent axis is program *identity*, not effect magnitude (|PC1| vs. n_downstream = 0.25).
 - **Uncertainty-aware effect network (bonus)**: ~2,470 robust edges (`P(|effect|>1.5×)>0.8`, i.e. the
   probability that the effect *magnitude* exceeds 1.5×, not that a causal edge exists) for the top
   regulators, extracted from the remote h5ad without downloading it.
@@ -63,6 +75,38 @@ LCK…) are TCR signaling, active only under stimulation. Both classes are real 
 distinction avoids confusing a universal regulator with a context-dependent one. See
 `docs/tables/top_global_regulators.csv` and `top_condition_specific_regulators.csv`.
 
+## Transcriptional programs
+
+A rank is one number; a **fingerprint** is what the perturbation actually does to the cell. On a
+balanced panel of 200 top perturbations (global · context-specific · reproducibility-promoted ·
+demoted), each regulator's downstream fingerprint (zscore vector) is compared to the curated **SAGA /
+Mediator / TCR** complexes. These are **candidate program assignments by fingerprint similarity — not
+claims of physical complex membership.** `scripts/analyze_fingerprints.py` · `make fingerprints`.
+
+- **Fingerprint similarity recovers the known complexes.** By permutation test the three complexes are
+  each significantly cohesive: **TCR z=11, SAGA z=9, Mediator z=3** (N=5000). The latent PC1 is program
+  *identity*, not effect magnitude (|PC1| vs. n_downstream Spearman = 0.25).
+- **The classifier is conservative — only 25 of 200 are assigned; the rest stay *mixed*, by design.**
+  The assigned set: **TCR signaling (13), SAGA/chromatin (9), Mediator/transcription (3)**. Each program
+  recovers its curated core and adds **newly assigned neighbors** (non-curated genes placed in the same
+  fingerprint neighborhood) — e.g. the chromatin remodeler **CHD7 is assigned to the SAGA/chromatin
+  program** (cosine 0.84; a related response, not complex membership), and Mediator's **MED12** lands in
+  the chromatin neighborhood (Mediator–SAGA-like response). Every assignment is auditable in
+  `docs/tables/program_label_evidence.csv`.
+- **The reproducibility-promoted hits are coherent but distinct.** Promoted/demoted regulators have
+  transcriptomic neighborhoods as tight as the top global regulators (kNN cosine ~0.47 vs. 0.40), so
+  they are not statistical noise — yet **none map onto the canonical complexes**: the audit surfaces a
+  *distinct high-confidence set* rather than simply rediscovering known complexes.
+
+Tables: `fingerprint_findings.csv` (per-regulator program, neighbors, markers) ·
+`fingerprint_program_markers.csv` · `program_label_evidence.csv` · `fingerprint_audit_coherence.csv`.
+Figures 20–24. Detail in [`docs/FINGERPRINT_ANALYSIS.md`](docs/FINGERPRINT_ANALYSIS.md).
+
+> *Honest scope:* fingerprint-based, program-level re-analysis anchored to known complexes — candidate
+> assignments and hypotheses, **not** de-novo pathway discovery or novel complex membership. The
+> convergent "response genes" are genes consistently moved by a program's regulators (relative to the
+> panel), not baseline cell-type markers; PCA is a view, not the proof.
+
 ## How to reproduce
 
 ```bash
@@ -77,8 +121,9 @@ scripts/download.sh tables
 make all
 ```
 
-Targets: `make eda` · `make model` · `make report` · `make all` · `make clean`.
-Optional (remote, requires `pip install h5py s3fs fsspec`): `make spike` · `make edges`.
+Targets: `make eda` · `make model` · `make audit` · `make report` · `make all` · `make clean`.
+Optional (remote, requires `pip install h5py s3fs fsspec` + `scikit-learn`): `make fingerprints` ·
+`make spike` · `make edges`.
 
 ## Outputs
 
@@ -87,8 +132,10 @@ Optional (remote, requires `pip install h5py s3fs fsspec`): `make spike` · `mak
 | `docs/report.md` | consolidated judge-facing report |
 | `docs/tables/top_regulators_for_review.csv` | top 30 regulators (judge-facing) |
 | `docs/tables/hub_ranking_bayes.csv` | full EB ranking (all genes) |
+| `docs/tables/fingerprint_findings.csv` | per-regulator transcriptional program + neighbors + markers |
+| `docs/tables/program_label_evidence.csv` | auditable basis for each program label |
 | `docs/tables/robust_edges.csv` | uncertainty-aware effect network (bonus, Model 1) |
-| `docs/figures/*.png` | EDA + ranking + overview |
+| `docs/figures/*.png` | EDA · ranking · programs (20–24) · overview |
 | `docs/data-model.html` | interactive explorer (data model + EDA + study) |
 
 ## Product: Regulator Atlas (API + UI)
@@ -108,9 +155,10 @@ The UI is served by the API itself (same origin), so there's **no file to open**
 with. If port 8000 is taken, use another (`--port 8010`) and open `http://localhost:8010/`.
 
 Key endpoints: `/summary`, `/regulators?q=&regulator_class=&sort_by=`, **`/regulators/{gene}`**
-(full profile: class, per-condition profile, audits, top edges, interpretation),
-`/audit/reproducibility`, `/edges/downstream`. The UI has 4 screens: Overview, Explore, Audit, and
-Effect network. Detail in [`api/README.md`](api/README.md).
+(full profile: class, per-condition profile, audits, **transcriptional program + neighbors + markers**,
+top edges, interpretation), `/audit/reproducibility`, **`/programs/summary`**, `/programs/findings`,
+`/edges/downstream`. The UI has **5 screens**: Overview, Explore, Audit, Effect network, and Programs.
+Detail in [`api/README.md`](api/README.md).
 
 ## Limitations
 
@@ -129,14 +177,18 @@ Effect network. Detail in [`api/README.md`](api/README.md).
 
 ## Submission summary
 
-A reproducible product that turns a 1.8 TB DE matrix into a **ranking of robust regulators with
-uncertainty**, runnable on a laptop with ~10 GB of disk using only 15 MB of data. The core is
-**CSV-only**; when `.obs` metadata is available, a **guide/donor-aware sensitivity audit** shows which
-regulators survive real reproducibility checks. As a bonus, an **uncertainty-aware effect network**
-streamed from the 17 GB h5ad without downloading it. On top of that, an explorable **Regulator
-Atlas**: read-only API (FastAPI) + UI to search a gene, view its profile, filter global vs.
-context-specific, and browse the audits. `make all` reproduces the core; `make api` launches the
-atlas. See `docs/report.md`.
+A reproducible product that turns a 1.8 TB CD4 Perturb-seq screen into **three explorable objects —
+robust regulators, reproducibility audits, and transcriptional programs** — runnable on a laptop with
+~10 GB of disk using only 15 MB of data for the core. The **CSV-only** core ranks regulators with
+uncertainty (empirical Bayes) and audits them (bootstrap stability + a guide/donor-aware
+reproducibility audit). On top of that, **fingerprint similarity organizes the top perturbations into
+recognizable programs** — recovering the SAGA, Mediator and TCR complexes (permutation z=9/3/11) and
+surfacing candidate neighbors (e.g. CHD7 assigned to the chromatin program by fingerprint) — plus a
+bonus **uncertainty-aware effect network**, both
+streamed from the 17 GB h5ad without downloading it. An explorable **Regulator Atlas** (read-only
+FastAPI + UI) ties it together: search a gene and see its rank, audit survival, transcriptional
+program, transcriptomic neighbors, and defining response genes in one view. `make all` reproduces the
+core; `make fingerprints` builds the programs; `make api` launches the atlas. See `docs/report.md`.
 
 ---
 Data: CZI Virtual Cells Platform · Marson Lab 2025 · biorxiv preprint `10.64898/2025.12.23.696273`.

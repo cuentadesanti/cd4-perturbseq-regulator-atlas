@@ -80,10 +80,11 @@ survive (`reproducibility_audit.csv`, fig 19).
 
 ---
 
-## Model 1 — uncertainty-aware effect network (STRICTLY OPTIONAL)
+## Model 1 — uncertainty-aware effect network (optional bonus)
 
 **Scripts:** `scripts/model_edges_spike.py` (validation) and `scripts/model_edges.py` (scaling).
-**Rule:** if the remote spike fails or is slow, the official deliverable is Model 2 + docs.
+**Note:** a bonus — if the remote spike fails or is slow, the core deliverable (ranking + audits +
+programs) is unaffected.
 
 ### Idea
 

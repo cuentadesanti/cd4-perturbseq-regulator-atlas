@@ -1,0 +1,73 @@
+program,direction,gene,mean_z,consistency
+SAGA/chromatin,up,ADA2,10.104,1.0
+SAGA/chromatin,up,PJA2,9.745,1.0
+SAGA/chromatin,up,TADA3,9.415,1.0
+SAGA/chromatin,up,MUC1,9.302,1.0
+SAGA/chromatin,up,MIEN1,8.889,1.0
+SAGA/chromatin,up,SELENOH,8.851,1.0
+SAGA/chromatin,up,NUCB2,8.781,1.0
+SAGA/chromatin,up,BST2,8.564,1.0
+SAGA/chromatin,up,SPPL2A,8.528,1.0
+SAGA/chromatin,up,CLU,8.47,1.0
+SAGA/chromatin,up,TSG101,8.378,1.0
+SAGA/chromatin,up,NUB1,8.377,1.0
+SAGA/chromatin,down,ETS1,-9.413,1.0
+SAGA/chromatin,down,CD2,-8.11,0.889
+SAGA/chromatin,down,SLC29A1,-8.046,1.0
+SAGA/chromatin,down,CISH,-7.945,1.0
+SAGA/chromatin,down,SERBP1,-7.792,1.0
+SAGA/chromatin,down,RBM17,-7.631,1.0
+SAGA/chromatin,down,ACSL6,-7.382,1.0
+SAGA/chromatin,down,BZW2,-7.144,1.0
+SAGA/chromatin,down,CD27,-6.964,0.889
+SAGA/chromatin,down,IKZF1,-6.798,1.0
+SAGA/chromatin,down,HIVEP3,-6.722,1.0
+SAGA/chromatin,down,HNRNPF,-6.616,1.0
+Mediator/transcription,up,ADA2,7.781,1.0
+Mediator/transcription,up,CD109,6.729,1.0
+Mediator/transcription,up,BRD2,6.547,1.0
+Mediator/transcription,up,MYL12A,6.443,1.0
+Mediator/transcription,up,KIF13B,6.145,1.0
+Mediator/transcription,up,DYNLT1,6.119,1.0
+Mediator/transcription,up,BCAP29,6.053,1.0
+Mediator/transcription,up,ABRACL,5.925,1.0
+Mediator/transcription,up,LAMP2,5.751,1.0
+Mediator/transcription,up,EVI2A,5.627,1.0
+Mediator/transcription,up,TCN2,5.591,1.0
+Mediator/transcription,up,MYL6,5.524,1.0
+Mediator/transcription,down,MYC,-5.797,1.0
+Mediator/transcription,down,EIF4A1,-5.719,1.0
+Mediator/transcription,down,PYCR1,-5.092,1.0
+Mediator/transcription,down,ADAM15,-5.03,1.0
+Mediator/transcription,down,DDX39A,-4.945,1.0
+Mediator/transcription,down,SLC38A5,-4.923,1.0
+Mediator/transcription,down,MIF,-4.563,1.0
+Mediator/transcription,down,ETS1,-4.548,1.0
+Mediator/transcription,down,IMPDH2,-4.524,1.0
+Mediator/transcription,down,HSP90AB1,-4.469,1.0
+Mediator/transcription,down,ZBED2,-4.455,1.0
+Mediator/transcription,down,HACD3,-4.444,1.0
+TCR signaling,up,STK17B,11.356,1.0
+TCR signaling,up,S100A11,11.224,0.923
+TCR signaling,up,RNF19B,10.883,1.0
+TCR signaling,up,SELPLG,10.804,1.0
+TCR signaling,up,MYO1F,10.58,1.0
+TCR signaling,up,BIN2,10.427,1.0
+TCR signaling,up,CD53,10.228,1.0
+TCR signaling,up,GPSM3,9.909,1.0
+TCR signaling,up,MYL12A,9.73,1.0
+TCR signaling,up,LIMD2,9.613,1.0
+TCR signaling,up,SLFN5,9.587,1.0
+TCR signaling,up,TRPV2,9.506,1.0
+TCR signaling,down,FABP5,-7.765,1.0
+TCR signaling,down,SRM,-7.679,1.0
+TCR signaling,down,TRAP1,-7.19,1.0
+TCR signaling,down,NME1,-7.063,1.0
+TCR signaling,down,HSP90AB1,-6.962,1.0
+TCR signaling,down,UCK2,-6.837,1.0
+TCR signaling,down,DKC1,-6.682,1.0
+TCR signaling,down,HSPD1,-6.505,1.0
+TCR signaling,down,SERBP1,-6.443,1.0
+TCR signaling,down,IRF4,-6.338,1.0
+TCR signaling,down,ZBED2,-6.282,1.0
+TCR signaling,down,IL2RA,-6.265,0.846
