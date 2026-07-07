@@ -1,0 +1,5 @@
+program_label,anchor_complex,n_regulators,n_known_complex_members,known_members,novel_members,mean_centroid_cosine,top_marker_genes
+SAGA/chromatin,SAGA,9,6,TADA2B;SUPT20H;TADA1;TAF6L;SUPT7L;USP22,CHD7;TSPYL5,0.812,ADA2+;PJA2+;TADA3+;MUC1+;MIEN1+;SELENOH+;NUCB2+;BST2+
+Mediator/transcription,Mediator,3,1,MED1,POGLUT3;GLIPR2,0.592,ADA2+;CD109+;BRD2+;MYL12A+;KIF13B+;DYNLT1+;BCAP29+;ABRACL+
+TCR signaling,TCR,13,5,ZAP70;LCK;LAT;CD3E;PLCG1,ATF7IP2;NCAPG2;CLCC1;EIF1AX;PGGT1B;FZD6;UBE2E2;EFR3A,0.768,STK17B+;S100A11+;RNF19B+;SELPLG+;MYO1F+;BIN2+;CD53+;GPSM3+
+mixed,-,175,7,,,,

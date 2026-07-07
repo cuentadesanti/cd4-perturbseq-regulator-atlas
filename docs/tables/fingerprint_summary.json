@@ -18,6 +18,12 @@
   ],
   "pc1_abs_vs_ndownstream_spearman": 0.249,
   "n_clusters": 12,
+  "n_regulators_in_programs": 25,
+  "programs": [
+    "Mediator/transcription",
+    "SAGA/chromatin",
+    "TCR signaling"
+  ],
   "complex_validation": [
     {
       "complex": "SAGA",
@@ -46,5 +52,27 @@
       "p_perm": 0.0002,
       "members": "ZAP70;LCK;LAT;CD3E;PLCG1"
     }
-  ]
+  ],
+  "audit_coherence": {
+    "global": {
+      "n": 75,
+      "mean_knn_sim": 0.395,
+      "pct_in_program": 13
+    },
+    "context-specific": {
+      "n": 75,
+      "mean_knn_sim": 0.502,
+      "pct_in_program": 20
+    },
+    "promoted": {
+      "n": 25,
+      "mean_knn_sim": 0.469,
+      "pct_in_program": 0
+    },
+    "demoted": {
+      "n": 25,
+      "mean_knn_sim": 0.459,
+      "pct_in_program": 0
+    }
+  }
 }
