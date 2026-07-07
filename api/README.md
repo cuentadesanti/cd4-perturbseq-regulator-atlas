@@ -14,8 +14,11 @@ make all                                  # genera los CSV que la API sirve
 uvicorn api.main:app --reload --port 8000
 ```
 
+- **UI** (Regulator Atlas): http://localhost:8000/ — la API sirve el frontend en el mismo origen,
+  así que no hay que abrir el archivo ni configurar CORS.
 - **Swagger UI** (demo sin frontend): http://localhost:8000/docs
-- Frontend mínimo: abrir `frontend/index.html` (apunta a `localhost:8000` por defecto).
+
+Si el puerto 8000 está ocupado, corré en otro (`--port 8010`) y abrí `http://localhost:8010/`.
 
 Si faltan tablas opcionales (reproducibilidad, edges), los endpoints siguen funcionando y devuelven
 `available: false` / campos `null`.

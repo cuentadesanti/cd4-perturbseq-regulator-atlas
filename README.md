@@ -98,9 +98,12 @@ modelos, **no** descarga h5ad y **no** toca S3 — solo sirve los CSV versionado
 ```bash
 pip install -r requirements.txt      # incluye fastapi + uvicorn
 make all                             # genera las tablas que la API sirve
-make api                             # uvicorn :8000 · Swagger en http://localhost:8000/docs
-open frontend/index.html             # UI mínima que consume la API
+make api                             # uvicorn :8000 (sirve API + UI en el mismo origen)
+open http://localhost:8000/          # la UI · Swagger en http://localhost:8000/docs
 ```
+
+La UI se sirve desde la propia API (mismo origen), así que **no hay que abrir el archivo** ni lidiar
+con CORS. Si el puerto 8000 está ocupado, usá otro (`--port 8010`) y abrí `http://localhost:8010/`.
 
 Endpoints clave: `/summary`, `/regulators?q=&regulator_class=&sort_by=`, **`/regulators/{gene}`**
 (perfil completo: clase, perfil por condición, auditorías, top edges, interpretación),
