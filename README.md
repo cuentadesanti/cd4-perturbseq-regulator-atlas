@@ -47,9 +47,10 @@ working disk has ~10 GB free) — the entire core runs **from the supplementary 
   large **and** stable effect across conditions, ranked above the Stim8hr-specific TCR-signaling hubs.
 - **Fingerprint similarity organizes perturbations into recognizable programs**: matching each
   regulator's downstream fingerprint to the curated complexes recovers **TCR signaling, SAGA/chromatin,
-  and Mediator/transcription** (permutation-validated at z=11, z=9, z=3) and adds fingerprint-neighbors
-  — e.g. the chromatin remodeler **CHD7 joins the SAGA/chromatin program** (cosine 0.84). The latent
-  axis is program *identity*, not effect magnitude (|PC1| vs. n_downstream = 0.25).
+  and Mediator/transcription** (permutation-validated at z=11, z=9, z=3) and surfaces candidate
+  neighbors — e.g. the chromatin remodeler **CHD7 is assigned to the SAGA/chromatin program** by
+  fingerprint similarity (cosine 0.84; a related perturbation response, not a complex-membership claim).
+  The latent axis is program *identity*, not effect magnitude (|PC1| vs. n_downstream = 0.25).
 - **Uncertainty-aware effect network (bonus)**: ~2,470 robust edges (`P(|effect|>1.5×)>0.8`, i.e. the
   probability that the effect *magnitude* exceeds 1.5×, not that a causal edge exists) for the top
   regulators, extracted from the remote h5ad without downloading it.
@@ -76,32 +77,35 @@ distinction avoids confusing a universal regulator with a context-dependent one.
 
 ## Transcriptional programs
 
-A rank is one number; a **fingerprint** is a regulator's whole effect on the cell. On a balanced
-panel of 200 top perturbations (global · context-specific · reproducibility-promoted · demoted), each
-regulator's downstream fingerprint (zscore vector) is compared to the curated **SAGA / Mediator / TCR**
-complexes; matches above threshold get a program label, the rest stay *mixed* (conservative — we only
-have prototypes for three complexes). `scripts/analyze_fingerprints.py` · `make fingerprints`.
+A rank is one number; a **fingerprint** is what the perturbation actually does to the cell. On a
+balanced panel of 200 top perturbations (global · context-specific · reproducibility-promoted ·
+demoted), each regulator's downstream fingerprint (zscore vector) is compared to the curated **SAGA /
+Mediator / TCR** complexes. These are **candidate program assignments by fingerprint similarity — not
+claims of physical complex membership.** `scripts/analyze_fingerprints.py` · `make fingerprints`.
 
-- **The space recovers known biology.** By permutation test the three complexes are each significantly
-  cohesive: **TCR z=11, SAGA z=9, Mediator z=3** (N=5000). The latent PC1 is program *identity*, not
-  effect magnitude (|PC1| vs. n_downstream Spearman = 0.25).
-- **Recognizable programs + new members.** 25 of 200 regulators map to a program: **TCR signaling (13),
-  SAGA/chromatin (9), Mediator/transcription (3)**. The labels recover each complex's core and add
-  fingerprint-neighbors — e.g. the chromatin remodeler **CHD7** joins SAGA/chromatin (cosine 0.84), and
-  Mediator's **MED12** sits in the chromatin program (Mediator–SAGA crosstalk). Every label is auditable
-  in `docs/tables/program_label_evidence.csv` with its members, centroid cosine, and marker genes.
+- **Fingerprint similarity recovers the known complexes.** By permutation test the three complexes are
+  each significantly cohesive: **TCR z=11, SAGA z=9, Mediator z=3** (N=5000). The latent PC1 is program
+  *identity*, not effect magnitude (|PC1| vs. n_downstream Spearman = 0.25).
+- **The classifier is conservative — only 25 of 200 are assigned; the rest stay *mixed*, by design.**
+  The assigned set: **TCR signaling (13), SAGA/chromatin (9), Mediator/transcription (3)**. Each program
+  recovers its curated core and adds **newly assigned neighbors** (non-curated genes placed in the same
+  fingerprint neighborhood) — e.g. the chromatin remodeler **CHD7 is assigned to the SAGA/chromatin
+  program** (cosine 0.84; a related response, not complex membership), and Mediator's **MED12** lands in
+  the chromatin neighborhood (Mediator–SAGA-like response). Every assignment is auditable in
+  `docs/tables/program_label_evidence.csv`.
 - **The reproducibility-promoted hits are coherent but distinct.** Promoted/demoted regulators have
   transcriptomic neighborhoods as tight as the top global regulators (kNN cosine ~0.47 vs. 0.40), so
   they are not statistical noise — yet **none map onto the canonical complexes**: the audit surfaces a
-  *separate* coherent set, not "more SAGA".
+  *distinct high-confidence set* rather than simply rediscovering known complexes.
 
 Tables: `fingerprint_findings.csv` (per-regulator program, neighbors, markers) ·
 `fingerprint_program_markers.csv` · `program_label_evidence.csv` · `fingerprint_audit_coherence.csv`.
 Figures 20–24. Detail in [`docs/FINGERPRINT_ANALYSIS.md`](docs/FINGERPRINT_ANALYSIS.md).
 
-> *Honest scope:* this is **perturbation-program similarity** anchored to known complexes, not de-novo
-> pathway discovery. The convergent "response genes" are genes consistently moved by a program's
-> regulators (relative to the panel), not baseline cell-type markers; PCA is a view, not the proof.
+> *Honest scope:* fingerprint-based, program-level re-analysis anchored to known complexes — candidate
+> assignments and hypotheses, **not** de-novo pathway discovery or novel complex membership. The
+> convergent "response genes" are genes consistently moved by a program's regulators (relative to the
+> panel), not baseline cell-type markers; PCA is a view, not the proof.
 
 ## How to reproduce
 
@@ -179,7 +183,8 @@ robust regulators, reproducibility audits, and transcriptional programs** — ru
 uncertainty (empirical Bayes) and audits them (bootstrap stability + a guide/donor-aware
 reproducibility audit). On top of that, **fingerprint similarity organizes the top perturbations into
 recognizable programs** — recovering the SAGA, Mediator and TCR complexes (permutation z=9/3/11) and
-adding new members like CHD7 → chromatin — plus a bonus **uncertainty-aware effect network**, both
+surfacing candidate neighbors (e.g. CHD7 assigned to the chromatin program by fingerprint) — plus a
+bonus **uncertainty-aware effect network**, both
 streamed from the 17 GB h5ad without downloading it. An explorable **Regulator Atlas** (read-only
 FastAPI + UI) ties it together: search a gene and see its rank, audit survival, transcriptional
 program, transcriptomic neighbors, and defining response genes in one view. `make all` reproduces the

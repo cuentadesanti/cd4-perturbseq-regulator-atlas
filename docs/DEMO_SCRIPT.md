@@ -39,12 +39,13 @@ Open two things: the browser at `http://localhost:8000/` and `docs/report.md` (o
 > and defensible."
 
 ### 1:45–2:15 — The headline: transcriptional programs  ·  *show: Programs tab, PCA colored by program, then the CHD7 profile*
-> "But a rank is one number. A regulator's *fingerprint* — its whole downstream effect — is the real
-> gold. So we matched each perturbation's fingerprint to the known SAGA, Mediator and TCR complexes.
-> The result: fingerprint similarity organizes the top perturbations into recognizable programs. The
-> complexes come back as statistically cohesive groups — TCR at z eleven, SAGA at z nine — biology the
-> model was never told about. And it finds *new* members: search CHD7 — a chromatin remodeler — and the
-> atlas places it right inside the SAGA chromatin program, next to TADA2B and SUPT20H."
+> "But a rank is one number. A regulator's *fingerprint* — what the perturbation actually does to the
+> cell — is the real gold. So we matched each perturbation's fingerprint to the known SAGA, Mediator and
+> TCR complexes. The result: fingerprint similarity organizes the top perturbations into recognizable
+> programs. The complexes come back as statistically cohesive groups — TCR at z eleven, SAGA at z nine —
+> biology the model was never told about. And it surfaces *candidates*: search CHD7 — a chromatin
+> remodeler — and the atlas assigns it to the SAGA/chromatin program by fingerprint similarity, next to
+> TADA2B and SUPT20H. Not a claim that CHD7 is in the complex — a program-level hypothesis worth testing."
 
 ### 2:15–2:45 — One gene, the whole atlas  ·  *show: Explore → search a gene profile*
 > "That's the atlas moment: search any gene and one view answers everything — its rank, whether it

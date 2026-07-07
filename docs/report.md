@@ -19,9 +19,10 @@ signal from noise and prioritizing by a **large and reproducible** effect, not b
   power with uncertainty. The robust top is **chromatin/transcription** machinery
   (SAGA complex, Mediator, KDM1A, SETD2) — a large **and** stable effect across conditions.
 - **Fingerprint similarity organizes the top perturbations into recognizable programs** — recovering
-  TCR signaling, SAGA/chromatin and Mediator/transcription (permutation z=11/9/3) and adding new
-  members like CHD7 → chromatin. Same honesty, different object: not just *who* is strong, but *what
-  program* each perturbation induces and *who resembles whom*.
+  TCR signaling, SAGA/chromatin and Mediator/transcription (permutation z=11/9/3) and surfacing
+  candidate neighbors (e.g. the chromatin remodeler CHD7 assigned to the chromatin program by
+  fingerprint, not by complex membership). Same honesty, different object: not just *who* is strong,
+  but *what program* each perturbation resembles and *who resembles whom*.
 
 We also built an **uncertainty-aware effect network** (bonus, Model 1) with **2,470 robust edges** (`P(|effect|>1.5×)>0.8` — the probability that the *magnitude* exceeds 1.5×, not that a causal edge exists) from 6 regulators in `docs/tables/robust_edges.csv`. It was assessed as a **proof-of-concept** (see `docs/EDGE_ANALYSIS.md`): coherent and biologically sensible, but of minimal coverage — kept as a bonus, not a strong result.
 
@@ -114,18 +115,21 @@ penalty for absent data). Of the top-30 EB, **5 are demoted** and **5 are promot
 
 ## Transcriptional programs
 
-A rank is one number; a **fingerprint** — a regulator's downstream effect vector — is its whole action
-on the cell. On a balanced panel of 200 top perturbations we match each regulator's fingerprint to the
-curated **SAGA / Mediator / TCR** complexes (nearest-centroid in the same space as the validated cosine
-similarity); matches above threshold get a program label, the rest stay *mixed*.
+A rank is one number; a **fingerprint** — a regulator's downstream effect vector — is what the
+perturbation actually does to the cell. On a balanced panel of 200 top perturbations we match each
+regulator's fingerprint to the curated **SAGA / Mediator / TCR** complexes (nearest-centroid in the
+same space as the validated cosine similarity). These are **candidate program assignments by
+fingerprint similarity — not claims of physical complex membership.** The classifier is conservative:
+only **25 of 200** perturbations are assigned a program; the rest remain *mixed*, by design.
 
-- **The space recovers known biology** (permutation test, N=5000): SAGA z=9.23 · Mediator z=3.23 · TCR z=11.24. The latent PC1 is program
-  *identity*, not effect magnitude (|PC1| vs. n_downstream Spearman = 0.249).
-- **25 of 200 regulators map to a program**: TCR signaling (13), SAGA/chromatin (9), Mediator/transcription (3). The labels recover each complex's core
-  and add fingerprint-neighbors — e.g. the chromatin remodeler **CHD7** joins SAGA/chromatin. Every
-  label is auditable below and in `program_label_evidence.csv`.
+- **Fingerprint similarity recovers the known complexes** (permutation test, N=5000): SAGA z=9.23 · Mediator z=3.23 · TCR z=11.24. The
+  latent PC1 is program *identity*, not effect magnitude (|PC1| vs. n_downstream Spearman = 0.249).
+- **25 assigned**: TCR signaling (13), SAGA/chromatin (9), Mediator/transcription (3). Each program recovers its curated core and adds **newly assigned
+  neighbors** (non-curated genes placed in the same fingerprint neighborhood) — e.g. the chromatin
+  remodeler **CHD7** is assigned to the SAGA/chromatin program (a related perturbation response, not
+  complex membership). Every assignment is auditable below and in `program_label_evidence.csv`.
 
-| program_label | n_regulators | n_known_complex_members | novel_members | mean_centroid_cosine | top_marker_genes |
+| program_label | n_regulators | n_known_complex_members | assigned_neighbors | mean_centroid_cosine | top_marker_genes |
 | --- | --- | --- | --- | --- | --- |
 | SAGA/chromatin | 9 | 6 | CHD7;TSPYL5 | 0.812 | ADA2+;PJA2+;TADA3+;MUC1+;MIEN1+;SELENOH+;NUCB2+;BST2+ |
 | Mediator/transcription | 3 | 1 | POGLUT3;GLIPR2 | 0.592 | ADA2+;CD109+;BRD2+;MYL12A+;KIF13B+;DYNLT1+;BCAP29+;ABRACL+ |
@@ -137,11 +141,13 @@ similarity); matches above threshold get a program label, the rest stay *mixed*.
 **Do the reproducibility-promoted hits form coherent programs?** They have neighborhoods as tight as
 the top global regulators (mean kNN cosine: promoted 0.469, demoted 0.459 vs.
 global 0.395), so they are **not statistical noise** — yet they map onto *none* of the
-canonical complexes. The reproducibility audit surfaces a **distinct** coherent set, not "more SAGA".
+canonical complexes. Read as: the audit surfaces a **distinct high-confidence set** rather than simply
+rediscovering the known complexes.
 
-*Scope: perturbation-program similarity anchored to known complexes, not de-novo pathway discovery;
-"response genes" are consistently-moved downstream genes (relative to the panel), not baseline markers;
-PCA is a view, not the proof. `make fingerprints` · detail in `docs/FINGERPRINT_ANALYSIS.md`.*
+*Scope: fingerprint-based, program-level re-analysis anchored to known complexes — candidate
+assignments and hypotheses, not de-novo pathway discovery or novel complex membership. "Response
+genes" are consistently-moved downstream genes (relative to the panel), not baseline markers; PCA is a
+view, not the proof. `make fingerprints` · detail in `docs/FINGERPRINT_ANALYSIS.md`.*
 
 ## EDA findings
 

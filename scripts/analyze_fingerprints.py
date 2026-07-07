@@ -330,24 +330,27 @@ def main():
                  ).to_csv(TAB / "fingerprint_program_markers.csv", index=False)
 
     # ---- auditable label evidence (per program) ----
+    # `assigned_neighbors` = non-curated genes PLACED in a program by fingerprint similarity —
+    # candidate program neighbors, NOT a claim of physical complex membership.
     ev_rows = []
     for cx, p in PROGRAM_OF.items():
         mask = prog_label == p
         members_here = [reg[i] for i in range(len(reg)) if mask[i]]
         known = [g for g in members_here if g in complex_members.get(cx, [])]
-        novel = [g for g in members_here if g not in complex_member_set]
+        assigned = [g for g in members_here if g not in complex_member_set]
         cos_here = [near_cos[i] for i in range(len(reg)) if mask[i]]
         ev_rows.append({
             "program_label": p, "anchor_complex": cx, "n_regulators": int(mask.sum()),
             "n_known_complex_members": len(known), "known_members": ";".join(known),
-            "novel_members": ";".join(novel[:15]),
+            "assigned_neighbors": ";".join(assigned[:15]),
             "mean_centroid_cosine": round(float(np.mean(cos_here)), 3) if cos_here else None,
             "top_marker_genes": ";".join(f"{g}{'+' if z > 0 else '-'}" for g, z, _ in prog_markers[p][:8])})
     nmix = int((prog_label == "mixed").sum())
     ev_rows.append({"program_label": "mixed", "anchor_complex": "-", "n_regulators": nmix,
                     "n_known_complex_members": int(sum(prog_label[i] == "mixed" and reg[i] in complex_member_set
                                                        for i in range(len(reg)))),
-                    "known_members": "", "novel_members": "", "mean_centroid_cosine": None, "top_marker_genes": ""})
+                    "known_members": "", "assigned_neighbors": "", "mean_centroid_cosine": None,
+                    "top_marker_genes": ""})
     pd.DataFrame(ev_rows).to_csv(TAB / "program_label_evidence.csv", index=False)
     progs = sorted(set(p for p in prog_label if p != "mixed"))
     n_lab = int((prog_label != "mixed").sum())

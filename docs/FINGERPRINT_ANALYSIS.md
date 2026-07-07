@@ -48,21 +48,25 @@ fingerprint); SAGA is cohesive; Mediator is diffuse but significant. This is the
 — **not** the PCA. PC1 (28.9% var) merely confirms the axis is program *identity*, not magnitude
 (`spearman(|PC1|, n_downstream) = 0.25`).
 
-### 2. Recognizable programs, with new members
+### 2. Recognizable programs, with newly assigned neighbors
 
-25 of the 200 regulators map to a program (the rest stay *mixed*):
+The classifier is conservative: only **25 of 200** regulators are assigned a program; the rest stay
+*mixed*, by design. These are **candidate program assignments by fingerprint similarity — not claims of
+physical complex membership.**
 
-| program | n | known-complex core | fingerprint-neighbors (novel) | centroid cosine |
+| program | n | curated core recovered | newly assigned neighbors (non-curated) | centroid cosine |
 |---|---|---|---|---|
 | **TCR signaling** | 13 | ZAP70, LCK, LAT, CD3E, PLCG1 | ATF7IP2, NCAPG2, CLCC1, EIF1AX, PGGT1B… | 0.77 |
 | **SAGA/chromatin** | 9 | TADA2B, SUPT20H, TADA1, TAF6L, SUPT7L, USP22 | **CHD7**, TSPYL5 | 0.81 |
 | **Mediator/transcription** | 3 | MED1 | POGLUT3, GLIPR2 | 0.59 |
 
-The labels recover each complex's core and add biologically coherent neighbors — most strikingly the
-chromatin remodeler **CHD7 joining SAGA/chromatin** (cosine 0.84), and Mediator's **MED12 landing in
-the chromatin program** (Mediator–SAGA coactivator crosstalk). Peripheral subunits stay *mixed* where
-the biology predicts weaker cohesion (e.g. **SGF29**, a SAGA reader, at cosine 0.21). Every label,
-with members, centroid cosine and marker genes, is in `program_label_evidence.csv`.
+Each program recovers its curated core and places non-curated genes in the same fingerprint
+neighborhood. The most interesting is the chromatin remodeler **CHD7**, assigned to the SAGA/chromatin
+program by fingerprint similarity (cosine 0.84) — a *related perturbation response*, suggesting a
+program-level hypothesis, not physical SAGA membership. Likewise Mediator's **MED12** lands in the
+chromatin neighborhood (a Mediator–SAGA-like response). Peripheral subunits stay *mixed* where the
+biology predicts weaker cohesion (e.g. **SGF29**, a SAGA reader, at cosine 0.21). Every assignment —
+with members, centroid cosine and marker genes — is in `program_label_evidence.csv`.
 
 ### 3. Convergent downstream response genes
 
@@ -96,7 +100,7 @@ Nearest neighbors by fingerprint cosine (`fingerprint_neighbors.csv`, `/programs
 and each gene's profile in the UI):
 
 - **ZAP70** → LAT (0.95), CD3E (0.95), PLCG1 (0.95), LCK (0.87) — pure TCR module.
-- **CHD7** → TADA2B (0.87), SUPT20H (0.84), TAF6L (0.83) — a chromatin remodeler inside the SAGA module.
+- **CHD7** → TADA2B (0.87), SUPT20H (0.84), TAF6L (0.83) — a chromatin remodeler in the SAGA fingerprint neighborhood.
 - **MED12** → MED19 (0.78), SENP5 (0.78), SUPT20H (0.75) — Mediator + SAGA (coactivators).
 
 The atlas no longer just ranks regulators: it **organizes perturbations by the program they induce**
@@ -129,8 +133,8 @@ program appears in every gene's Explore profile.
 ## Verdict
 
 **A real, defensible program-level result.** Fingerprint similarity recovers the SAGA/Mediator/TCR
-complexes with permutation significance (z=9/3/11), organizes 25 top perturbations into three
-recognizable programs with biologically coherent new members (CHD7 → chromatin), and shows the
-reproducibility-promoted hits are coherent but distinct from the canonical machinery. The atlas moves
-from "regulator ranking" to "map of transcriptional programs" — honestly scoped, and navigable from a
-gene's profile.
+complexes with permutation significance (z=9/3/11), assigns 25 top perturbations to three recognizable
+programs (conservatively — 175 stay *mixed*) and surfaces candidate neighbors like CHD7 → chromatin as
+program-level *hypotheses*, and shows the reproducibility-promoted hits are coherent but distinct from
+the canonical machinery. The atlas moves from "regulator ranking" to "map of transcriptional programs"
+— honestly scoped (candidate assignments, not novel discovery), and navigable from a gene's profile.

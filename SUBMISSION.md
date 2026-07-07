@@ -63,12 +63,14 @@ runs from the **15 MB supplementary CSV tables alone**, and the heavier objects 
   a large *and* stable effect across conditions, above the Stim8hr-specific TCR-signaling hubs.
 - **Fingerprint similarity organizes the top perturbations into recognizable programs.** The three
   curated complexes are each significantly cohesive by permutation test (**TCR z=11, SAGA z=9, Mediator
-  z=3**), and the latent axis is program *identity*, not magnitude (|PC1| vs. n_downstream = 0.25). 25
-  of 200 regulators map to a program — **TCR signaling (13), SAGA/chromatin (9), Mediator/transcription
-  (3)** — recovering each complex's core and adding new members, most strikingly the chromatin remodeler
-  **CHD7 joining the SAGA/chromatin program** (cosine 0.84). The reproducibility-promoted hits have
+  z=3**), and the latent axis is program *identity*, not magnitude (|PC1| vs. n_downstream = 0.25). The
+  classifier is conservative — only **25 of 200** perturbations are assigned a program (**TCR signaling
+  13, SAGA/chromatin 9, Mediator/transcription 3**); the rest stay *mixed*, by design. Each program
+  recovers its curated core and surfaces candidate neighbors — most strikingly the chromatin remodeler
+  **CHD7, assigned to the SAGA/chromatin program by fingerprint similarity** (cosine 0.84; a related
+  perturbation response, not a complex-membership claim). The reproducibility-promoted hits have
   neighborhoods as tight as the top regulators (so they aren't noise) but map onto *none* of the
-  canonical complexes — the audit surfaces a distinct coherent set, not "more SAGA".
+  canonical complexes — the audit surfaces a distinct high-confidence set, not "more SAGA".
 
 **Why it matters.** It answers not just *who is a strong regulator* but *what program each perturbation
 induces and who resembles whom* — turning a 1.8 TB screen into a defensible, uncertainty-aware atlas a

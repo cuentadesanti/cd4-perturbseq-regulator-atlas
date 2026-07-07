@@ -196,7 +196,7 @@ penalty for absent data). Of the top-30 EB, **{len(dem)} are demoted** and **{le
         counts_txt = ", ".join(f"{k} ({v})" for k, v in sorted(counts.items(), key=lambda x: -x[1]))
         zline = " · ".join(f"{r.complex} z={r.z}" for r in cval.itertuples() if pd.notna(r.z))
         ev = evid[evid.program_label != "mixed"][["program_label", "n_regulators", "n_known_complex_members",
-                                                  "novel_members", "mean_centroid_cosine", "top_marker_genes"]]
+                                                  "assigned_neighbors", "mean_centroid_cosine", "top_marker_genes"]]
         ev_tbl = df_to_md(ev)
 
         def _c(s):
@@ -205,16 +205,19 @@ penalty for absent data). Of the top-30 EB, **{len(dem)} are demoted** and **{le
         programs_md = f"""
 ## Transcriptional programs
 
-A rank is one number; a **fingerprint** — a regulator's downstream effect vector — is its whole action
-on the cell. On a balanced panel of 200 top perturbations we match each regulator's fingerprint to the
-curated **SAGA / Mediator / TCR** complexes (nearest-centroid in the same space as the validated cosine
-similarity); matches above threshold get a program label, the rest stay *mixed*.
+A rank is one number; a **fingerprint** — a regulator's downstream effect vector — is what the
+perturbation actually does to the cell. On a balanced panel of 200 top perturbations we match each
+regulator's fingerprint to the curated **SAGA / Mediator / TCR** complexes (nearest-centroid in the
+same space as the validated cosine similarity). These are **candidate program assignments by
+fingerprint similarity — not claims of physical complex membership.** The classifier is conservative:
+only **{n_in} of 200** perturbations are assigned a program; the rest remain *mixed*, by design.
 
-- **The space recovers known biology** (permutation test, N=5000): {zline}. The latent PC1 is program
-  *identity*, not effect magnitude (|PC1| vs. n_downstream Spearman = {pc1}).
-- **{n_in} of 200 regulators map to a program**: {counts_txt}. The labels recover each complex's core
-  and add fingerprint-neighbors — e.g. the chromatin remodeler **CHD7** joins SAGA/chromatin. Every
-  label is auditable below and in `program_label_evidence.csv`.
+- **Fingerprint similarity recovers the known complexes** (permutation test, N=5000): {zline}. The
+  latent PC1 is program *identity*, not effect magnitude (|PC1| vs. n_downstream Spearman = {pc1}).
+- **{n_in} assigned**: {counts_txt}. Each program recovers its curated core and adds **newly assigned
+  neighbors** (non-curated genes placed in the same fingerprint neighborhood) — e.g. the chromatin
+  remodeler **CHD7** is assigned to the SAGA/chromatin program (a related perturbation response, not
+  complex membership). Every assignment is auditable below and in `program_label_evidence.csv`.
 
 {ev_tbl}
 
@@ -224,11 +227,13 @@ similarity); matches above threshold get a program label, the rest stay *mixed*.
 **Do the reproducibility-promoted hits form coherent programs?** They have neighborhoods as tight as
 the top global regulators (mean kNN cosine: promoted {_c('promoted')}, demoted {_c('demoted')} vs.
 global {_c('global')}), so they are **not statistical noise** — yet they map onto *none* of the
-canonical complexes. The reproducibility audit surfaces a **distinct** coherent set, not "more SAGA".
+canonical complexes. Read as: the audit surfaces a **distinct high-confidence set** rather than simply
+rediscovering the known complexes.
 
-*Scope: perturbation-program similarity anchored to known complexes, not de-novo pathway discovery;
-"response genes" are consistently-moved downstream genes (relative to the panel), not baseline markers;
-PCA is a view, not the proof. `make fingerprints` · detail in `docs/FINGERPRINT_ANALYSIS.md`.*
+*Scope: fingerprint-based, program-level re-analysis anchored to known complexes — candidate
+assignments and hypotheses, not de-novo pathway discovery or novel complex membership. "Response
+genes" are consistently-moved downstream genes (relative to the panel), not baseline markers; PCA is a
+view, not the proof. `make fingerprints` · detail in `docs/FINGERPRINT_ANALYSIS.md`.*
 """
 
     md = f"""# Report — Genome-scale CD4+ T cell Perturb-seq
@@ -252,9 +257,10 @@ signal from noise and prioritizing by a **large and reproducible** effect, not b
   power with uncertainty. The robust top is **chromatin/transcription** machinery
   (SAGA complex, Mediator, KDM1A, SETD2) — a large **and** stable effect across conditions.
 - **Fingerprint similarity organizes the top perturbations into recognizable programs** — recovering
-  TCR signaling, SAGA/chromatin and Mediator/transcription (permutation z=11/9/3) and adding new
-  members like CHD7 → chromatin. Same honesty, different object: not just *who* is strong, but *what
-  program* each perturbation induces and *who resembles whom*.
+  TCR signaling, SAGA/chromatin and Mediator/transcription (permutation z=11/9/3) and surfacing
+  candidate neighbors (e.g. the chromatin remodeler CHD7 assigned to the chromatin program by
+  fingerprint, not by complex membership). Same honesty, different object: not just *who* is strong,
+  but *what program* each perturbation resembles and *who resembles whom*.
 {edges_line}
 ## Top regulators (for review)
 

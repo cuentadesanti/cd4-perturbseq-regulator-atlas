@@ -216,7 +216,7 @@ async function showProfile(gene){
   const progHtml=p.in_program_panel?`
     <div class="sec" style="margin-top:20px">Transcriptional program</div>
     <p class="lead" style="margin:0 0 8px">${labeled
-      ? `Maps to the <b>${p.program_label}</b> program — nearest <b>${p.nearest_complex}</b> centroid, cosine <b>${fmt(p.nearest_complex_cosine)}</b>.`
+      ? `Assigned to the <b>${p.program_label}</b> program by fingerprint similarity (nearest <b>${p.nearest_complex}</b> centroid, cosine <b>${fmt(p.nearest_complex_cosine)}</b>) — a program-level hypothesis, not a complex-membership claim.`
       : `In the fingerprint panel but <b>unassigned</b> (mixed) — nearest complex ${p.nearest_complex} at cosine ${fmt(p.nearest_complex_cosine)} (below the labeling threshold).`}</p>
     ${(p.transcriptomic_neighbors||[]).length?`<div style="margin-bottom:8px"><span class="muted" style="font-size:12px">transcriptomic neighbors · </span>${p.transcriptomic_neighbors.map(n=>`<span class="chip pgnb" data-gene="${n.neighbor}" style="cursor:pointer"><b>${n.neighbor}</b> ${n.similarity.toFixed(2)}</span>`).join(" ")}</div>`:""}
     ${(p.program_markers||[]).length?`<div><span class="muted" style="font-size:12px">program response genes · </span>${p.program_markers.map(m=>`<span class="chip">${m.gene}${m.direction==="up"?" ↑":" ↓"}</span>`).join(" ")}</div>`:""}`:"";
@@ -293,7 +293,7 @@ async function renderPrograms(){
   PCA_PTS=d.points;
   const cv=(sm&&sm.complex_validation)||[];
   const zline=cv.filter(c=>c.z!=null).map(c=>`${c.complex} z=${c.z}`).join(" · ");
-  $("#pg").innerHTML=`<p class="lead">Fingerprint <b>similarity</b> organizes top perturbations into <b>recognizable programs</b>. Each regulator's fingerprint (its downstream zscore vector) is matched to the curated SAGA / Mediator / TCR complexes; matches above threshold are labeled, the rest stay <i>mixed</i> (conservative). Permutation validation: <b>${zline||"—"}</b>. The PCA below is a view — the evidence is nearest-neighbor recovery + these z-scores + program markers.</p>
+  $("#pg").innerHTML=`<p class="lead">Fingerprint <b>similarity</b> organizes top perturbations into <b>recognizable programs</b>. Each regulator's fingerprint (its downstream zscore vector) is matched to the curated SAGA / Mediator / TCR complexes; above threshold it's assigned, the rest stay <i>mixed</i> (only 25/200 assigned — conservative). These are <b>candidate program assignments by fingerprint similarity, not complex-membership claims</b>. Permutation validation: <b>${zline||"—"}</b>. The PCA is a view — the evidence is nearest-neighbor recovery + these z-scores + program markers.</p>
     <div class="filters"><label class="muted">color by</label>
       <select id="colby"><option value="program_label">program</option><option value="regulator_class">class</option><option value="source">panel source</option><option value="condition">condition</option></select>
       <span id="leg" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"></span></div>
