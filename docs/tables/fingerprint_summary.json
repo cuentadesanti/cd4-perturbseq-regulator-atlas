@@ -1,75 +1,50 @@
 {
-  "n_regulators": 220,
-  "n_genes_variable": 10282,
+  "matrix": "zscore",
+  "n_regulators": 200,
+  "n_genes": 2000,
+  "top_genes": 2000,
+  "panel_sources": {
+    "global": 75,
+    "context-specific": 75,
+    "promoted": 25,
+    "demoted": 25
+  },
   "evr_pc1_5": [
-    0.1637,
-    0.0556,
-    0.0406,
-    0.0309,
-    0.0276
+    0.2887,
+    0.0744,
+    0.0696,
+    0.0359,
+    0.0338
   ],
-  "pc1_abs_vs_ndownstream_spearman": 0.207,
+  "pc1_abs_vs_ndownstream_spearman": 0.249,
+  "n_clusters": 12,
   "complex_validation": [
     {
       "complex": "SAGA",
-      "n_present": 14,
-      "mean_intra_cosine": 0.1951,
-      "null_mean": 0.064,
-      "z": 4.23,
-      "p_perm": 0.0014,
-      "members": "TADA1;TADA2A;TADA2B;TADA3;SUPT20H;SUPT7L;TAF5L;TAF6L;SGF29;ATXN7L3;USP22;ENY2;KAT2B;SUPT3H"
+      "n_present": 8,
+      "mean_intra_cosine": 0.4784,
+      "null_mean": 0.0039,
+      "z": 9.23,
+      "p_perm": 0.0002,
+      "members": "TADA1;TADA2B;SUPT20H;SUPT7L;TAF6L;SGF29;ATXN7L3;USP22"
     },
     {
       "complex": "Mediator",
-      "n_present": 10,
-      "mean_intra_cosine": 0.2106,
-      "null_mean": 0.0641,
-      "z": 3.88,
-      "p_perm": 0.002,
-      "members": "MED1;MED10;MED12;MED13;MED14;MED15;MED19;MED23;MED24;CCNC"
+      "n_present": 7,
+      "mean_intra_cosine": 0.1962,
+      "null_mean": 0.0066,
+      "z": 3.23,
+      "p_perm": 0.0132,
+      "members": "MED1;MED12;MED15;MED19;MED23;MED24;CCNC"
     },
     {
       "complex": "TCR",
-      "n_present": 16,
-      "mean_intra_cosine": 0.5069,
-      "null_mean": 0.0641,
-      "z": 15.6,
+      "n_present": 5,
+      "mean_intra_cosine": 0.9161,
+      "null_mean": 0.0044,
+      "z": 11.24,
       "p_perm": 0.0002,
-      "members": "ZAP70;LCK;LAT;CD3D;CD3E;CD3G;CD247;ITK;PLCG1;LCP2;VAV1;PIK3CD;PRKCQ;CARD11;BCL10;MALT1"
-    },
-    {
-      "complex": "SWI/SNF",
-      "n_present": 8,
-      "mean_intra_cosine": 0.1444,
-      "null_mean": 0.0633,
-      "z": 1.87,
-      "p_perm": 0.04719,
-      "members": "SMARCA4;SMARCB1;SMARCC1;SMARCD1;SMARCD2;SMARCE1;ARID1A;ARID2"
+      "members": "ZAP70;LCK;LAT;CD3E;PLCG1"
     }
-  ],
-  "n_context_regulators": 1388,
-  "most_context_specific": [
-    "NDUFA5",
-    "CKS1B",
-    "TNFAIP3",
-    "CENPE",
-    "MTPAP",
-    "CNIH4",
-    "UNC45A",
-    "BRIP1",
-    "CAMLG",
-    "RBFA"
-  ],
-  "most_global": [
-    "L3MBTL2",
-    "TADA2B",
-    "ATF7IP2",
-    "NSD1",
-    "CCNA2",
-    "KDM1A",
-    "PCGF1",
-    "TRAF3",
-    "SETDB1",
-    "ATAD5"
   ]
 }

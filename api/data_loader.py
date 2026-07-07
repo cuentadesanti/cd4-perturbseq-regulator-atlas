@@ -58,6 +58,10 @@ class DataStore:
         self.edges = self._t("robust_edges.csv")
         self.edge_summary = self._t("edge_summary_by_regulator.csv")
         self.downstream = self._t("top_downstream_genes.csv")
+        # side analysis: transcriptional fingerprints (opcional, `make fingerprints`)
+        self.fp_pca = self._t("fingerprint_pca_scores.csv")
+        self.fp_neighbors = self._t("fingerprint_neighbors.csv")
+        self.fp_clusters = self._t("fingerprint_clusters.csv")
         self.de = self._t("DE_stats.suppl_table.csv", base=DATA)  # para el perfil por condición
 
         if self.ranking is None:
@@ -87,6 +91,11 @@ class DataStore:
         if self.edges is not None:
             for gene, sub in self.edges.groupby("perturbed_gene"):
                 self.edges_by_reg[gene] = sub
+        # nearest neighbors por gen (side analysis)
+        self.fp_neighbors_by_gene = {}
+        if self.fp_neighbors is not None:
+            for gene, sub in self.fp_neighbors.groupby("gene"):
+                self.fp_neighbors_by_gene[gene] = _records(sub.sort_values("rank"))
 
         self.conditions = (sorted(self.de["culture_condition"].unique().tolist())
                            if self.de is not None else ["Rest", "Stim8hr", "Stim48hr"])
@@ -114,7 +123,29 @@ class DataStore:
             "conditions": self.conditions,
             "reproducibility_available": self.repro is not None,
             "edges_available": self.edges is not None,
+            "programs_available": self.fp_pca is not None,
         }
+
+    # ---- side analysis: transcriptional fingerprints ----
+    def programs_pca(self):
+        if self.fp_pca is None:
+            return {"available": False, "points": []}
+        cols = [c for c in ["gene", "condition", "source", "regulator_class", "cluster",
+                            "regpower_eb_mean", "n_downstream", "PC1", "PC2", "PC3"]
+                if c in self.fp_pca.columns]
+        return {"available": True, "points": _records(self.fp_pca[cols])}
+
+    def programs_neighbors(self, gene):
+        nb = self.fp_neighbors_by_gene.get(gene)
+        if nb is None:
+            return {"gene": gene, "available": gene in self.fp_neighbors_by_gene,
+                    "in_panel": False, "neighbors": []}
+        return {"gene": gene, "available": True, "in_panel": True, "neighbors": nb}
+
+    def programs_clusters(self):
+        if self.fp_clusters is None:
+            return {"available": False, "clusters": []}
+        return {"available": True, "clusters": _records(self.fp_clusters)}
 
     def list_regulators(self, q=None, regulator_class=None, limit=50,
                         sort_by="core_rank"):

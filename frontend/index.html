@@ -90,12 +90,14 @@
     <button class="tab" data-view="explorer">Explorar reguladores</button>
     <button class="tab" data-view="audit">Auditoría</button>
     <button class="tab" data-view="edges">Red de efectos</button>
+    <button class="tab" data-view="programs">Programas</button>
   </div>
 
   <section id="v-overview"></section>
   <section id="v-explorer" class="hide"></section>
   <section id="v-audit" class="hide"></section>
   <section id="v-edges" class="hide"></section>
+  <section id="v-programs" class="hide"></section>
 </div>
 
 <script>
@@ -124,7 +126,7 @@ document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
   document.querySelectorAll("section[id^=v-]").forEach(s=>s.classList.toggle("hide",s.id!=="v-"+current));
   render(current);
 }));
-function render(v){ if(!SUMMARY)return; ({overview:renderOverview,explorer:renderExplorer,audit:renderAudit,edges:renderEdges}[v])(); }
+function render(v){ if(!SUMMARY)return; ({overview:renderOverview,explorer:renderExplorer,audit:renderAudit,edges:renderEdges,programs:renderPrograms}[v])(); }
 
 /* ---- Overview ---- */
 async function renderOverview(){
@@ -231,6 +233,60 @@ async function renderEdges(){
   $("#ed").innerHTML=`<p class="lead">2.470 edges de 6 reguladores del complejo SAGA. <span class="mono">P(|efecto|&gt;1.5×)</span>, no P(arista causal). Cobertura mínima → <b>bonus</b>.</p>
     <div class="sec" style="margin-top:6px">Edges por regulador <span class="up">↑</span>/<span class="down">↓</span></div>${regRows}
     <div class="sec" style="margin-top:18px">Targets convergentes</div><div style="display:flex;flex-wrap:wrap;gap:6px">${conv}</div>`;
+}
+
+/* ---- Programas (transcriptional fingerprints) ---- */
+const CPLX={SAGA:["TADA1","TADA2A","TADA2B","TADA3","SUPT20H","SGF29","TAF6L","TAF5L","USP22","ENY2","ATXN7L3","KAT2A"],
+  Mediator:["MED12","MED13","MED14","MED23","MED24","CCNC","CDK8"],
+  TCR:["ZAP70","LCK","LAT","LCP2","VAV1","ITK","CARD11","PLCG1"]};
+const cplxOf=g=>Object.keys(CPLX).find(k=>CPLX[k].includes(g));
+const COLBY={regulator_class:{global:"#4c8bf5","condition-specific":"#37b24d",NA:"#888"},
+  source:{global:"#4c8bf5","context-specific":"#37b24d",promoted:"#9775fa",demoted:"#b08968"},
+  condition:{Rest:"#888",Stim8hr:"#f59f00",Stim48hr:"#e03131"}};
+let PCA_PTS=null;
+async function renderPrograms(){
+  $("#v-programs").innerHTML=`<div class="panel"><div class="sec">Mapa de programas transcriptómicos · side analysis</div><div id="pg" class="muted">cargando…</div></div>`;
+  let d; try{ d=await api("/programs/pca"); }catch(e){ d={available:false}; }
+  if(!d||!d.available){$("#pg").innerHTML=`<span class="muted">No disponible (corre <span class="mono">make fingerprints</span>).</span>`;return;}
+  PCA_PTS=d.points;
+  $("#pg").innerHTML=`<p class="lead">De "qué reguladores son fuertes" a "<b>qué programa induce cada perturbación</b>". PCA sobre las huellas transcriptómicas (zscore) de un panel balanceado. Anillos = complejo conocido. Exploratorio, no descubrimiento causal.</p>
+    <div class="filters"><label class="muted">colorear por</label>
+      <select id="colby"><option value="regulator_class">clase</option><option value="source">fuente del panel</option><option value="condition">condición</option></select>
+      <span id="leg" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"></span></div>
+    <div id="scatter" style="margin-top:6px"></div>
+    <div class="search" style="margin-top:14px"><input id="nq" placeholder="reguladores similares a… (p. ej. SGF29, ZAP70)" autocomplete="off"><button id="ngo">Ver vecinos</button></div>
+    <div id="neighbors"></div>`;
+  const draw=()=>drawScatter($("#colby").value);
+  $("#colby").onchange=draw; draw();
+  $("#ngo").onclick=()=>showNeighbors($("#nq").value.trim());
+  $("#nq").addEventListener("keydown",e=>{if(e.key==="Enter")showNeighbors($("#nq").value.trim());});
+}
+function drawScatter(colby){
+  const P=PCA_PTS, W=760,H=520,pad=34;
+  const xs=P.map(p=>p.PC1),ys=P.map(p=>p.PC2);
+  const xmn=Math.min(...xs),xmx=Math.max(...xs),ymn=Math.min(...ys),ymx=Math.max(...ys);
+  const sx=v=>pad+(v-xmn)/(xmx-xmn)*(W-2*pad), sy=v=>H-pad-(v-ymn)/(ymx-ymn)*(H-2*pad);
+  const pal=COLBY[colby];
+  const dots=P.map(p=>{const c=pal[p[colby]]||"#888",cx=sx(p.PC1),cy=sy(p.PC2),k=cplxOf(p.gene);
+    return `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${k?5.5:4}" fill="${c}" fill-opacity="0.8"
+      ${k?`stroke="#111" stroke-width="1.4"`:``}><title>${p.gene} · ${p.condition} · ${p.source}</title></circle>`
+    +(k?`<text x="${(cx+6).toFixed(1)}" y="${(cy+3).toFixed(1)}" font-size="9" fill="var(--text)">${p.gene}</text>`:``);}).join("");
+  $("#scatter").innerHTML=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px;background:var(--panel2);border:1px solid var(--line2);border-radius:10px">
+    <text x="${W/2}" y="${H-8}" text-anchor="middle" font-size="11" fill="var(--muted)">PC1</text>
+    <text x="14" y="${H/2}" text-anchor="middle" font-size="11" fill="var(--muted)" transform="rotate(-90 14 ${H/2})">PC2</text>${dots}</svg>`;
+  $("#leg").innerHTML=Object.entries(pal).map(([k,c])=>`<span class="chip"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${c};margin-right:5px"></span>${k}</span>`).join("");
+}
+async function showNeighbors(gene){
+  if(!gene)return; const box=$("#neighbors"); const g=gene.toUpperCase();
+  box.innerHTML=`<div class="panel muted">buscando vecinos de ${g}…</div>`;
+  let d; try{ d=await api("/programs/neighbors/"+encodeURIComponent(g)); }catch(e){ d={in_panel:false}; }
+  if(!d.in_panel){box.innerHTML=`<div class="panel muted"><b>${g}</b> no está en el panel de huellas (200 reguladores balanceados). Prueba SGF29, ZAP70, MED12…</div>`;return;}
+  const chips=d.neighbors.map(n=>`<span class="chip" data-gene="${n.neighbor}" style="cursor:pointer">
+    <b>${n.neighbor}</b> · ${n.similarity.toFixed(2)} <span class="muted">${n.neighbor_condition}</span></span>`).join(" ");
+  box.innerHTML=`<div class="panel"><div class="sec">Reguladores transcriptómicamente similares a ${g}</div>
+    <p class="muted" style="margin:2px 0 10px">Vecinos por similitud coseno de huella. Clic → perfil.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">${chips}</div></div>`;
+  box.querySelectorAll(".chip[data-gene]").forEach(c=>c.addEventListener("click",()=>showProfile(c.dataset.gene)));
 }
 
 /* helpers */

@@ -90,6 +90,24 @@ def regulators_by_class(regulator_class: str):
     return get_store().list_regulators(regulator_class=regulator_class, limit=2000)
 
 
+@app.get("/programs/pca", tags=["programs"])
+def programs_pca():
+    """Scores PCA del panel de huellas transcriptómicas (side analysis)."""
+    return get_store().programs_pca()
+
+
+@app.get("/programs/neighbors/{gene}", tags=["programs"])
+def programs_neighbors(gene: str):
+    """Reguladores transcriptómicamente similares (nearest neighbors por huella)."""
+    return get_store().programs_neighbors(gene.upper())
+
+
+@app.get("/programs/clusters", tags=["programs"])
+def programs_clusters():
+    """Clusters de perturbaciones por similitud de huella."""
+    return get_store().programs_clusters()
+
+
 @app.get("/edges/summary", tags=["edges"])
 def edges_summary():
     s = get_store()

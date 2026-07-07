@@ -19,6 +19,7 @@ class Summary(BaseModel):
     conditions: list[str]
     reproducibility_available: bool
     edges_available: bool
+    programs_available: bool = False
 
 
 class RegulatorSummary(BaseModel):
