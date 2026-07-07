@@ -194,6 +194,11 @@ def main():
              .head(20).reset_index().rename(columns={"index": "gene"}))
     g_tab.to_csv(TAB / "top_global_regulators.csv", index=False)
     c_tab.to_csv(TAB / "top_condition_specific_regulators.csv", index=False)
+    # tabla completa de clases (todos los genes) — para el filtro de la API
+    cls_full = cls.reset_index()
+    cls_full = cls_full.rename(columns={cls_full.columns[0]: "gene"})
+    cls_full[["gene", "regulator_class", "condition_specificity",
+              "n_signif_conditions", "peak_condition"]].to_csv(TAB / "regulator_classes.csv", index=False)
     n_glob = int((cls.regulator_class == "global").sum())
     print(f"  [3] global vs condition-specific → 2 tablas "
           f"({n_glob} global / {len(cls)-n_glob} condition-specific)")

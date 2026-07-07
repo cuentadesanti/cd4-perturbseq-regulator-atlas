@@ -88,25 +88,49 @@ Opcional (remoto, requiere `pip install h5py s3fs fsspec`): `make spike` · `mak
 | `docs/tables/hub_ranking_bayes.csv` | ranking EB completo (todos los genes) |
 | `docs/tables/robust_edges.csv` | red de efectos con incertidumbre (bonus, Modelo 1) |
 | `docs/figures/*.png` | EDA + ranking + overview |
-| `docs/data-model.html` | explorador interactivo del modelo de datos |
+| `docs/data-model.html` | explorador interactivo (modelo de datos + EDA + estudio) |
+
+## Producto: Regulator Atlas (API + UI)
+
+*El pipeline produce los artefactos; una API read-only los hace explorables.* La API **no** corre
+modelos, **no** descarga h5ad y **no** toca S3 — solo sirve los CSV versionados de `make all`.
+
+```bash
+pip install -r requirements.txt      # incluye fastapi + uvicorn
+make all                             # genera las tablas que la API sirve
+make api                             # uvicorn :8000 · Swagger en http://localhost:8000/docs
+open frontend/index.html             # UI mínima que consume la API
+```
+
+Endpoints clave: `/summary`, `/regulators?q=&regulator_class=&sort_by=`, **`/regulators/{gene}`**
+(perfil completo: clase, perfil por condición, auditorías, top edges, interpretación),
+`/audit/reproducibility`, `/edges/downstream`. La UI tiene 4 pantallas: Overview, Explorar,
+Auditoría y Red de efectos. Detalle en [`api/README.md`](api/README.md).
 
 ## Limitaciones
 
 - **Nomenclatura honesta**: los modelos son **empirical-Bayes / pseudo-bayesianos**, no NB jerárquico
   completo ni MCMC (sin PPL, sin random effects formales).
-- `xcond_reproducibility` es una **feature exploratoria** (estabilidad cross-condición); **no** sustituye
-  la reproducibilidad cross-donor/cross-guide, que vive en `DE_stats.h5ad` (`single_guide_estimate`,
-  `donor_correlation_hits_mean`) — marcadas como `NA` en la tabla de review.
+- `xcond_reproducibility` es una **feature exploratoria** (estabilidad cross-condición). Se **audita** con
+  una **auditoría de sensibilidad guide/donor-aware** (`make repro-meta` → `scripts/extract_de_obs_metadata.py`,
+  extrae solo el `.obs`, sin `.layers`) que **repondera** el score EB con reproducibilidad **real** cross-guide
+  (`guide_correlation_all`) y cross-donor (`donor_correlation_hits_mean`) — es un **análisis de sensibilidad,
+  no un posterior nuevo**. Opcional, no reemplaza el core; ver *Auditoría de sensibilidad* en `docs/report.md`.
+  Cobertura honesta: cross-guide ~78% pero cross-donor solo ~19% de los contrastes → **peso neutral** donde
+  falta (un gen no se penaliza por no tener metadata de donante).
 - **Modelo 1 es opcional**: el acceso remoto por slice es viable (~4.5 s/fila, medido) pero latency-bound;
   el entregable oficial se sostiene solo con el core local.
 
 ## Submission summary
 
 Producto reproducible que convierte una matriz de DE de 1.8 TB en un **ranking de reguladores robustos
-con incertidumbre**, ejecutable en una laptop con ~10 GB de disco usando solo 15 MB de datos, más una
-**red de efectos con incertidumbre** (uncertainty-aware effect network) opcional leída en streaming del
-h5ad de 17 GB sin descargarlo.
-`make all` reproduce todo el core; ver `docs/report.md`.
+con incertidumbre**, ejecutable en una laptop con ~10 GB de disco usando solo 15 MB de datos. El core es
+**CSV-only**; cuando hay metadata `.obs` disponible, una **auditoría de sensibilidad guide/donor-aware**
+muestra qué reguladores sobreviven a chequeos de reproducibilidad real. Como bonus, una **red de efectos
+con incertidumbre** (uncertainty-aware effect network) leída en streaming del h5ad de 17 GB sin descargarlo.
+Y sobre todo eso, un **Regulator Atlas explorable**: API read-only (FastAPI) + UI para buscar un gen, ver su
+perfil, filtrar global vs context-specific y navegar las auditorías. `make all` reproduce el core;
+`make api` levanta el atlas. Ver `docs/report.md`.
 
 ---
 Datos: CZI Virtual Cells Platform · Marson Lab 2025 · preprint biorxiv `10.64898/2025.12.23.696273`.

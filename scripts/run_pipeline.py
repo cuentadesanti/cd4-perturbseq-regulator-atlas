@@ -35,6 +35,7 @@ OUTPUTS = [
     "docs/tables/hub_ranking_stability.csv",
     "docs/tables/top_global_regulators.csv",
     "docs/tables/top_condition_specific_regulators.csv",
+    "docs/tables/regulator_classes.csv",
     "docs/figures/07_hub_posterior_ranking.png",
     "docs/figures/08_kd_gate_changes_ranking.png",
     "docs/figures/10_global_vs_context_specific.png",

@@ -62,8 +62,21 @@ shrinkage premia a los reguladores con efecto grande **y** estable.
 - `xcond_reproducibility` es una **feature exploratoria** (estabilidad cross-condición). **No**
   sustituye la reproducibilidad cross-donor / cross-guide, que requiere `DE_stats.h5ad`.
 - El baseline de efectos fijos se trata como conocido (plug-in) → pseudo-bayesiano, no full-Bayes.
-- `single_guide_estimate` y `n_guides` NO están en el CSV; en la tabla de review aparecen como
-  `NA (requiere DE_stats.h5ad)`.
+- `single_guide_estimate` y `n_guides` NO están en el CSV; en la tabla de review del core aparecen como
+  `NA (requiere DE_stats.h5ad)` — sí están en la auditoría de sensibilidad de abajo.
+
+### Auditoría de sensibilidad guide/donor-aware (opcional)
+
+Cuando existe `de_obs_reproducibility_metadata.csv` (extraído del `.obs` de `DE_stats.h5ad`,
+sin `.layers`), `model_hubs.py` corre una auditoría: **repondera** el score EB con reproducibilidad
+real (`reweighted_score = regpower_eb_mean · repro_weight`) y reporta qué reguladores sobreviven
+(`reproducibility_audit.csv`, fig 19).
+
+- **Es un análisis de sensibilidad, no un posterior nuevo**: NO se reestima el modelo EB.
+- **Cobertura parcial**: `guide_correlation_all` ~78% de contrastes, `donor_correlation_hits_mean`
+  solo ~19% → en la práctica es más *guide-aware* que *donor-aware*. Donde falta la métrica se usa un
+  **peso neutral** (0.75), de modo que **un gen no se penaliza solo por no tener metadata de donante**.
+- El ranking **core no depende** de este archivo (`make all` corre sin él).
 
 ---
 

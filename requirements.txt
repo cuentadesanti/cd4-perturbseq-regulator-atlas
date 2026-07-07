@@ -6,5 +6,10 @@ statsmodels
 matplotlib
 
 # Opcional — Modelo 1 (streaming del h5ad remoto sin descargarlo)
-# instala solo si vas a correr `make spike` / `make edges`:
+# instala solo si vas a correr `make spike` / `make edges` / `make repro-meta`:
 #   pip install h5py s3fs fsspec
+
+# Opcional — API read-only (Regulator Atlas)
+# instala solo si vas a correr la API:  uvicorn api.main:app --port 8000
+fastapi
+uvicorn[standard]

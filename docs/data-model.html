@@ -172,6 +172,36 @@
   .repbar span{display:block;height:100%;background:var(--accent)}
   @media (max-width:720px){.charts{grid-template-columns:1fr}.cpanel.wide{grid-column:auto}}
 
+  /* ---------- study view ---------- */
+  .study-sec{margin:0 0 30px}
+  .study-h{font-family:var(--font-display);font-size:19px;font-weight:660;letter-spacing:-.015em;
+    margin:0 0 4px;display:flex;align-items:center;gap:10px}
+  .study-h .n{font-family:var(--font-mono);font-size:12px;color:var(--accent);font-weight:600}
+  .study-h .bonus{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--violet);border:1px solid color-mix(in srgb,var(--violet) 40%,var(--line));border-radius:20px;padding:2px 8px}
+  .study-lead{color:var(--muted);font-size:13.5px;margin:0 0 16px;max-width:70ch}
+  .study-lead b{color:var(--text)}
+  .study-panel{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .slopewrap{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:14px 16px 6px}
+  .slopewrap h4{font-family:var(--font-display);font-size:14px;font-weight:640;margin:0 0 2px}
+  .slopewrap .csub{font-size:12px;color:var(--muted);margin:0 0 8px}
+  svg.slope{width:100%;height:auto;display:block;overflow:visible}
+  svg.slope text{font-family:var(--font-mono)}
+  .rt-bar{display:inline-block;height:8px;border-radius:4px;background:var(--accent);vertical-align:middle;margin-right:7px}
+  .cls{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.04em;padding:2px 7px;border-radius:20px}
+  .cls.global{background:var(--accent-dim);color:var(--accent)}
+  .cls.cs{background:var(--violet-dim);color:var(--violet)}
+  .stt{font-family:var(--font-mono);font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:5px}
+  .stt.dem{background:color-mix(in srgb,var(--up) 16%,transparent);color:var(--up)}
+  .stt.pro{background:var(--accent-dim);color:var(--accent)}
+  .cov{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:4px 0 14px}
+  .covc{background:var(--panel-2);border:1px solid var(--line);border-radius:11px;padding:13px 15px;border-left:3px solid var(--accent)}
+  .covc.partial{border-left-color:var(--amber)}
+  .covc .cn{font-family:var(--font-mono);font-size:23px;font-weight:600;font-variant-numeric:tabular-nums}
+  .covc .ck{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:680px){.two-col{grid-template-columns:1fr}}
+
   /* ---------- drawer ---------- */
   .scrim{position:fixed;inset:0;background:rgba(4,6,10,.55);backdrop-filter:blur(2px);
     opacity:0;pointer-events:none;transition:opacity .2s;z-index:40}
@@ -263,6 +293,7 @@
     <button class="tab" role="tab" id="tab-flow" aria-selected="true" aria-controls="view-flow">Flujo de granularidad</button>
     <button class="tab" role="tab" id="tab-files" aria-selected="false" aria-controls="view-files">Artefactos y archivos</button>
     <button class="tab" role="tab" id="tab-eda" aria-selected="false" aria-controls="view-eda">EDA · 80/20</button>
+    <button class="tab" role="tab" id="tab-study" aria-selected="false" aria-controls="view-study">Estudio · reguladores</button>
   </div>
 
   <!-- ============ VIEW: FLOW ============ -->
@@ -299,6 +330,12 @@
     <p class="tabhint mono">Análisis exploratorio 80/20 · solo con las tablas suplementarias (~15 MB) · regenerable con <span style="color:var(--accent)">scripts/eda.py</span></p>
     <div class="findings" id="findings"></div>
     <div class="charts" id="charts"></div>
+  </section>
+
+  <!-- ============ VIEW: STUDY ============ -->
+  <section id="view-study" role="tabpanel" aria-labelledby="tab-study" class="hide">
+    <p class="tabhint mono">De la matriz de DE a reguladores robustos con incertidumbre · empirical-Bayes + auditorías</p>
+    <div id="study"></div>
   </section>
 
   <footer>
@@ -756,18 +793,151 @@ function drawRepro(){
   a.x.save();a.x.translate(12,a.h/2);a.x.rotate(-Math.PI/2);a.x.fillText("efecto máx (log)",0,0);a.x.restore();
 }
 
+/* ---------------- STUDY view ---------------- */
+const S_EB=[["SGF29",2.5,0.84,"global"],["TADA2B",2.45,0.67,"global"],["SENP5",2.43,0.72,"global"],["SUPT20H",2.39,0.7,"global"],["TADA1",2.35,0.58,"global"],["CCNC",2.29,0.64,"global"],["MED12",2.28,0.62,"global"],["NFRKB",2.27,0.64,"global"],["TAF6L",2.24,0.68,"global"],["ARNT",2.22,0.52,"global"],["ATP2A2",2.22,0.64,"global"],["TAF13",2.19,0.59,"global"],["LEO1",2.18,0.58,"global"],["KDM1A",2.16,0.59,"global"]];
+const S_KD=[["TADA2B",1,1,2,false],["CD3E",2,2,309,false],["LAT",3,3,244,false],["SENP5",4,4,3,false],["PLCG1",5,5,320,false],["ZAP70",6,6,88,false],["CD3D",7,7,765,false],["LCP2",8,8,851,false],["CD3G",9,9,436,false],["VAV1",10,10,84,false],["SGF29",11,11,1,false],["TAF6L",12,12,9,false],["UBXN1",13,13,34,false],["CD247",15,15,389,false],["ZBED3",17,null,null,true],["MED12",18,17,7,false]];
+const S_MOV=[["SETDB1",37,14,"promovido",0.57,0.88],["CPSF6",31,16,"promovido",null,0.77],["WDR82",38,22,"promovido",0.43,0.85],["WAC",35,25,"promovido",0.36,0.82],["MED24",49,30,"promovido",0.42,0.83],["EIF4G2",23,31,"demotado",0.31,0.71],["ELOF1",15,33,"demotado",0.28,0.69],["ELOB",17,43,"demotado",0.24,0.64],["CCNC",6,45,"demotado",0.18,0.58],["SMG1",24,288,"demotado",0.05,0.45]];
+const S_SURV=[["TADA2B",2,1],["SGF29",1,2],["MED12",7,3],["TAF6L",9,4],["TADA1",5,5],["SUPT20H",4,8]];
+const S_COV={guide:78.3,donor:18.8};
+const S_GLOB=["SGF29","TADA2B","SENP5","SUPT20H","TADA1","CCNC"], S_CTX=["NCKAP1L","DOP1B","POGLUT3","ZAP70","TFAM","LCK"];
+const S_EDN=[["CLU",6],["HHLA2",6],["TCN2",6],["ALPK1",6],["EBI3",6],["SCARB2",6],["IL4I1",6],["HMSD",6]];
+const S_EDR=[["TADA2B",676,114],["SENP5",441,60],["SGF29",280,146],["TADA1",256,56],["SUPT20H",231,39],["TSPYL5",155,16]];
+
+function slopeSVG(colLabels, series, cap, sink, H){
+  const W=880, top=34, bot=18;
+  const plotH=H-top-bot, n=colLabels.length, xL=150, xR=W-90;
+  const cx=i=> n===1?xL : xL + i/(n-1)*(xR-xL);
+  const yOf=r=> top + (Math.min(r==null?sink:r, sink)-1)/(sink-1)*plotH;
+  let s=`<svg class="slope" viewBox="0 0 ${W} ${H}" role="img" aria-label="slopegraph">`;
+  colLabels.forEach((L,i)=>{ L.split("\n").forEach((ln,k)=>{
+    s+=`<text x="${cx(i).toFixed(0)}" y="${12+k*11}" text-anchor="middle" font-size="10.5" style="fill:var(--muted)">${ln}</text>`; }); });
+  series.forEach(se=>{
+    const pts=se.ranks.map((r,i)=>[cx(i), yOf(r)]);
+    const d=pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" ");
+    s+=`<path d="${d}" fill="none" stroke-width="1.6" opacity="0.85" style="stroke:${se.color}"/>`;
+    pts.forEach(p=> s+=`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.8" style="fill:${se.color}"/>`);
+    s+=`<text x="${xL-7}" y="${(yOf(se.ranks[0])+3).toFixed(1)}" text-anchor="end" font-size="9.5" style="fill:var(--text)">${se.label}</text>`;
+    if(se.right) s+=`<text x="${xR+7}" y="${(pts[pts.length-1][1]+3).toFixed(1)}" text-anchor="start" font-size="9" style="fill:${se.color}">${se.right}</text>`;
+  });
+  return s+`</svg>`;
+}
+
+function renderStudy(){
+  const TEAL="var(--accent)", AMBER="var(--amber)", UPc="var(--up)", DOWNc="var(--down)";
+  // 1 — ranking EB
+  const maxrp=Math.max(...S_EB.map(r=>r[1]));
+  const ebRows=S_EB.map(r=>`<tr>
+    <td class="gn">${r[0]}</td>
+    <td><span class="rt-bar" style="width:${(r[1]/maxrp*90).toFixed(0)}px"></span><span class="mono" style="font-size:11px">${r[1]}</span></td>
+    <td class="num">${(r[2]*100).toFixed(0)}%</td>
+    <td><span class="cls ${r[3]==="global"?"global":"cs"}">${r[3]}</span></td></tr>`).join("");
+  // 2 — KD gate slope
+  const kdSeries=S_KD.map(r=>{
+    const dropped=r[4], eb=r[3];
+    const col= dropped?UPc : (eb>30?AMBER:TEAL);
+    return {label:r[0], color:col, ranks:[r[1], r[2], r[3]], right: dropped?"sin KD":(eb>30?"▼":"")};
+  });
+  // 3 — repro slope (movers + survivors), cap 50
+  const reproSeries=[
+    ...S_SURV.map(r=>({label:r[0],color:TEAL,ranks:[r[1],r[2]]})),
+    ...S_MOV.map(r=>({label:r[0], color:r[3]==="demotado"?AMBER:DOWNc,
+                      ranks:[r[1], Math.min(r[2],52)], right:"#"+r[2]}))
+  ];
+  const movRows=S_MOV.map(r=>`<tr>
+    <td class="gn">${r[0]}</td><td class="num mono">${r[1]}→${r[2]}</td>
+    <td><span class="stt ${r[3]==="demotado"?"dem":"pro"}">${r[3]==="demotado"?"demotado":"promovido"}</span></td>
+    <td class="num">${r[4]==null?"—":r[4]}</td><td class="num">${r[5]}</td>
+    <td style="font-size:11px;color:var(--muted)">${r[6]}</td></tr>`).join("");
+  // 4 — edges
+  const maxe=Math.max(...S_EDR.map(r=>r[1]+r[2]));
+  const edrRows=S_EDR.map(r=>{const t=r[1]+r[2],uw=(r[1]/t*100).toFixed(0);
+    return `<div class="bar-row"><span class="lb">${r[0]}</span>
+      <div class="bar-track" style="background:transparent"><div class="split" style="width:${(t/maxe*100).toFixed(0)}%">
+      <div class="u" style="width:${uw}%"></div><div class="d" style="flex:1"></div></div></div>
+      <span class="vv">${t}</span></div>`;}).join("");
+
+  $("#study").innerHTML=`
+  <div class="study-sec">
+    <div class="study-h"><span class="n">01</span>Ranking empirical-Bayes de reguladores</div>
+    <p class="study-lead">Poder regulatorio latente por gen, con <b>gate de knockdown</b> y shrinkage. El top es
+      maquinaria de <b>cromatina/transcripción</b> (SAGA, Mediador), no los hubs crudos del TCR.</p>
+    <div class="study-panel"><table class="rtable"><thead><tr>
+      <th>gen</th><th>poder regulatorio (EB)</th><th class="num">estab.</th><th>clase</th></tr></thead>
+      <tbody>${ebRows}</tbody></table>
+      <div class="legend-in" style="margin-top:10px">estab. = frecuencia de selección en el top-30 (bootstrap B=200) · clase = global / context-specific</div></div>
+  </div>
+
+  <div class="study-sec">
+    <div class="study-h"><span class="n">02</span>Auditoría de calidad — ¿por qué importan los gates?</div>
+    <p class="study-lead">Rankear por <b>n_downstream</b> crudo premia hubs que no sobreviven: <b>2/30</b> caen por
+      el gate de KD (sin knockdown validado) y <b>~9</b> se demotan por ser <b>context-specific</b>.</p>
+    <div class="slopewrap" style="margin-bottom:14px"><h4>El gate de KD + shrinkage reordena el top</h4>
+      <p class="csub">raw → KD-gated → EB · amarillo = hub TCR demotado (context-specific) · rojo = sin KD válido</p>
+      ${slopeSVG(["raw\n(n_downstream)","KD-gated","EB (core)"], kdSeries, 40, 45, 440)}</div>
+    <div>
+      <div class="study-panel">
+        <div class="sec-t" style="margin-top:2px">Global vs context-specific</div>
+        <p style="font-size:12.5px;color:var(--muted);margin:0 0 8px">Separando por
+          <span class="mono">condition_specificity = max/sum</span> de n_downstream:</p>
+        <p style="font-size:12.5px;margin:0 0 6px"><b>Globales</b> (estables en ≥2 cond):</p>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px">${S_GLOB.map(g=>`<span class="cls global">${g}</span>`).join("")}</div>
+        <p style="font-size:12.5px;margin:0 0 6px"><b>Context-specific</b> (una condición) — incluye TCR:</p>
+        <div style="display:flex;flex-wrap:wrap;gap:5px">${S_CTX.map(g=>`<span class="cls cs">${g}</span>`).join("")}</div>
+        <div class="callout" style="margin-top:14px">La estabilidad por bootstrap es <b>moderada</b>: léelo como
+          un <b>conjunto</b> de reguladores robustos, no como un orden exacto.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="study-sec">
+    <div class="study-h"><span class="n">03</span>Auditoría de sensibilidad — reproducibilidad real</div>
+    <p class="study-lead"><b>No es un modelo nuevo</b>: reponderamos el score EB con reproducibilidad real
+      (cross-guide, cross-donor) del <span class="mono">.obs</span> de DE_stats.h5ad, como análisis de sensibilidad.</p>
+    <div class="cov">
+      <div class="covc"><div class="cn">${S_COV.guide.toFixed(0)}%</div><div class="ck">cobertura cross-guide (amplia)</div></div>
+      <div class="covc partial"><div class="cn">${S_COV.donor.toFixed(0)}%</div><div class="ck">cobertura cross-donor (parcial → peso neutral)</div></div>
+    </div>
+    <div class="slopewrap" style="margin-bottom:14px"><h4>¿Quién sobrevive a la reproducibilidad real?</h4>
+      <p class="csub">EB core → guide/donor-aware · amarillo = demotado · azul = promovido · teal = sobrevive</p>
+      ${slopeSVG(["EB (core)","guide/donor-aware"], reproSeries, 52, 56, 470)}</div>
+    <div>
+      <div class="study-panel"><div class="sec-t" style="margin-top:2px">Movimientos del top-30</div>
+        <div style="overflow-x:auto"><table class="rtable" style="min-width:0"><thead><tr>
+          <th>gen</th><th class="num">rank</th><th>estado</th><th class="num">guide</th><th class="num">donor</th><th>razón</th>
+        </tr></thead><tbody>${movRows}</tbody></table></div></div>
+    </div>
+  </div>
+
+  <div class="study-sec">
+    <div class="study-h"><span class="n">04</span>Red de efectos con incertidumbre<span class="bonus">bonus · proof-of-concept</span></div>
+    <p class="study-lead">EB normal-normal sobre log_fc/lfcSE del h5ad remoto (sin descargarlo). <b>2.470 edges</b>
+      de 6 reguladores del complejo <b>SAGA</b>. <span class="mono">P(|efecto|&gt;1.5×)</span>, no P(arista causal).</p>
+    <div class="two-col">
+      <div class="study-panel"><div class="sec-t" style="margin-top:2px">Edges por regulador
+        <span style="color:var(--up)">↑</span>/<span style="color:var(--down)">↓</span></div>
+        <div class="bars">${edrRows}</div></div>
+      <div class="study-panel"><div class="sec-t" style="margin-top:2px">Targets convergentes (6/6 reguladores)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">${S_EDN.map(r=>`<span class="chip"><b>${r[0]}</b></span>`).join("")}</div>
+        <div class="callout">Los 6 co-miembros de SAGA comparten <b>579 targets</b> → convergencia esperada
+          que <b>valida el método</b>. Cobertura mínima (6/7913) → se deja como <b>bonus</b>, no resultado fuerte.</div></div>
+    </div>
+  </div>`;
+}
+
 /* ---------------- tabs ---------------- */
-const VIEWS={flow:$("#view-flow"),files:$("#view-files"),eda:$("#view-eda")};
-const TABS={flow:$("#tab-flow"),files:$("#tab-files"),eda:$("#tab-eda")};
-let edaBuilt=false;
+const VIEWS={flow:$("#view-flow"),files:$("#view-files"),eda:$("#view-eda"),study:$("#view-study")};
+const TABS={flow:$("#tab-flow"),files:$("#tab-files"),eda:$("#tab-eda"),study:$("#tab-study")};
+let edaBuilt=false, studyBuilt=false;
 function selectTab(which){
   for(const k in VIEWS){VIEWS[k].classList.toggle("hide",k!==which);TABS[k].setAttribute("aria-selected",k===which);}
   if(which==="flow") requestAnimationFrame(drawLinks);
   if(which==="eda"){ if(!edaBuilt){renderEDA();edaBuilt=true;} else requestAnimationFrame(drawScatter); }
+  if(which==="study" && !studyBuilt){ renderStudy(); studyBuilt=true; }
 }
 TABS.flow.addEventListener("click",()=>selectTab("flow"));
 TABS.files.addEventListener("click",()=>selectTab("files"));
 TABS.eda.addEventListener("click",()=>selectTab("eda"));
+TABS.study.addEventListener("click",()=>selectTab("study"));
 
 /* ---------------- redraw hooks ---------------- */
 function redraw(){drawLinks(); if(current==="devalue")drawVolcano(); if(edaBuilt&&!VIEWS.eda.classList.contains("hide")){drawScatter();drawRepro();}}

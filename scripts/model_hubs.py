@@ -185,7 +185,143 @@ def main():
     fig.tight_layout(); fig.savefig(FIG / "07_hub_posterior_ranking.png", dpi=130, bbox_inches="tight")
     plt.close(fig)
     print("  figura → docs/figures/07_hub_posterior_ranking.png")
+
+    reproducibility_sensitivity_audit(de, rank)   # auditoría opcional (no reemplaza el core)
     print("\n✓ Modelo 2 completo.")
+
+
+def reproducibility_sensitivity_audit(de, core_rank):
+    """Auditoría de SENSIBILIDAD guide/donor-aware.
+
+    NO reestima el posterior EB ni es un modelo nuevo: repondera el score EB con
+    reproducibilidad REAL del .obs de DE_stats.h5ad (cross-guide amplia, cross-donor
+    parcial) y observa qué reguladores sobreviven. Solo corre si existe el metadata;
+    el ranking core NO depende de esto."""
+    meta_path = TAB / "de_obs_reproducibility_metadata.csv"
+    if not meta_path.exists():
+        print("  [sensitivity audit] omitido (no existe de_obs_reproducibility_metadata.csv). "
+              "El core no depende de esto.")
+        return
+    AMBER = "#e0a441"
+    meta = pd.read_csv(meta_path).drop(columns=["target_contrast_gene_name"], errors="ignore")
+    sig = de[de["ontarget_significant"]][
+        ["target_contrast_gene_name", "target_contrast", "culture_condition", "n_downstream"]].copy()
+    m = sig.merge(meta, on=["target_contrast", "culture_condition"], how="left")
+
+    # --- coverage del join (explícito: cross-donor es parcial) ---
+    cov = pd.DataFrame([{
+        "n_rows_de": len(de),
+        "n_rows_sig": len(sig),
+        "n_rows_joined": int(m["single_guide_estimate"].notna().sum()),
+        "pct_single_guide_available": round(m["single_guide_estimate"].notna().mean() * 100, 1),
+        "pct_guide_corr_available": round(m["guide_correlation_all"].notna().mean() * 100, 1),
+        "pct_donor_corr_available": round(m["donor_correlation_hits_mean"].notna().mean() * 100, 1),
+    }])
+    cov.to_csv(TAB / "reproducibility_coverage.csv", index=False)
+    print(f"  [sensitivity audit] coverage: guide_corr {cov.pct_guide_corr_available[0]:.0f}% · "
+          f"donor_corr {cov.pct_donor_corr_available[0]:.0f}% (parcial) → peso neutral donde falta")
+
+    def agg(g):
+        return pd.Series({
+            "guide_corr": g["guide_correlation_all"].mean(),
+            "donor_corr": g["donor_correlation_hits_mean"].mean(),
+            "single_guide_frac": g["single_guide_estimate"].astype(float).mean(),
+            "n_guides_med": g["n_guides"].median(),
+            "peak_condition": g.loc[g["n_downstream"].idxmax(), "culture_condition"],
+        })
+    pg = m.groupby("target_contrast_gene_name").apply(agg, include_groups=False)
+
+    pg["guide_score"] = pg["guide_corr"].clip(0, 1)
+    pg["donor_score"] = pg["donor_corr"].clip(0, 1)
+    pg["single_guide_penalty"] = (1 - 0.4 * pg["single_guide_frac"].fillna(1)).round(3)
+    # reweighting (neutral 0.75 donde falta la métrica → no penaliza por dato ausente)
+    gt = (0.5 + 0.5 * pg["guide_score"]).fillna(0.75)
+    dt = (0.5 + 0.5 * pg["donor_score"]).fillna(0.75)
+    pg["repro_weight"] = (gt * dt * pg["single_guide_penalty"]).round(3)
+    pg["donor_metadata"] = np.where(pg["donor_corr"].notna(), "presente", "ausente (peso neutral)")
+
+    out = core_rank[["rank", "regpower_eb_mean"]].rename(columns={"rank": "eb_rank"}).join(pg, how="left")
+    out["repro_weight"] = out["repro_weight"].fillna(0.75)          # genes sin metadata → neutral
+    out["donor_metadata"] = out["donor_metadata"].fillna("ausente (peso neutral)")
+    out["reweighted_score"] = (out["regpower_eb_mean"] * out["repro_weight"]).round(4)
+    out = out.sort_values("reweighted_score", ascending=False)
+    out["new_rank"] = np.arange(1, len(out) + 1)
+    out = out.rename(columns={"eb_rank": "old_rank"})
+    out["rank_shift"] = out["old_rank"] - out["new_rank"]           # + = subió con reproducibilidad
+    out["guide_corr"] = out["guide_corr"].round(3)
+    out["donor_corr"] = out["donor_corr"].round(3)
+    out["single_guide_frac"] = out["single_guide_frac"].round(2)
+
+    full = out.reset_index()
+    full = full.rename(columns={full.columns[0]: "gene"})
+    full[["gene", "old_rank", "new_rank", "rank_shift", "regpower_eb_mean", "guide_corr",
+          "donor_corr", "single_guide_frac", "repro_weight", "reweighted_score",
+          "donor_metadata", "n_guides_med", "peak_condition"]].to_csv(
+        TAB / "hub_ranking_bayes_reproducibility_aware.csv", index=False)
+
+    # --- audit interpretable: unión de top-30 de ambos rankings, con razón textual ---
+    uni = full[(full["old_rank"] <= 30) | (full["new_rank"] <= 30)].copy()
+    def classify(r):
+        if r["old_rank"] <= 30 and r["new_rank"] <= 30:
+            st = "sobrevive"
+        elif r["old_rank"] <= 30 and r["new_rank"] > 30:
+            st = "demotado"
+        else:
+            st = "promovido"
+        if st == "promovido":
+            rs = "promoted: reproducibilidad guide/donor alta (subvalorada por el core)"
+        elif st == "demotado":
+            if r["single_guide_frac"] >= 0.5:
+                rs = "demoted: single-guide (sin chequeo cross-guide)"
+            elif pd.notna(r["guide_corr"]) and r["guide_corr"] < 0.3:
+                rs = "demoted: baja correlación cross-guide"
+            else:
+                rs = "demoted: reproducibilidad más baja que sus pares"
+        else:  # sobrevive
+            rs = ("survives: EB alto; donor metadata ausente (peso neutral)"
+                  if r["donor_metadata"].startswith("ausente")
+                  else "survives: EB alto y reproducible (guide + donor)")
+        return pd.Series({"status": st, "reason": rs})
+    uni[["status", "reason"]] = uni.apply(classify, axis=1)
+    audit = uni[["gene", "old_rank", "new_rank", "status", "rank_shift", "guide_corr",
+                 "donor_corr", "single_guide_frac", "donor_metadata", "reason"]]
+    audit.sort_values("new_rank").to_csv(TAB / "reproducibility_audit.csv", index=False)
+
+    # top-30 guide/donor-aware (judge-facing) con las columnas del join
+    top = full.sort_values("new_rank").head(30)[
+        ["gene", "peak_condition", "old_rank", "new_rank", "rank_shift", "guide_corr",
+         "donor_corr", "single_guide_frac", "repro_weight", "reweighted_score", "donor_metadata"]]
+    top.to_csv(TAB / "top_regulators_reproducibility_aware.csv", index=False)
+
+    n_dem = int((uni["status"] == "demotado").sum())
+    n_pro = int((uni["status"] == "promovido").sum())
+    print(f"  [sensitivity audit] join OK · {n_dem} demotados / {n_pro} promovidos del top-30")
+    print("      tablas → hub_ranking_bayes_reproducibility_aware.csv, "
+          "top_regulators_reproducibility_aware.csv, reproducibility_audit.csv, reproducibility_coverage.csv")
+
+    # figura 19 — slopegraph EB core -> reweighted (guide/donor-aware) para el top-20 EB
+    top20 = full.sort_values("old_rank").head(20)
+    CAP = 40
+    fig, ax = plt.subplots(figsize=(7.4, 6.6))
+    for _, r in top20.iterrows():
+        y0, y1 = min(int(r["old_rank"]), CAP), min(int(r["new_rank"]), CAP)
+        col = ACCENT if r["new_rank"] <= 30 else AMBER
+        ax.plot([0, 1], [y0, y1], "-o", color=col, lw=1.6, ms=5, alpha=.85)
+        ax.text(-0.04, y0, r["gene"], ha="right", va="center", fontsize=8, color="#333")
+        if r["new_rank"] > 30:
+            ax.text(1.04, y1, f"#{int(r['new_rank'])}", ha="left", va="center", fontsize=7.5, color=col)
+    ax.set_xlim(-0.45, 1.5); ax.set_ylim(CAP + 3, 0)
+    ax.set_xticks([0, 1])
+    ax.set_xticklabels(["ranking EB\n(core)", "guide/donor-aware\n(EB score reponderado)"])
+    ax.set_yticks([1, 10, 20, 30, 40]); ax.set_ylabel("posición en el ranking (top-40)")
+    ax.set_title("Auditoría de sensibilidad — ¿quién sobrevive a la reproducibilidad real?",
+                 fontweight="bold", fontsize=11)
+    ax.grid(False)
+    ax.text(0.5, CAP + 2.2, "amarillo = demotado al reponderar por reproducibilidad real (no es un modelo nuevo)",
+            ha="center", fontsize=8, color=AMBER, style="italic")
+    fig.tight_layout(); fig.savefig(FIG / "19_reproducibility_aware_ranking_shift.png", dpi=135, bbox_inches="tight")
+    plt.close(fig)
+    print("      figura → docs/figures/19_reproducibility_aware_ranking_shift.png")
 
 
 if __name__ == "__main__":

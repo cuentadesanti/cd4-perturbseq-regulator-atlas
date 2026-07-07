@@ -1,6 +1,6 @@
 PY := python3
 
-.PHONY: all eda model audit report spike edges eda-edges clean pipeline help
+.PHONY: all eda model audit report spike edges eda-edges repro-meta api clean pipeline help
 
 help:
 	@echo "Targets:"
@@ -12,6 +12,8 @@ help:
 	@echo "  make spike    - Modelo 1: spike de acceso remoto (OPCIONAL)"
 	@echo "  make edges    - Modelo 1: red de edges, bonus (OPCIONAL, remoto)"
 	@echo "  make eda-edges- EDA de la red de edges (usa robust_edges.csv si existe)"
+	@echo "  make repro-meta - extrae .obs de reproducibilidad del h5ad (OPCIONAL, remoto)"
+	@echo "  make api      - Regulator Atlas API read-only (uvicorn :8000, Swagger en /docs)"
 	@echo "  make clean    - borra outputs generados (docs/figures, docs/tables, report)"
 
 eda:
@@ -40,6 +42,12 @@ edges:
 
 eda-edges:
 	$(PY) scripts/eda_edges.py
+
+repro-meta:
+	$(PY) scripts/extract_de_obs_metadata.py
+
+api:
+	$(PY) -m uvicorn api.main:app --reload --port 8000
 
 clean:
 	rm -f docs/figures/*.png docs/tables/*.csv docs/report.md

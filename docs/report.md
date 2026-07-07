@@ -74,6 +74,40 @@ Tablas: `top_global_regulators.csv`, `top_condition_specific_regulators.csv`.
 
 ![globalvs](figures/10_global_vs_context_specific.png)
 
+## Auditoría de sensibilidad: ¿el ranking sobrevive a la reproducibilidad real (guide/donor)?
+
+El caveat del ranking core era usar `xcond_reproducibility` (proxy cross-condición). Lo auditamos con
+reproducibilidad **real** del `.obs` de `DE_stats.h5ad` (`scripts/extract_de_obs_metadata.py`, solo
+`.obs`, ~4 s, sin `.layers`): `guide_correlation_all` (concordancia entre las 2 guías) y
+`donor_correlation_hits_mean` (concordancia cross-donor), más penalización a targets de una sola guía.
+
+**No reestimamos el posterior EB ni es un modelo nuevo**: reponderamos el score EB
+(`reweighted_score = regpower_eb_mean · repro_weight`) como **análisis de sensibilidad** — qué
+reguladores sobreviven. En la práctica es más **guide-aware** que **donor-aware**: `guide_corr` cubre
+78% de los contrastes pero `donor_corr` solo **19%**
+(el análisis cross-donor se hizo en un subconjunto); donde falta, se usa un **peso neutral** (no penaliza
+por dato ausente). Del top-30 EB, **5 se demotan** y **5 se promueven**:
+
+| gene | old_rank | new_rank | status | guide_corr | donor_corr | reason |
+| --- | --- | --- | --- | --- | --- | --- |
+| CCNC | 6 | 45 | demotado | 0.185 | 0.582 | demoted: baja correlación cross-guide |
+| ELOF1 | 15 | 33 | demotado | 0.283 | 0.687 | demoted: baja correlación cross-guide |
+| ELOB | 17 | 43 | demotado | 0.242 | 0.643 | demoted: baja correlación cross-guide |
+| EIF4G2 | 23 | 31 | demotado | 0.313 | 0.71 | demoted: reproducibilidad más baja que sus pares |
+| SMG1 | 24 | 288 | demotado | 0.053 | 0.445 | demoted: single-guide (sin chequeo cross-guide) |
+| CPSF6 | 31 | 16 | promovido | nan | 0.766 | promoted: reproducibilidad guide/donor alta (subvalorada por el core) |
+| WAC | 35 | 25 | promovido | 0.363 | 0.816 | promoted: reproducibilidad guide/donor alta (subvalorada por el core) |
+| SETDB1 | 37 | 14 | promovido | 0.573 | 0.878 | promoted: reproducibilidad guide/donor alta (subvalorada por el core) |
+| WDR82 | 38 | 22 | promovido | 0.426 | 0.849 | promoted: reproducibilidad guide/donor alta (subvalorada por el core) |
+| MED24 | 49 | 30 | promovido | 0.42 | 0.829 | promoted: reproducibilidad guide/donor alta (subvalorada por el core) |
+
+- **Sobreviven** (efecto grande + reproducible): TADA2B, SGF29, MED12, TAF6L, TADA1… — SAGA + Mediador.
+
+![reproshift](figures/19_reproducibility_aware_ranking_shift.png)
+
+**El ranking core sigue funcionando sin este archivo** — la auditoría vive aparte en
+`hub_ranking_bayes_reproducibility_aware.csv` / `reproducibility_audit.csv`.
+
 ## Hallazgos del EDA
 
 ![degs](figures/01_distribution_n_total_de_genes.png)
@@ -409,8 +443,21 @@ shrinkage premia a los reguladores con efecto grande **y** estable.
 - `xcond_reproducibility` es una **feature exploratoria** (estabilidad cross-condición). **No**
   sustituye la reproducibilidad cross-donor / cross-guide, que requiere `DE_stats.h5ad`.
 - El baseline de efectos fijos se trata como conocido (plug-in) → pseudo-bayesiano, no full-Bayes.
-- `single_guide_estimate` y `n_guides` NO están en el CSV; en la tabla de review aparecen como
-  `NA (requiere DE_stats.h5ad)`.
+- `single_guide_estimate` y `n_guides` NO están en el CSV; en la tabla de review del core aparecen como
+  `NA (requiere DE_stats.h5ad)` — sí están en la auditoría de sensibilidad de abajo.
+
+### Auditoría de sensibilidad guide/donor-aware (opcional)
+
+Cuando existe `de_obs_reproducibility_metadata.csv` (extraído del `.obs` de `DE_stats.h5ad`,
+sin `.layers`), `model_hubs.py` corre una auditoría: **repondera** el score EB con reproducibilidad
+real (`reweighted_score = regpower_eb_mean · repro_weight`) y reporta qué reguladores sobreviven
+(`reproducibility_audit.csv`, fig 19).
+
+- **Es un análisis de sensibilidad, no un posterior nuevo**: NO se reestima el modelo EB.
+- **Cobertura parcial**: `guide_correlation_all` ~78% de contrastes, `donor_correlation_hits_mean`
+  solo ~19% → en la práctica es más *guide-aware* que *donor-aware*. Donde falta la métrica se usa un
+  **peso neutral** (0.75), de modo que **un gen no se penaliza solo por no tener metadata de donante**.
+- El ranking **core no depende** de este archivo (`make all` corre sin él).
 
 ---
 

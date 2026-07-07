@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CD4 Perturb-seq Regulator Atlas</title>
+<style>
+  :root{
+    --bg:#0b0e14; --panel:#12161f; --panel2:#161b26; --panel3:#1b2130;
+    --line:#232b3a; --line2:#313c50; --text:#e7ecf3; --muted:#8b95a8; --faint:#5d6779;
+    --accent:#22b8c4; --accent-dim:rgba(34,184,196,.14);
+    --amber:#e0a441; --violet:#9585e0; --up:#f0645a; --down:#4f86ea;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,monospace;
+    --sans:-apple-system,"SF Pro Text","Segoe UI",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.5;
+    background-image:radial-gradient(1000px 500px at 85% -10%,var(--accent-dim),transparent 60%)}
+  a{color:var(--accent)}
+  .wrap{max-width:1080px;margin:0 auto;padding:26px 20px 70px}
+  header{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px;border-bottom:1px solid var(--line);padding-bottom:18px}
+  h1{font-size:22px;font-weight:680;letter-spacing:-.02em;margin:0}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);font-weight:600}
+  .conn{margin-left:auto;display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .conn input{background:var(--panel2);border:1px solid var(--line2);color:var(--text);border-radius:7px;padding:5px 8px;font-family:var(--mono);font-size:12px;width:180px}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--faint)}
+  .dot.ok{background:#38c172}.dot.bad{background:var(--up)}
+  .tabs{display:flex;gap:6px;margin:20px 0 18px;flex-wrap:wrap}
+  .tab{font-family:var(--mono);font-size:13px;padding:8px 14px;border-radius:9px;cursor:pointer;background:transparent;border:1px solid var(--line2);color:var(--muted)}
+  .tab[aria-selected=true]{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+  .hide{display:none}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .card{background:var(--panel);padding:14px 16px}
+  .card .n{font-family:var(--mono);font-size:22px;font-weight:600}
+  .card .k{font-size:12px;color:var(--muted);margin-top:2px}
+  .panel{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-top:16px}
+  .sec{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin:0 0 12px;display:flex;align-items:center;gap:10px}
+  .sec::after{content:"";flex:1;height:1px;background:var(--line)}
+  .search{display:flex;gap:8px;margin-bottom:6px}
+  .search input{flex:1;background:var(--panel2);border:1px solid var(--line2);color:var(--text);border-radius:9px;padding:11px 14px;font-family:var(--mono);font-size:15px}
+  .search button,.filters button{background:var(--accent);color:#04252a;border:0;border-radius:9px;padding:0 16px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+  .filters{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  .filters select{background:var(--panel2);border:1px solid var(--line2);color:var(--text);border-radius:8px;padding:7px 10px;font-family:var(--mono);font-size:12px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);text-align:left;padding:7px 8px;border-bottom:1px solid var(--line2)}
+  td{padding:7px 8px;border-bottom:1px solid var(--line);font-family:var(--mono)}
+  tr:last-child td{border-bottom:0}
+  tbody tr{cursor:pointer}
+  tbody tr:hover td{background:var(--panel3)}
+  .num{text-align:right;font-variant-numeric:tabular-nums}
+  .gn{color:var(--text);font-weight:600}
+  .cls{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:20px}
+  .cls.global{background:var(--accent-dim);color:var(--accent)}
+  .cls.cs{background:rgba(149,133,224,.16);color:var(--violet)}
+  .chip{font-family:var(--mono);font-size:11px;padding:4px 9px;border-radius:20px;background:var(--panel3);border:1px solid var(--line);color:var(--muted)}
+  .stt{font-family:var(--mono);font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px}
+  .stt.dem{background:rgba(240,100,90,.16);color:var(--up)} .stt.pro{background:var(--accent-dim);color:var(--accent)} .stt.sur{background:rgba(56,193,114,.16);color:#38c172}
+  .prof-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px}
+  .prof-head h2{font-family:var(--mono);font-size:26px;margin:0}
+  .prof-head .rk{font-family:var(--mono);color:var(--accent);font-size:14px}
+  .interp{color:var(--muted);font-size:13.5px;margin:8px 0 0}
+  .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:14px}
+  .kv .b{background:var(--panel3);border:1px solid var(--line);border-radius:9px;padding:9px 11px}
+  .kv .b .v{font-family:var(--mono);font-size:16px;font-weight:600}
+  .kv .b .l{font-size:11px;color:var(--muted)}
+  .barrow{display:grid;grid-template-columns:70px 1fr auto;align-items:center;gap:10px;margin:6px 0;font-family:var(--mono);font-size:12px}
+  .track{height:14px;background:var(--panel3);border-radius:5px;overflow:hidden}
+  .fill{height:100%;background:var(--accent);border-radius:5px}
+  .muted{color:var(--muted)} .err{color:var(--up);font-family:var(--mono);font-size:13px}
+  .up{color:var(--up)} .down{color:var(--down)}
+  .lead{color:var(--muted);font-size:13.5px;margin:0 0 4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">Read-only atlas</div>
+      <h1>CD4 Perturb-seq Regulator Atlas</h1>
+    </div>
+    <div class="conn">
+      <span class="dot" id="dot"></span>
+      <span id="conntxt">conectando…</span>
+      <input id="apibase" value="http://localhost:8000" title="URL de la API">
+    </div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" data-view="overview" aria-selected="true">Overview</button>
+    <button class="tab" data-view="explorer">Explorar reguladores</button>
+    <button class="tab" data-view="audit">Auditoría</button>
+    <button class="tab" data-view="edges">Red de efectos</button>
+  </div>
+
+  <section id="v-overview"></section>
+  <section id="v-explorer" class="hide"></section>
+  <section id="v-audit" class="hide"></section>
+  <section id="v-edges" class="hide"></section>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+let API=localStorage.getItem("atlas_api")||"http://localhost:8000";
+$("#apibase").value=API;
+const fmt=n=>n==null?"—":(typeof n==="number"?(Number.isInteger(n)?n.toLocaleString():n.toFixed(2)):n);
+const pct=n=>n==null?"—":(n*100).toFixed(0)+"%";
+async function api(path){const r=await fetch(API+path);if(!r.ok)throw new Error(r.status+" "+path);return r.json();}
+
+let SUMMARY=null;
+async function connect(){
+  try{ const h=await api("/health"); SUMMARY=await api("/summary");
+    $("#dot").className="dot ok"; $("#conntxt").textContent=`ok · ${h.n_regulators.toLocaleString()} reguladores`;
+    render(current);
+  }catch(e){ $("#dot").className="dot bad"; $("#conntxt").textContent="API no disponible";
+    $("#v-"+current).innerHTML=`<div class="panel err">No se pudo conectar a <b>${API}</b>.<br>Arranca la API: <span class="muted">uvicorn api.main:app --port 8000</span></div>`; }
+}
+$("#apibase").addEventListener("change",e=>{API=e.target.value.replace(/\/$/,"");localStorage.setItem("atlas_api",API);connect();});
+
+/* tabs */
+let current="overview";
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
+  current=t.dataset.view;
+  document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected",x===t));
+  document.querySelectorAll("section[id^=v-]").forEach(s=>s.classList.toggle("hide",s.id!=="v-"+current));
+  render(current);
+}));
+function render(v){ if(!SUMMARY)return; ({overview:renderOverview,explorer:renderExplorer,audit:renderAudit,edges:renderEdges}[v])(); }
+
+/* ---- Overview ---- */
+async function renderOverview(){
+  const s=SUMMARY;
+  $("#v-overview").innerHTML=`
+    <div class="cards">
+      <div class="card"><div class="n">${s.n_regulators.toLocaleString()}</div><div class="k">reguladores rankeados</div></div>
+      <div class="card"><div class="n">${fmt(s.n_global)}</div><div class="k">globales</div></div>
+      <div class="card"><div class="n">${fmt(s.n_context_specific)}</div><div class="k">context-specific</div></div>
+      <div class="card"><div class="n">${s.edges_available?"sí":"no"}</div><div class="k">red de efectos (PoC)</div></div>
+    </div>
+    <div class="panel"><div class="sec">Top reguladores robustos</div>
+      <div id="ov-top" class="muted">cargando…</div></div>
+    <p class="lead" style="margin-top:14px">El pipeline (<span class="mono">make all</span>) produce los artefactos; esta API los hace explorables. Nada se calcula en vivo.</p>`;
+  const list=await api("/regulators?limit=10");
+  $("#ov-top").innerHTML=regTable(list);
+  wireRows($("#ov-top"));
+}
+
+/* ---- Explorer ---- */
+async function renderExplorer(){
+  $("#v-explorer").innerHTML=`
+    <div class="panel">
+      <div class="search"><input id="q" placeholder="buscar gen (p. ej. SGF29, ZAP70)…" autocomplete="off">
+        <button id="go">Ver perfil</button></div>
+      <div class="filters">
+        <select id="fclass"><option value="">todas las clases</option><option value="global">global</option><option value="condition-specific">context-specific</option></select>
+        <select id="fsort"><option value="core_rank">orden: rank EB</option><option value="stability_frequency">estabilidad</option><option value="reweighted_score">reproducibilidad</option></select>
+      </div>
+      <div id="reglist" class="muted">cargando…</div>
+    </div>
+    <div id="profile"></div>`;
+  const load=async()=>{const c=$("#fclass").value,so=$("#fsort").value;
+    const list=await api(`/regulators?limit=25${c?`&regulator_class=${c}`:""}&sort_by=${so}`);
+    $("#reglist").innerHTML=regTable(list); wireRows($("#reglist"));};
+  $("#fclass").onchange=load; $("#fsort").onchange=load;
+  $("#go").onclick=()=>showProfile($("#q").value.trim());
+  $("#q").addEventListener("keydown",e=>{if(e.key==="Enter")showProfile($("#q").value.trim());});
+  load();
+}
+async function showProfile(gene){
+  if(!gene)return; current="explorer";
+  document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected",x.dataset.view==="explorer"));
+  document.querySelectorAll("section[id^=v-]").forEach(s=>s.classList.toggle("hide",s.id!=="v-explorer"));
+  if(!$("#profile")){await renderExplorer();}
+  const box=$("#profile"); box.innerHTML=`<div class="panel muted">cargando ${gene}…</div>`;
+  let p; try{ p=await api("/regulators/"+encodeURIComponent(gene.toUpperCase())); }
+  catch(e){ box.innerHTML=`<div class="panel err">No se encontró <b>${gene}</b> (¿pasó el gate de KD?).</div>`; return; }
+  const cond=p.condition_profile||{}; const mx=Math.max(1,...Object.values(cond));
+  const order=["Rest","Stim8hr","Stim48hr"];
+  const condBars=order.filter(c=>c in cond).map(c=>`<div class="barrow"><span class="muted">${c}</span>
+    <div class="track"><div class="fill" style="width:${(cond[c]/mx*100).toFixed(0)}%"></div></div><span>${cond[c].toLocaleString()}</span></div>`).join("")||`<span class="muted">sin perfil por condición</span>`;
+  const edges=(p.top_downstream_edges||[]).map(e=>`<tr><td class="gn">${e.measured_gene}</td>
+    <td class="${e.direction}">${e.direction==="up"?"↑":"↓"} ${e.log_fc}</td>
+    <td class="num">${e.p_abs_effect_gt_1p5x}</td><td class="muted">${e.condition}</td></tr>`).join("");
+  const stt=p.audit_status; const sttc=stt==="demotado"?"dem":stt==="promovido"?"pro":"sur";
+  box.innerHTML=`<div class="panel">
+    <div class="prof-head"><h2>${p.gene}</h2>
+      <span class="rk">EB #${p.core_rank}</span>
+      ${p.regulator_class?`<span class="cls ${p.regulator_class==="global"?"global":"cs"}">${p.regulator_class}</span>`:""}
+      ${stt?`<span class="stt ${sttc}">${stt}</span>`:""}</div>
+    <p class="interp">${p.interpretation}</p>
+    <div class="kv">
+      <div class="b"><div class="v">${fmt(p.regpower_eb_mean)}</div><div class="l">poder regulatorio EB</div></div>
+      <div class="b"><div class="v">${pct(p.stability_frequency)}</div><div class="l">estabilidad (bootstrap)</div></div>
+      <div class="b"><div class="v">${p.kd_significant_conditions??"—"}/3</div><div class="l">condiciones con KD sig.</div></div>
+      <div class="b"><div class="v">${fmt(p.condition_specificity)}</div><div class="l">condition specificity</div></div>
+      <div class="b"><div class="v">${fmt(p.guide_corr)}</div><div class="l">reprod. cross-guide</div></div>
+      <div class="b"><div class="v">${fmt(p.donor_corr)}</div><div class="l">reprod. cross-donor</div></div>
+    </div>
+    <div class="sec" style="margin-top:20px">Perfil por condición (n_downstream)</div>${condBars}
+    ${edges?`<div class="sec" style="margin-top:20px">Top edges downstream (bonus)</div>
+      <table><thead><tr><th>gen</th><th>efecto (log₂FC)</th><th class="num">P(&gt;1.5×)</th><th>cond.</th></tr></thead><tbody>${edges}</tbody></table>`:""}
+  </div>`;
+}
+
+/* ---- Audit ---- */
+async function renderAudit(){
+  $("#v-audit").innerHTML=`<div class="panel"><div class="sec">Auditoría de reproducibilidad</div><div id="au" class="muted">cargando…</div></div>`;
+  const d=await api("/audit/reproducibility");
+  if(!d.available){$("#au").innerHTML=`<span class="muted">No disponible (corre <span class="mono">make repro-meta</span>).</span>`;return;}
+  const c=d.coverage||{};
+  const rows=d.rows.map(r=>{const sc=r.status==="demotado"?"dem":r.status==="promovido"?"pro":"sur";
+    return `<tr><td class="gn">${r.gene}</td><td class="num">${r.old_rank}→${r.new_rank}</td>
+      <td><span class="stt ${sc}">${r.status}</span></td><td class="num">${fmt(r.guide_corr)}</td>
+      <td class="num">${fmt(r.donor_corr)}</td><td class="muted" style="font-size:11px">${r.reason||""}</td></tr>`;}).join("");
+  $("#au").innerHTML=`<p class="lead">Análisis de <b>sensibilidad</b> (no un modelo nuevo): reponderamos el score EB con reproducibilidad real. Cobertura cross-guide <b>${c.pct_guide_corr_available??"?"}%</b>, cross-donor <b>${c.pct_donor_corr_available??"?"}%</b> (parcial → peso neutral).</p>
+    <table><thead><tr><th>gen</th><th class="num">rank</th><th>estado</th><th class="num">guide</th><th class="num">donor</th><th>razón</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+/* ---- Edges ---- */
+async function renderEdges(){
+  $("#v-edges").innerHTML=`<div class="panel"><div class="sec">Red de efectos con incertidumbre · proof-of-concept</div><div id="ed" class="muted">cargando…</div></div>`;
+  const sum=await api("/edges/summary"); const dn=await api("/edges/downstream?limit=12");
+  if(!sum.available){$("#ed").innerHTML=`<span class="muted">No disponible (corre <span class="mono">make edges</span> + <span class="mono">make eda-edges</span>).</span>`;return;}
+  const byreg={}; sum.rows.forEach(r=>{byreg[r.perturbed_gene]=(byreg[r.perturbed_gene]||{p:0,n:0});byreg[r.perturbed_gene].p+=r.n_positive;byreg[r.perturbed_gene].n+=r.n_negative;});
+  const reg=Object.entries(byreg).sort((a,b)=>(b[1].p+b[1].n)-(a[1].p+a[1].n));
+  const mx=Math.max(...reg.map(r=>r[1].p+r[1].n));
+  const regRows=reg.map(([g,v])=>`<div class="barrow"><span class="gn">${g}</span>
+    <div class="track" style="background:transparent"><div style="display:flex;height:14px;border-radius:5px;overflow:hidden;width:${((v.p+v.n)/mx*100).toFixed(0)}%">
+    <div style="background:var(--up);width:${(v.p/(v.p+v.n)*100).toFixed(0)}%"></div><div style="background:var(--down);flex:1"></div></div></div>
+    <span>${v.p+v.n}</span></div>`).join("");
+  const conv=dn.rows.map(r=>`<span class="chip"><b>${r.measured_gene}</b> · ${r.n_upstream_regulators}/6</span>`).join(" ");
+  $("#ed").innerHTML=`<p class="lead">2.470 edges de 6 reguladores del complejo SAGA. <span class="mono">P(|efecto|&gt;1.5×)</span>, no P(arista causal). Cobertura mínima → <b>bonus</b>.</p>
+    <div class="sec" style="margin-top:6px">Edges por regulador <span class="up">↑</span>/<span class="down">↓</span></div>${regRows}
+    <div class="sec" style="margin-top:18px">Targets convergentes</div><div style="display:flex;flex-wrap:wrap;gap:6px">${conv}</div>`;
+}
+
+/* helpers */
+function regTable(list){
+  return `<table><thead><tr><th>gen</th><th class="num">rank</th><th>clase</th><th class="num">EB</th><th class="num">estab.</th><th class="num">guide</th><th class="num">donor</th></tr></thead><tbody>${
+    list.map(r=>`<tr data-gene="${r.gene}"><td class="gn">${r.gene}</td><td class="num">${r.core_rank}</td>
+      <td>${r.regulator_class?`<span class="cls ${r.regulator_class==="global"?"global":"cs"}">${r.regulator_class}</span>`:"—"}</td>
+      <td class="num">${fmt(r.regpower_eb_mean)}</td><td class="num">${pct(r.stability_frequency)}</td>
+      <td class="num">${fmt(r.guide_corr)}</td><td class="num">${fmt(r.donor_corr)}</td></tr>`).join("")}</tbody></table>`;
+}
+function wireRows(container){ container.querySelectorAll("tr[data-gene]").forEach(tr=>tr.addEventListener("click",()=>showProfile(tr.dataset.gene))); }
+
+connect();
+</script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+"""CD4 Perturb-seq Regulator Atlas — API read-only sobre los outputs de `make all`.
+
+El pipeline produce los artefactos; esta API solo los hace explorables. No corre modelos,
+no descarga h5ad, no toca S3. `make all` sigue siendo la fuente de verdad.
+
+    uvicorn api.main:app --reload --port 8000
+    → http://localhost:8000/docs   (Swagger)
+"""
+from __future__ import annotations
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
+
+from api.data_loader import get_store
+from api.schemas import Health, Summary, RegulatorSummary, RegulatorProfile
+
+app = FastAPI(
+    title="CD4 Perturb-seq Regulator Atlas",
+    description="Search, rank, audit and explore robust CD4+ T cell regulators. "
+                "Read-only API over versioned pipeline outputs.",
+    version="1.0.0",
+)
+app.add_middleware(
+    CORSMiddleware, allow_origins=["*"], allow_methods=["GET"], allow_headers=["*"],
+)
+
+
+@app.get("/health", response_model=Health, tags=["meta"])
+def health():
+    s = get_store()
+    return {"status": "ok", "n_regulators": len(s.ranking), "tables_loaded": s.loaded}
+
+
+@app.get("/summary", response_model=Summary, tags=["meta"])
+def summary():
+    return get_store().summary()
+
+
+@app.get("/regulators", response_model=list[RegulatorSummary], tags=["regulators"])
+def regulators(
+    q: str | None = Query(None, description="búsqueda por símbolo de gen"),
+    regulator_class: str | None = Query(None, enum=["global", "condition-specific"]),
+    limit: int = Query(50, ge=1, le=2000),
+    sort_by: str = Query("core_rank", enum=["core_rank", "stability_frequency", "reweighted_score"]),
+):
+    return get_store().list_regulators(q=q, regulator_class=regulator_class,
+                                       limit=limit, sort_by=sort_by)
+
+
+@app.get("/regulators/{gene}", response_model=RegulatorProfile, tags=["regulators"])
+def regulator(gene: str):
+    p = get_store().profile(gene.upper())
+    if p is None:
+        raise HTTPException(404, f"regulador '{gene}' no encontrado (¿pasó el gate de KD?)")
+    return p
+
+
+@app.get("/regulators/{gene}/edges", tags=["regulators"])
+def regulator_edges(gene: str, limit: int = Query(200, ge=1, le=5000)):
+    s = get_store()
+    if s.edges is None:
+        return {"gene": gene.upper(), "edges_available": False, "edges": []}
+    edges = s.edges_for(gene.upper(), top=limit)
+    return {"gene": gene.upper(), "edges_available": True, "n": len(edges), "edges": edges}
+
+
+@app.get("/audit/reproducibility", tags=["audit"])
+def audit_reproducibility():
+    s = get_store()
+    from api.data_loader import _records
+    if s.audit is None:
+        return {"available": False, "coverage": None, "rows": []}
+    cov = _records(s.coverage)[0] if s.coverage is not None else None
+    return {"available": True, "coverage": cov, "rows": _records(s.audit)}
+
+
+@app.get("/audit/kd-gate", tags=["audit"])
+def audit_kd_gate(limit: int = Query(50, ge=1, le=2000)):
+    s = get_store()
+    from api.data_loader import _records
+    if s.baseline is None:
+        return {"available": False, "rows": []}
+    df = s.baseline.sort_values("raw_rank").head(limit)
+    return {"available": True, "rows": _records(df)}
+
+
+@app.get("/classes/{regulator_class}", tags=["regulators"])
+def regulators_by_class(regulator_class: str):
+    if regulator_class not in ("global", "context-specific"):
+        raise HTTPException(400, "regulator_class debe ser 'global' o 'context-specific'")
+    return get_store().list_regulators(regulator_class=regulator_class, limit=2000)
+
+
+@app.get("/edges/summary", tags=["edges"])
+def edges_summary():
+    s = get_store()
+    from api.data_loader import _records
+    if s.edge_summary is None:
+        return {"available": False, "rows": []}
+    return {"available": True, "rows": _records(s.edge_summary)}
+
+
+@app.get("/edges/downstream", tags=["edges"])
+def edges_downstream(limit: int = Query(50, ge=1, le=2000)):
+    s = get_store()
+    from api.data_loader import _records
+    if s.downstream is None:
+        return {"available": False, "rows": []}
+    return {"available": True, "rows": _records(s.downstream.head(limit))}

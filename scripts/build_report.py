@@ -141,6 +141,45 @@ Tablas: `top_global_regulators.csv`, `top_condition_specific_regulators.csv`.
 ![globalvs](figures/10_global_vs_context_specific.png)
 """
 
+    # --- auditoría de sensibilidad guide/donor-aware (metadata real, opcional) ---
+    repro_p = TAB / "reproducibility_audit.csv"
+    cov_p = TAB / "reproducibility_coverage.csv"
+    if comp_p.exists() and repro_p.exists() and cov_p.exists():
+        au = pd.read_csv(repro_p)
+        cov = pd.read_csv(cov_p).iloc[0]
+        dem = au[au["status"] == "demotado"].sort_values("old_rank")
+        pro = au[au["status"] == "promovido"].sort_values("new_rank")
+        surv = au[au["status"] == "sobrevive"].sort_values("new_rank")
+        survlist = ", ".join(surv.head(5)["gene"])
+        # tabla interpretable demotados + promovidos
+        mv = pd.concat([dem, pro]).sort_values(["status", "old_rank"])
+        mv = mv[["gene", "old_rank", "new_rank", "status", "guide_corr", "donor_corr", "reason"]]
+        mv_tbl = df_to_md(mv)
+        audit_md += f"""
+## Auditoría de sensibilidad: ¿el ranking sobrevive a la reproducibilidad real (guide/donor)?
+
+El caveat del ranking core era usar `xcond_reproducibility` (proxy cross-condición). Lo auditamos con
+reproducibilidad **real** del `.obs` de `DE_stats.h5ad` (`scripts/extract_de_obs_metadata.py`, solo
+`.obs`, ~4 s, sin `.layers`): `guide_correlation_all` (concordancia entre las 2 guías) y
+`donor_correlation_hits_mean` (concordancia cross-donor), más penalización a targets de una sola guía.
+
+**No reestimamos el posterior EB ni es un modelo nuevo**: reponderamos el score EB
+(`reweighted_score = regpower_eb_mean · repro_weight`) como **análisis de sensibilidad** — qué
+reguladores sobreviven. En la práctica es más **guide-aware** que **donor-aware**: `guide_corr` cubre
+{cov.pct_guide_corr_available:.0f}% de los contrastes pero `donor_corr` solo **{cov.pct_donor_corr_available:.0f}%**
+(el análisis cross-donor se hizo en un subconjunto); donde falta, se usa un **peso neutral** (no penaliza
+por dato ausente). Del top-30 EB, **{len(dem)} se demotan** y **{len(pro)} se promueven**:
+
+{mv_tbl}
+
+- **Sobreviven** (efecto grande + reproducible): {survlist}… — SAGA + Mediador.
+
+![reproshift](figures/19_reproducibility_aware_ranking_shift.png)
+
+**El ranking core sigue funcionando sin este archivo** — la auditoría vive aparte en
+`hub_ranking_bayes_reproducibility_aware.csv` / `reproducibility_audit.csv`.
+"""
+
     md = f"""# Reporte — Genome-scale CD4+ T cell Perturb-seq
 
 *Reporte consolidado para revisión. Reproducible con `make all` (solo CSV locales).*
