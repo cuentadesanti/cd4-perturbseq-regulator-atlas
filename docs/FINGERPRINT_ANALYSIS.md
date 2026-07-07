@@ -49,14 +49,22 @@ fingerprint); SAGA is cohesive; Mediator is diffuse but significant. This is the
 (`spearman(|PC1|, n_downstream) = 0.25`).
 
 **Spectral sanity check (`make spectral` → `fingerprint_spectral_sanity.csv`, fig 25).** A second,
-independent-ish check: are the *assigned* program members (curated core **+** newly assigned neighbors,
-not just the curated members) more compact than random panel groups in the PC1–PC10 spectral
-embedding? By **cosine** (response direction — the metric that defines the programs) they clearly are:
-**SAGA z=9.0, Mediator z=2.8, TCR z=11.2** (5,000 permutations, all p≤0.01). By **raw Euclidean**
-distance they are *not* (TCR is even anti-compact, z=−1.1) — because raw PCA distance is dominated by
-effect *magnitude* (the high-variance PC1 axis), and a program's members span a wide range of effect
-sizes. Honest reading: **these are response-*shape* programs, not effect-*size* clusters** — coherent
-in what they do to the cell, not in how much.
+independent-ish check on the *assigned* members (curated core **+** newly assigned neighbors, not just
+the curated ones), in the low-rank PC1–PC10 embedding.
+
+- **Do members point in similar directions in the low-rank space?** (cosine in PC1–PC10) — yes,
+  strongly: intra-program cosine similarity **0.88 (SAGA) / 0.79 (Mediator) / 0.84 (TCR)** vs. ~0.03
+  for random panel pairs → **z=9.0 / 2.8 / 11.4**, 5,000 permutations, all p≤0.01.
+- **Is that structure preserved by the projection, or a dimensionality-reduction artifact?** The same
+  cosine in the *full* fingerprint space gives z=15.5 / 3.3 / 18.0 — the direction coherence is
+  present in the full space and **preserved (even sharpened) by the top-10 PCs** (they capture the
+  program direction and drop noise), not created by it.
+- **By raw Euclidean distance they are *not* compact** (TCR is even anti-compact, z=−1.1) — raw PCA
+  distance is dominated by effect *magnitude* (the high-variance PC1 axis), and a program's members
+  span a wide range of effect sizes.
+
+Honest reading: **these are response-*shape* programs, not effect-*size* clusters** — coherent in what
+they do to the cell, not in how much.
 
 ### 2. Recognizable programs, with newly assigned neighbors
 

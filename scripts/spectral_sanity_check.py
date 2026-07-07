@@ -10,10 +10,13 @@ For each labeled program (SAGA/chromatin, TCR signaling, Mediator/transcription)
     3. compare against 5,000 random groups of the same size (permutation null),
     4. report a z-score and a one-sided permutation p-value (z>0 = tighter than random).
 
-We report THREE distances, because the answer depends on the metric — and that contrast is
+We report several distances, because the answer depends on the metric — and that contrast is
 the point:
-    cosine              — response *direction* (matches how programs are defined and the
-                          cosine-space complex validation). This is the primary check.
+    cosine              — Variant A: response *direction* in the PC1..PCk low-rank space
+                          (do members point the same way?). This is the primary check.
+    cosine_full         — the same cosine in the FULL standardized fingerprint space (needs the
+                          cached matrix); comparison → is the direction structure preserved by the
+                          top-K PCs, or lost/created by dimensionality reduction?
     euclidean_raw       — raw PC space; magnitude-sensitive (PC1 = high-variance effect-size axis).
     euclidean_whitened  — standardized PCs (equal weight), balancing direction and magnitude.
 
@@ -44,13 +47,34 @@ from scipy.spatial.distance import pdist
 ROOT = Path(__file__).resolve().parent.parent
 TAB = ROOT / "docs" / "tables"
 FIG = ROOT / "docs" / "figures"
+CACHE = ROOT / "data" / "cache"
 RNG = np.random.RandomState(0)
 PROGRAM_COLOR = {"SAGA/chromatin": "#d6412f", "Mediator/transcription": "#2f5ed0",
                  "TCR signaling": "#37b24d"}
-METRICS = ["cosine", "euclidean_raw", "euclidean_whitened"]
-METRIC_LABEL = {"cosine": "cosine\n(response direction)",
+# Variant A = cosine in PC1..PCk (does the low-rank projection keep the direction structure?);
+# cosine_full = cosine in the full standardized fingerprint space (the comparison it is judged against).
+METRIC_LABEL = {"cosine": "cosine\n(PC1..PCk direction)",
+                "cosine_full": "cosine\n(full space)",
                 "euclidean_raw": "euclidean\n(raw PCs, magnitude)",
                 "euclidean_whitened": "euclidean\n(whitened PCs)"}
+
+
+def load_full_space():
+    """Reproduce the standardized full-space fingerprint matrix X (200 × top-2000 genes) the
+    exact way analyze_fingerprints.py builds it, from the cached panel zscore matrix — so
+    full-space cosine can be compared to PC-space cosine on the SAME assigned member sets.
+    Rows align with fingerprint_pca_scores.csv (panel order). Returns None if cache is absent."""
+    files = sorted(CACHE.glob("panel_zscore_*.npy"))
+    if not files:
+        return None
+    M = np.nan_to_num(np.load(files[-1]), nan=0.0, posinf=0.0, neginf=0.0)
+    v = M.var(0)
+    keep = np.argsort(v)[::-1][:2000]
+    keep = keep[v[keep] > 0]
+    Mg = M[:, keep]
+    mu, sd = Mg.mean(0), Mg.std(0)
+    sd[sd == 0] = 1.0
+    return (Mg - mu) / sd
 
 
 def _perm_test(M, idx, metric, perms):
@@ -83,8 +107,14 @@ def main():
     X = pca[pcs].to_numpy(float)
     labels = pca["program_label"].astype(str).to_numpy()
     Xw = (X - X.mean(0)) / (X.std(0) + 1e-9)                        # whitened PCs (equal weight)
-    space = {"euclidean_raw": (X, "euclidean"), "euclidean_whitened": (Xw, "euclidean"),
-             "cosine": (X, "cosine")}
+    space = {"cosine": (X, "cosine"), "euclidean_raw": (X, "euclidean"),
+             "euclidean_whitened": (Xw, "euclidean")}
+    metrics = ["cosine", "euclidean_raw", "euclidean_whitened"]
+    Xfull = load_full_space()                                       # comparison: full fingerprint space
+    if Xfull is not None and len(Xfull) == len(X):
+        space["cosine_full"] = (Xfull, "cosine")
+        metrics = ["cosine", "cosine_full", "euclidean_raw", "euclidean_whitened"]
+        print(f"  (full-space comparison available: {Xfull.shape[1]} genes)")
 
     evid_p = TAB / "program_label_evidence.csv"
     if evid_p.exists():
@@ -100,16 +130,21 @@ def main():
         if len(idx) < 2:
             print(f"  [{p}] n={len(idx)} — skipped (<2 members)")
             continue
-        for metric in METRICS:
+        for metric in metrics:
             M, m = space[metric]
             obs, nmean, sd, z, pv, null = _perm_test(M, idx, m, args.perms)
             nulls[(p, metric)] = (null, obs)
             sig = z > 0 and pv < 0.05
+            is_cos = metric.startswith("cosine")
             rows.append({"program": p, "n_members": int(len(idx)), "n_pcs": len(pcs), "metric": metric,
                          "mean_intra_distance": round(obs, 4), "null_mean_distance": round(nmean, 4),
+                         # for cosine metrics the intuitive number is similarity = 1 - distance
+                         "mean_intra_similarity": round(1 - obs, 3) if is_cos else None,
+                         "null_mean_similarity": round(1 - nmean, 3) if is_cos else None,
                          "null_sd": round(sd, 4), "z": round(z, 2), "p_perm": round(pv, 5),
                          "compact_vs_random": "yes" if sig else "ns"})
-            print(f"  [{p:24s} · {metric:18s}] n={len(idx):2d} intra={obs:8.3f} null={nmean:8.3f} "
+            extra = f"sim={1 - obs:.3f} vs {1 - nmean:.3f}  " if is_cos else ""
+            print(f"  [{p:24s} · {metric:18s}] n={len(idx):2d} {extra}"
                   f"z={z:+6.2f} p={pv:.4f}  {'COMPACT' if sig else 'ns'}")
 
     df = pd.DataFrame(rows)
@@ -119,12 +154,12 @@ def main():
     # ---- figure 25: z-score of compactness per program × metric ----
     if rows:
         progs = [p for p in programs if any(r["program"] == p for r in rows)]
-        xm = np.arange(len(METRICS))
+        xm = np.arange(len(metrics))
         w = 0.8 / max(1, len(progs))
-        fig, ax = plt.subplots(figsize=(8.2, 4.6))
+        fig, ax = plt.subplots(figsize=(9.2, 4.8))
         for k, p in enumerate(progs):
-            zs = [next(r["z"] for r in rows if r["program"] == p and r["metric"] == mtr) for mtr in METRICS]
-            ps = [next(r["p_perm"] for r in rows if r["program"] == p and r["metric"] == mtr) for mtr in METRICS]
+            zs = [next(r["z"] for r in rows if r["program"] == p and r["metric"] == mtr) for mtr in metrics]
+            ps = [next(r["p_perm"] for r in rows if r["program"] == p and r["metric"] == mtr) for mtr in metrics]
             base = PROGRAM_COLOR.get(p, "#888")
             colors = [base if (z > 0 and pv < 0.05) else "#c7ccd6" for z, pv in zip(zs, ps)]
             xpos = xm + (k - (len(progs) - 1) / 2) * w
@@ -134,11 +169,11 @@ def main():
                         fontsize=7.5, color="#333")
         ax.axhline(0, color="#333", lw=1)
         ax.axhline(1.64, color="#999", ls="--", lw=1)
-        ax.text(len(METRICS) - 0.5, 1.74, "one-sided p≈0.05", fontsize=8, color="#777", ha="right")
-        ax.set_xticks(xm); ax.set_xticklabels([METRIC_LABEL[m] for m in METRICS], fontsize=9)
+        ax.text(len(metrics) - 0.5, 1.74, "one-sided p≈0.05", fontsize=8, color="#777", ha="right")
+        ax.set_xticks(xm); ax.set_xticklabels([METRIC_LABEL[m] for m in metrics], fontsize=9)
         ax.set_ylabel("compactness z-score\n(> 0 = tighter than random)")
         ax.set_title("Spectral sanity check — assigned programs are compact by response direction (cosine),\n"
-                     "not by magnitude-sensitive raw distance (they are response-shape programs, not size clusters)",
+                     "in PC1..10 as in the full space; not by magnitude-sensitive raw distance (response-shape, not size)",
                      fontsize=10.5, fontweight="bold")
         ax.legend(frameon=False, fontsize=9, ncol=len(progs), loc="upper center", bbox_to_anchor=(0.5, -0.14))
         for s in ("top", "right"):
@@ -150,10 +185,15 @@ def main():
 
     # headline
     cos = df[df.metric == "cosine"]
-    print("\n  VERDICT (cosine / response-direction): "
+    print("\n  VARIANT A (cosine in PC1..PCk — do members point in similar directions in low-rank space?): "
           + " · ".join(f"{r.program.split('/')[0]} z={r.z} p={r.p_perm}" for r in cos.itertuples()))
-    print("  Programs are compact by response DIRECTION in the spectral embedding; raw-Euclidean")
-    print("  distance is magnitude-dominated (PC1 = effect-size axis) → not a size cluster. Honest nuance.")
+    if "cosine_full" in df.metric.values:
+        full = df[df.metric == "cosine_full"]
+        print("  vs FULL space cosine: "
+              + " · ".join(f"{r.program.split('/')[0]} z={r.z}" for r in full.itertuples())
+              + "  → the direction structure is preserved by the top-K PCs (not a high-dim-noise artifact).")
+    print("  Programs are compact by response DIRECTION; raw-Euclidean distance is magnitude-dominated")
+    print("  (PC1 = effect-size axis) → response-shape programs, not size clusters. Honest nuance.")
     print("✓ spectral sanity check complete.")
 
 
