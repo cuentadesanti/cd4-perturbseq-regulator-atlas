@@ -2,8 +2,10 @@
 
 Donors are the unit of replication in this screen (4 donors), so cross-donor reproducibility is the
 robustness question that matters most. The original audit reweighted the EB score with donor metadata
-present on only **19%** of contrasts — neutral-weighted (inert) for the other 81%. This replaces that
-gesture with the dedicated per-donor DE object.
+present on only a small minority of contrasts in the summary object — **14.4%** of all 33,983
+contrasts in `GWCD4i.DE_stats.h5ad` (the "~19%" quoted earlier was the KD-gated subset; same
+conclusion either way) — neutral-weighted (inert) for the rest. This replaces that gesture with the
+dedicated per-donor DE object.
 
 ## Data
 
@@ -12,6 +14,14 @@ gesture with the dedicated per-donor DE object.
 the **6 pairwise donor correlations** (4 donors → C(4,2)=6) of each perturbation's effect vector over
 its hit genes. `donor_corr_hits_min` (worst pair) is the strict analog of "concordant in ≥3/4 donors".
 Reproduce: `scripts/donor_concordance.py` → `docs/tables/donor_concordance.csv`.
+
+**Provenance check (verified).** This is a genuinely separate per-donor object, not the summary
+column reused: (1) donor-correlation coverage is **100%** here vs **14.4%** in `DE_stats.h5ad` — if it
+were the same column the coverage would be identical; (2) the value distribution differs (it includes
+negative correlations the summary object lacks); (3) each of the 6 donor-pair modalities is a full DE
+result — `mod/<pair>/layers/{log_fc, zscore, lfcSE, adj_p_value, ...}`, each **(4,880 × 10,273)** —
+so the 6 pairwise correlations are computed from **real per-donor effect vectors**, not a
+donor-collapsed vector compared to itself. (Those six full DE matrices are what fills the 15.7 GB.)
 
 ## Findings
 
