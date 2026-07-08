@@ -26,8 +26,9 @@ donor-collapsed vector compared to itself. (Those six full DE matrices are what 
 ## Findings
 
 1. **Full coverage, real spread.** 3,993 KD-gated regulators, 100% with a donor-reproducibility
-   value (vs 19% before). Distribution: median 0.74, 10th pct 0.27, range −0.72…0.99 — discriminating,
-   not uniformly high.
+   value (vs 14.4% of all contrasts in the summary object; the "~19%" cited elsewhere is the KD-gated
+   subset — not the coverage-jump figure). Distribution: median 0.74, 10th pct 0.27, range −0.72…0.99
+   — discriminating, not uniformly high.
 2. **An independent axis.** Donor reproducibility is ~uncorrelated with effect size
    (ρ=0.045 vs `n_downstream`) and cell number (ρ=0.033) — it is genuinely new information, not a
    proxy for rank or power.
