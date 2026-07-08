@@ -76,6 +76,11 @@ class DataStore:
         self.fp_complex_validation = self._t("fingerprint_complex_validation.csv")
         self.fp_coherence = self._t("fingerprint_audit_coherence.csv")
         self.fp_summary = self._read_json("fingerprint_summary.json")
+        # balanced 30-regulator class programs (optional, `make class-programs`)
+        self.cp_panel = self._t("balanced_panel_30.csv")
+        self.cp_isg = self._t("class_isg_enrichment.csv")
+        self.cp_targets = self._t("class_convergent_targets.csv")
+        self.cp_summary_path = TABLES / "class_program_summary.json"
         self.de = self._t("DE_stats.suppl_table.csv", base=DATA)  # for the per-condition profile
 
         if self.ranking is None:
@@ -144,7 +149,82 @@ class DataStore:
             "reproducibility_available": self.repro is not None,
             "edges_available": self.edges is not None,
             "programs_available": self.fp_pca is not None,
+            "class_programs_available": self.cp_isg is not None,
         }
+
+    # ---- balanced 30-regulator class programs ----
+    def programs_classes(self):
+        """Do different regulator classes converge on different downstream programs?
+
+        Serves the offline `make class-programs` outputs: per-class convergent-target
+        counts, the interferon-specificity test, and the pairwise Jaccard of target sets.
+        """
+        if self.cp_isg is None or self.cp_panel is None:
+            return {"available": False, "classes": [], "jaccard": None,
+                    "members": {}, "n_edges_total": None}
+        import json as _json
+        summ = {}
+        if self.cp_summary_path.exists():
+            try:
+                summ = _json.loads(self.cp_summary_path.read_text())
+            except Exception:
+                summ = {}
+        members = {}
+        for cls, sub in self.cp_panel.groupby("reg_class"):
+            members[cls] = sub["gene"].tolist()
+        program = {
+            "SAGA/chromatin": "immune response / interferon (repressed)",
+            "Mediator": "signal transduction / proliferation",
+            "TCR (context-specific)": "immune system / TCR signaling",
+            "Other robust": "response to stimulus / immune",
+            "Repro-promoted": "no coherent enriched program (few targets)",
+            "Demoted control": "carries ISG signal but no coherent STRING program (reproducibility-demoted)",
+        }
+        rows = []
+        for r in self.cp_isg.to_dict("records"):
+            cls = r["class"]
+            rows.append({
+                "regulator_class": cls,
+                "n_regulators": len(members.get(cls, [])),
+                "n_convergent_targets": _clean(r.get("targets")),
+                "isg_count": _clean(r.get("ISGs")),
+                "isg_fold_enrichment": _clean(r.get("fold")),
+                "isg_p_value": _clean(r.get("p")),
+                "frac_up_on_knockdown": _clean(r.get("frac_up_on_KD")),
+                "dominant_program": program.get(cls),
+            })
+        rows.sort(key=lambda x: (x["isg_fold_enrichment"] is None, -(x["isg_fold_enrichment"] or 0)))
+        jaccard = None
+        if self.cp_targets is not None:
+            tset = {c: set(s["target_gene"]) for c, s in self.cp_targets.groupby("reg_class")}
+            cls_list = list(tset)
+            jaccard = {"classes": cls_list, "matrix": [
+                [round(len(tset[a] & tset[b]) / len(tset[a] | tset[b]), 3) if (tset[a] | tset[b]) else 0.0
+                 for b in cls_list] for a in cls_list]}
+        return {
+            "available": True,
+            "question": "Do different regulator classes converge on different downstream programs?",
+            "answer": "Yes — off-diagonal Jaccard is low (distinct target sets); interferon repression is most "
+                      "concentrated under SAGA/chromatin.",
+            "jaccard_offdiag_median": summ.get("_jaccard_offdiag_median"),
+            "n_edges_total": summ.get("_n_edges_total"),
+            "classes": rows,
+            "jaccard": jaccard,
+            "members": members,
+        }
+
+    def class_targets(self, regulator_class):
+        """Convergent target list for one class (ISG-flagged)."""
+        if self.cp_targets is None:
+            return {"regulator_class": regulator_class, "available": False, "targets": []}
+        sub = self.cp_targets[self.cp_targets["reg_class"] == regulator_class]
+        if sub.empty:
+            avail = sorted(self.cp_targets["reg_class"].unique().tolist())
+            return {"regulator_class": regulator_class, "available": False,
+                    "targets": [], "known_classes": avail}
+        return {"regulator_class": regulator_class, "available": True,
+                "n_targets": int(len(sub)), "n_isg": int(sub["is_ISG"].sum()),
+                "targets": _records(sub[["target_gene", "is_ISG"]])}
 
     # ---- transcriptional programs / fingerprints ----
     def programs_pca(self):

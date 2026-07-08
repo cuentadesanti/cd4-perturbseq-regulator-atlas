@@ -1,0 +1,14 @@
+category,term,description,number_of_genes,number_of_genes_in_background,fdr
+RCTM,HSA-168256,Immune System,39,1979,0.00063
+Keyword,KW-0051,Antiviral defense,9,127,0.0013
+Process,GO:0002376,Immune system process,41,2121,0.0032
+RCTM,HSA-909733,Interferon alpha/beta signaling,7,71,0.0041
+Keyword,KW-0391,Immunity,16,537,0.0045
+Keyword,KW-0399,Innate immunity,12,329,0.0058
+RCTM,HSA-1280215,Cytokine Signaling in Immune system,19,706,0.0063
+RCTM,HSA-913531,Interferon Signaling,10,199,0.0063
+Process,GO:0006955,Immune response,29,1321,0.0127
+Process,GO:0002683,Negative regulation of immune system process,15,433,0.0235
+Process,GO:0002682,Regulation of immune system process,29,1438,0.0323
+Process,GO:0051336,Regulation of hydrolase activity,23,1011,0.0402
+Keyword,KW-0963,Cytoplasm,63,5095,0.0415

@@ -91,6 +91,7 @@
     <button class="tab" data-view="audit">Audit</button>
     <button class="tab" data-view="edges">Effect network</button>
     <button class="tab" data-view="programs">Programs</button>
+    <button class="tab" data-view="classes">Programs by class</button>
   </div>
 
   <section id="v-overview"></section>
@@ -98,6 +99,7 @@
   <section id="v-audit" class="hide"></section>
   <section id="v-edges" class="hide"></section>
   <section id="v-programs" class="hide"></section>
+  <section id="v-classes" class="hide"></section>
 </div>
 
 <script>
@@ -144,7 +146,7 @@ document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
   document.querySelectorAll("section[id^=v-]").forEach(s=>s.classList.toggle("hide",s.id!=="v-"+current));
   render(current);
 }));
-function render(v){ if(!SUMMARY)return; ({overview:renderOverview,explorer:renderExplorer,audit:renderAudit,edges:renderEdges,programs:renderPrograms}[v])(); }
+function render(v){ if(!SUMMARY)return; ({overview:renderOverview,explorer:renderExplorer,audit:renderAudit,edges:renderEdges,programs:renderPrograms,classes:renderClasses}[v])(); }
 
 /* ---- Overview ---- */
 async function renderOverview(){
@@ -331,6 +333,60 @@ async function showNeighbors(gene){
     <p class="muted" style="margin:2px 0 10px">Neighbors by fingerprint cosine similarity. Click → profile.</p>
     <div style="display:flex;flex-wrap:wrap;gap:6px">${chips}</div></div>`;
   box.querySelectorAll(".chip[data-gene]").forEach(c=>c.addEventListener("click",()=>showProfile(c.dataset.gene)));
+}
+
+/* ---- Programs by class (balanced 30-regulator panel) ---- */
+const CLSCOL={"SAGA/chromatin":"#9585e0","Mediator":"#4c8bf5","TCR (context-specific)":"#37b24d",
+  "Other robust":"#8b95a8","Repro-promoted":"#e0a441","Demoted control":"#5d6779"};
+const CLSSHORT={"SAGA/chromatin":"SAGA","Mediator":"Mediator","TCR (context-specific)":"TCR",
+  "Other robust":"Other","Repro-promoted":"Promoted","Demoted control":"Demoted"};
+function sigStars(p){ return p==null?"":(p<1e-10?"***":p<1e-4?"**":p<0.05?"*":"ns"); }
+async function renderClasses(){
+  $("#v-classes").innerHTML=`<div class="panel"><div class="sec">Do different regulator classes converge on different programs?</div><div id="cp" class="muted">loading…</div></div>`;
+  let d; try{ d=await api("/programs/classes"); }catch(e){ d={available:false}; }
+  if(!d||!d.available){$("#cp").innerHTML=`<span class="muted">Not available (run <span class="mono">make class-programs</span>).</span>`;return;}
+  const jm=d.jaccard_offdiag_median;
+  const cards=d.classes.map(c=>{
+    const col=CLSCOL[c.regulator_class]||"#888";
+    const foldTxt=c.isg_fold_enrichment==null?"—":c.isg_fold_enrichment.toFixed(1)+"×";
+    return `<div class="card clscard" data-cls="${c.regulator_class}" style="cursor:pointer;border-left:3px solid ${col}">
+      <div class="n" style="color:${col}">${foldTxt}</div>
+      <div class="k"><b>${CLSSHORT[c.regulator_class]||c.regulator_class}</b> · ISG ${sigStars(c.isg_p_value)}</div>
+      <div class="k" style="margin-top:4px">${c.n_regulators} reg · ${c.n_convergent_targets} targets</div>
+      <div class="k muted" style="margin-top:3px;font-size:11px">${c.dominant_program||""}</div></div>`;}).join("");
+  $("#cp").innerHTML=`<p class="lead"><b>${d.answer}</b></p>
+    <p class="muted" style="margin:2px 0 12px;font-size:12.5px">Balanced panel of <b>30 regulators</b> chosen by class (not by rank) · <b>${(d.n_edges_total||0).toLocaleString()}</b> robust edges · median off-diagonal Jaccard <b>${jm==null?"—":jm.toFixed(2)}</b> (low overlap = distinct programs). Offline (<span class="mono">make class-programs</span>). These are candidate convergent-target programs, not causal pathways.</p>
+    <div class="cards" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">${cards}</div>
+    <div class="sec" style="margin-top:20px">Overlap between classes (Jaccard of target sets)</div>
+    <div id="jac"></div>
+    <div id="cltargets" style="margin-top:8px"></div>`;
+  drawJaccard(d.jaccard);
+  $("#cp").querySelectorAll(".clscard").forEach(el=>el.addEventListener("click",()=>showClassTargets(el.dataset.cls)));
+}
+function drawJaccard(J){
+  if(!J){ $("#jac").innerHTML=`<span class="muted">—</span>`; return; }
+  const cls=J.classes, n=cls.length, cell=52, lab=78, W=lab+n*cell+10, H=lab+n*cell+10;
+  const col=v=>{const t=Math.min(1,v/0.3); const r=Math.round(18+t*(34-18)),g=Math.round(22+t*(184-22)),b=Math.round(31+t*(196-31));return `rgb(${r},${g},${b})`;};
+  let svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px">`;
+  for(let i=0;i<n;i++){
+    svg+=`<text x="${lab-6}" y="${lab+i*cell+cell/2+3}" text-anchor="end" font-size="10" fill="var(--muted)">${CLSSHORT[cls[i]]||cls[i]}</text>`;
+    svg+=`<text x="${lab+i*cell+cell/2}" y="${lab-6}" text-anchor="start" font-size="10" fill="var(--muted)" transform="rotate(-45 ${lab+i*cell+cell/2} ${lab-6})">${CLSSHORT[cls[i]]||cls[i]}</text>`;
+    for(let j=0;j<n;j++){const v=J.matrix[i][j],x=lab+j*cell,y=lab+i*cell;
+      svg+=`<rect x="${x}" y="${y}" width="${cell-2}" height="${cell-2}" rx="4" fill="${col(v)}"><title>${cls[i]} ∩ ${cls[j]} = ${v.toFixed(2)}</title></rect>
+        <text x="${x+cell/2-1}" y="${y+cell/2+3}" text-anchor="middle" font-size="10" fill="${v>0.15?'#fff':'#8b95a8'}" font-family="var(--mono)">${v.toFixed(2)}</text>`;}
+  }
+  $("#jac").innerHTML=svg+`</svg>`;
+}
+async function showClassTargets(cls){
+  const box=$("#cltargets"); box.innerHTML=`<div class="panel muted">loading targets for ${cls}…</div>`;
+  let d; try{ d=await api("/programs/class-targets?class="+encodeURIComponent(cls)); }catch(e){ d={available:false}; }
+  if(!d.available){box.innerHTML=`<div class="panel muted">No target list for <b>${cls}</b>.</div>`;return;}
+  const isg=d.targets.filter(t=>t.is_ISG).map(t=>`<span class="chip" style="border-color:var(--up);color:var(--up)"><b>${t.target_gene}</b></span>`).join(" ");
+  const rest=d.targets.filter(t=>!t.is_ISG).slice(0,60).map(t=>`<span class="chip">${t.target_gene}</span>`).join(" ");
+  box.innerHTML=`<div class="panel"><div class="sec">${cls} · ${d.n_targets} convergent targets (${d.n_isg} ISG)</div>
+    ${isg?`<p class="muted" style="margin:2px 0 6px;font-size:12px">Interferon-stimulated genes (ISGs):</p><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">${isg}</div>`:""}
+    <p class="muted" style="margin:2px 0 6px;font-size:12px">Other targets${d.targets.length-d.n_isg>60?" (first 60)":""}:</p>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">${rest||'<span class="muted">—</span>'}</div></div>`;
 }
 
 /* helpers */

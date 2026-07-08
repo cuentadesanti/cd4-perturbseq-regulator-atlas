@@ -236,6 +236,49 @@ genes" are consistently-moved downstream genes (relative to the panel), not base
 view, not the proof. `make fingerprints` · detail in `docs/FINGERPRINT_ANALYSIS.md`.*
 """
 
+    # --- convergent programs by regulator class (optional, `make class-programs`) ---
+    class_md = ""
+    cls_p = TAB / "class_isg_enrichment.csv"
+    if cls_p.exists():
+        ci = pd.read_csv(cls_p).sort_values("fold", ascending=False)
+        saga = ci[ci["class"] == "SAGA/chromatin"]
+        saga_fold = float(saga["fold"].iloc[0]) if len(saga) else None
+        jm = None
+        csp = TAB / "class_program_summary.json"
+        if csp.exists():
+            import json as _j
+            jm = _j.loads(csp.read_text()).get("_jaccard_offdiag_median")
+        cm = TAB / "convergent_module_summary.json"
+        mod = {}
+        if cm.exists():
+            import json as _j
+            mod = _j.loads(cm.read_text())
+        ct = ci[["class", "targets", "ISGs", "fold", "p", "frac_up_on_KD"]].copy()
+        ct["fold"] = ct["fold"].map(lambda x: f"{x}×")
+        ct["p"] = ct["p"].map(lambda x: f"{x:.1e}")
+        class_md = f"""
+## Convergent programs by regulator class
+
+Is "chromatin machinery recovers as top hubs" just the expected result of perturbing coactivators? A
+**balanced 30-regulator panel** — chosen by *class*, not by rank — tests whether classes converge on
+*distinct* downstream programs (`make class-programs`, fully offline).
+
+- **Classes converge on distinct programs**: median off-diagonal Jaccard of per-class convergent-target
+  sets ≈ **{jm:.2f}** — classes barely share targets.
+- **A convergent interferon module** answers the "SAGA is expected" critique: genes hit by ≥4 of the 6
+  robust SAGA-family regulators form a **{mod.get('module_size_ge4of6','?')}-gene module**,
+  **{mod.get('ISG_fold_enrichment','?')}× enriched for interferon-stimulated genes**
+  (P≈{mod.get('ISG_hypergeom_p', float('nan')):.1e}), **all de-repressive** (knockdown raises ISGs).
+- Interferon repression is **most concentrated under SAGA/chromatin ({saga_fold}× in the class panel)**.
+
+{df_to_md(ct)}
+
+![class programs](figures/27_regulator_class_programs.png)
+
+*Candidate convergent-target programs (ISG-flagged), not causal pathways. Detail:
+`docs/literature_positioning.md`; per-class target lists in the **Programs by class** UI tab.*
+"""
+
     md = f"""# Report — Genome-scale CD4+ T cell Perturb-seq
 
 *Consolidated report for review. Reproducible with `make all` (local CSVs only).*
@@ -271,6 +314,7 @@ Full table (30, with all columns): `docs/tables/top_regulators_for_review.csv`.
 ![ranking](figures/07_hub_posterior_ranking.png)
 {audit_md}
 {programs_md}
+{class_md}
 ## EDA findings
 
 ![degs](figures/01_distribution_n_total_de_genes.png)

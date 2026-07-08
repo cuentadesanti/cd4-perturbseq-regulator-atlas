@@ -1,0 +1,39 @@
+{
+  "robust_regulators": [
+    "SENP5",
+    "SGF29",
+    "SUPT20H",
+    "TADA1",
+    "TADA2B",
+    "TSPYL5"
+  ],
+  "module_size_ge4of6": 163,
+  "hit_by_all6": 13,
+  "ISG_reference_in_universe": 48,
+  "universe_size": 10282,
+  "ISGs_in_module": 18,
+  "ISG_fold_enrichment": 23.7,
+  "ISG_hypergeom_p": 7.47462671161565e-21,
+  "ISG_edges_all_positive": true,
+  "module_edges_positive_share": 0.913,
+  "ISG_members_in_module": [
+    "APOL1",
+    "APOL4",
+    "BST2",
+    "CMPK2",
+    "EPSTI1",
+    "GBP1",
+    "HELZ2",
+    "IFI35",
+    "IFI44",
+    "IFI44L",
+    "IFI6",
+    "MX1",
+    "OAS1",
+    "OAS3",
+    "RIGI",
+    "SAMD9",
+    "SAMD9L",
+    "XAF1"
+  ]
+}

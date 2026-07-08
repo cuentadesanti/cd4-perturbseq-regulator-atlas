@@ -107,6 +107,33 @@ Figures 20–24. Detail in [`docs/FINGERPRINT_ANALYSIS.md`](docs/FINGERPRINT_ANA
 > convergent "response genes" are genes consistently moved by a program's regulators (relative to the
 > panel), not baseline cell-type markers; PCA is a view, not the proof.
 
+## Convergent programs by regulator class
+
+A rank tells you *who* is strong; the fingerprint tells you *what a perturbation does*. But is
+"chromatin machinery recovers as top hubs" just the expected result of perturbing coactivators? To
+test that, a **balanced 30-regulator panel** — chosen by *class* (SAGA/chromatin, Mediator, TCR,
+other-robust, reproducibility-promoted, demoted control), not by rank — asks whether different classes
+converge on *different* downstream programs. Fully offline (`make class-programs`, uses the cached
+fingerprint panel; `scripts/analyze_class_programs.py`).
+
+- **Classes converge on distinct programs.** The pairwise Jaccard of per-class convergent-target sets
+  has a **median off-diagonal of ~0.05** — the classes barely share targets, so the "programs" are
+  real, not an artifact of every strong perturbation moving the same genes.
+- **A convergent interferon module answers the "SAGA is expected" critique.** Genes hit by ≥4 of the 6
+  robust SAGA-family regulators form a **163-gene module**, and it is **24× enriched for interferon-
+  stimulated genes** (18/163 ISGs, hypergeometric P≈7.5e-21), **all de-repressive** (knockdown *raises*
+  ISGs). Interferon repression is **most concentrated under SAGA/chromatin (19.2× in the class panel)** —
+  a specific, directional program, not a generic "moves many genes" signature.
+- **Programs are condition-dependent.** Across 3 conditions (phase-2 comparison), TCR programs are
+  **stimulation-gated** (~4× Rest→Stim) while chromatin programs are **constitutive**; the interferon
+  program is stimulation-gated in every class.
+
+These are **candidate convergent-target programs** (ISG-flagged, STRING-style interpretation), not
+causal pathways. UI: the **Programs by class** tab (per-class cards, Jaccard heatmap, ISG-flagged
+target lists). Tables: `class_isg_enrichment.csv`, `class_convergent_targets.csv`,
+`convergent_module_*`, `phase2_*`. Figures 26–28. Lit context:
+[`docs/literature_positioning.md`](docs/literature_positioning.md).
+
 ## How to reproduce
 
 ```bash
@@ -134,8 +161,10 @@ Optional (remote, requires `pip install h5py s3fs fsspec` + `scikit-learn`): `ma
 | `docs/tables/hub_ranking_bayes.csv` | full EB ranking (all genes) |
 | `docs/tables/fingerprint_findings.csv` | per-regulator transcriptional program + neighbors + markers |
 | `docs/tables/program_label_evidence.csv` | auditable basis for each program label |
+| `docs/tables/class_isg_enrichment.csv` · `class_convergent_targets.csv` | per-class convergent programs + interferon test |
+| `docs/tables/convergent_module_*` · `phase2_*` | interferon module + condition-dependence analyses |
 | `docs/tables/robust_edges.csv` | uncertainty-aware effect network (bonus, Model 1) |
-| `docs/figures/*.png` | EDA · ranking · programs (20–24) · overview |
+| `docs/figures/*.png` | EDA · ranking · programs (20–25) · class programs (26–28) · overview |
 | `docs/data-model.html` | interactive explorer (data model + EDA + study) |
 
 ## Product: Regulator Atlas (API + UI)
@@ -157,7 +186,8 @@ with. If port 8000 is taken, use another (`--port 8010`) and open `http://localh
 Key endpoints: `/summary`, `/regulators?q=&regulator_class=&sort_by=`, **`/regulators/{gene}`**
 (full profile: class, per-condition profile, audits, **transcriptional program + neighbors + markers**,
 top edges, interpretation), `/audit/reproducibility`, **`/programs/summary`**, `/programs/findings`,
-`/edges/downstream`. The UI has **5 screens**: Overview, Explore, Audit, Effect network, and Programs.
+**`/programs/classes`**, `/programs/class-targets?class=`, `/edges/downstream`. The UI has **6 screens**:
+Overview, Explore, Audit, Effect network, Programs, and **Programs by class**.
 Detail in [`api/README.md`](api/README.md).
 
 ## Limitations
