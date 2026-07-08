@@ -92,7 +92,9 @@ def fig26():
     axes[2].set_yticks(yp); axes[2].set_yticklabels(rd["reg"], fontsize=8)
     axes[2].set_xlabel(f"ISG edges at Stim8hr (of {n_isg} module ISGs)")
     axes[2].set_title("C · knockdown de-represses ISGs — consistently", loc="left", fontsize=9.5)
-    axes[2].legend(fontsize=6.5, loc="lower right", frameon=False)
+    axes[2].set_xlim(left=-5.5)
+    axes[2].legend(fontsize=6.0, loc="lower left", frameon=False, handlelength=1.1,
+                   borderaxespad=0.4)
 
     fig.suptitle("A convergent interferon module — SAGA-family knockdown de-represses interferon genes",
                  fontsize=11.5, fontweight="bold")
