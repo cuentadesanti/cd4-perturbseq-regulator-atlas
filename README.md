@@ -61,7 +61,19 @@ Rigor audit / response to reviewer: [`docs/REVIEW_RESPONSE.md`](docs/REVIEW_RESP
 
 ## Validating the ranking
 
-Before trusting the ranking, we audit it (`scripts/audit_ranking.py`, no new dependencies).
+Before trusting the ranking, we audit it (`scripts/audit_ranking.py`, no new dependencies). It is
+further pressure-tested against a senior-researcher critique in [`docs/REVIEW_RESPONSE.md`](docs/REVIEW_RESPONSE.md)
+(effect-size metric vs. DE-count, within-condition null, external concordance) and against the true
+replication unit in [`docs/DONOR_ROBUSTNESS.md`](docs/DONOR_ROBUSTNESS.md).
+
+**Donor robustness (the replication unit that matters).** From the dedicated per-donor DE object
+(`by_donors.h5mu`, 100% cross-donor coverage on KD-gated contrasts) we add a `donor_robust` flag
+(worst of 6 pairwise donor correlations ≥ 0.5) as a **column, not a re-sort** — a large-effect hub
+that fails replication stays visible at its rank (e.g. **SMG1, rank 24, 2,683 DEGs, fails donor
+concordance**). The top regulators are donor-robust as a class (29/30). The same check over the
+fingerprint programs flags **4 assigned-neighbor false positives** (TCR: ATF7IP2/NCAPG2/EIF1AX;
+Mediator: GLIPR2) while the SAGA/chromatin neighbor **CHD7 survives** — so the programs are now
+internally consistent with the donor-audited ranking.
 
 **Naive hubs vs. quality-aware regulators.** Ranking by raw `n_downstream` rewards hubs that don't
 survive the controls: of the top 30 raw hubs, **2 fall out at the knockdown gate** (no validated
