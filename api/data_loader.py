@@ -81,6 +81,7 @@ class DataStore:
         self.cp_isg = self._t("class_isg_enrichment.csv")
         self.cp_targets = self._t("class_convergent_targets.csv")
         self.cp_summary_path = TABLES / "class_program_summary.json"
+        self.phase2 = self._read_json("phase2_condition_summary.json")
         self.de = self._t("DE_stats.suppl_table.csv", base=DATA)  # for the per-condition profile
 
         if self.ranking is None:
@@ -225,6 +226,21 @@ class DataStore:
         return {"regulator_class": regulator_class, "available": True,
                 "n_targets": int(len(sub)), "n_isg": int(sub["is_ISG"].sum()),
                 "targets": _records(sub[["target_gene", "is_ISG"]])}
+
+    def programs_phase2(self):
+        """Condition dependence of the class programs (10 genes × 3 conditions): per-class
+        interferon-fold by condition + the stim-vs-rest downstream-breadth ratio."""
+        p = self.phase2
+        if not p:
+            return {"available": False}
+        return {
+            "available": True,
+            "conditions": p.get("conditions", []),
+            "genes": p.get("genes", []),
+            "method": p.get("method"),
+            "by_class_isg_fold": p.get("by_class_isg_fold", {}),
+            "stim_vs_rest_ratio": p.get("n_downstream_stim_vs_rest_ratio_median", {}),
+        }
 
     # ---- transcriptional programs / fingerprints ----
     def programs_pca(self):

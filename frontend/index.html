@@ -359,9 +359,38 @@ async function renderClasses(){
     <div class="cards" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">${cards}</div>
     <div class="sec" style="margin-top:20px">Overlap between classes (Jaccard of target sets)</div>
     <div id="jac"></div>
+    <div class="sec" style="margin-top:22px">Condition dependence · stimulation-gated vs constitutive (phase-2)</div>
+    <div id="ph2" class="muted" style="font-size:12.5px">loading…</div>
     <div id="cltargets" style="margin-top:8px"></div>`;
   drawJaccard(d.jaccard);
+  loadPhase2();
   $("#cp").querySelectorAll(".clscard").forEach(el=>el.addEventListener("click",()=>showClassTargets(el.dataset.cls)));
+}
+let PHASE2=null, PH2_COND=null;
+async function loadPhase2(){
+  try{ PHASE2=await api("/programs/phase2"); }catch(e){ PHASE2={available:false}; }
+  if(!PHASE2||!PHASE2.available){ $("#ph2").innerHTML=`<span class="muted">Not available (run <span class="mono">make class-programs</span>).</span>`; return; }
+  PH2_COND=PHASE2.conditions.includes("Stim8hr")?"Stim8hr":PHASE2.conditions[0];
+  const rr=PHASE2.stim_vs_rest_ratio||{};
+  const ratioTxt=Object.keys(PHASE2.by_class_isg_fold||{}).map(c=>`${CLSSHORT[c]||c} ${rr[c]==null?"—":rr[c].toFixed(1)+"×"}`).join(" · ");
+  $("#ph2").innerHTML=`<p class="muted" style="margin:0 0 8px">Same 10 regulators (3 classes) tracked across the 3 culture conditions. Toggle a condition to see the interferon (ISG) fold-enrichment per class.</p>
+    <div class="filters" id="ph2toggle" style="margin-bottom:8px">${PHASE2.conditions.map(c=>`<button class="tab" data-cond="${c}" style="font-size:12px;padding:5px 12px">${c}</button>`).join("")}</div>
+    <div id="ph2bars"></div>
+    <p class="muted" style="margin:10px 0 0;font-size:12px">Downstream breadth (Stim/Rest ratio): <b>${ratioTxt}</b> — TCR programs are <b>stimulation-gated</b> (~4×), chromatin/Mediator largely <b>constitutive</b> (~1×). The interferon program peaks under stimulation in every class.</p>`;
+  $("#ph2toggle").querySelectorAll("[data-cond]").forEach(b=>b.addEventListener("click",()=>drawPhase2(b.dataset.cond)));
+  drawPhase2(PH2_COND);
+}
+function drawPhase2(cond){
+  PH2_COND=cond;
+  $("#ph2toggle").querySelectorAll("[data-cond]").forEach(b=>b.setAttribute("aria-selected", b.dataset.cond===cond));
+  const bc=PHASE2.by_class_isg_fold||{};
+  const rows=Object.entries(bc).map(([c,byc])=>[c, byc[cond]==null?0:byc[cond]]).sort((a,b)=>b[1]-a[1]);
+  const mx=Math.max(1,...rows.map(r=>r[1]));
+  $("#ph2bars").innerHTML=rows.map(([c,v])=>{
+    const col=CLSCOL[c]||"#888";
+    return `<div class="barrow" style="grid-template-columns:96px 1fr auto"><span style="color:${col};font-weight:600">${CLSSHORT[c]||c}</span>
+      <div class="track"><div class="fill" style="width:${(v/mx*100).toFixed(0)}%;background:${col}"></div></div>
+      <span class="mono">${v.toFixed(1)}× ISG</span></div>`;}).join("");
 }
 function drawJaccard(J){
   if(!J){ $("#jac").innerHTML=`<span class="muted">—</span>`; return; }
