@@ -120,14 +120,17 @@ perturbation actually does to the cell. On a balanced panel of 200 top perturbat
 regulator's fingerprint to the curated **SAGA / Mediator / TCR** complexes (nearest-centroid in the
 same space as the validated cosine similarity). These are **candidate program assignments by
 fingerprint similarity — not claims of physical complex membership.** The classifier is conservative:
-only **25 of 200** perturbations are assigned a program; the rest remain *mixed*, by design.
+only **25 of 200** perturbations are assigned a program (**4 flagged donor-fragile**: TCR signaling 3; Mediator/transcription 1);
+the rest remain *mixed*, by design.
 
-- **Fingerprint similarity recovers the known complexes** (permutation test, N=5000): SAGA z=9.23 · Mediator z=3.23 · TCR z=11.24. The
+- **Fingerprint similarity recovers the known complexes** (permutation test, N=5000): SAGA z=9.37→11.07 (cross→within-condition) · Mediator z=3.16→3.96 (cross→within-condition) · TCR z=11.17→11.24 (cross→within-condition). The
   latent PC1 is program *identity*, not effect magnitude (|PC1| vs. n_downstream Spearman = 0.249).
-- **25 assigned**: TCR signaling (13), SAGA/chromatin (9), Mediator/transcription (3). Each program recovers its curated core and adds **newly assigned
-  neighbors** (non-curated genes placed in the same fingerprint neighborhood) — e.g. the chromatin
-  remodeler **CHD7** is assigned to the SAGA/chromatin program (a related perturbation response, not
-  complex membership). Every assignment is auditable below and in `program_label_evidence.csv`.
+- **25 assigned** (4 donor-fragile — TCR signaling 3; Mediator/transcription 1): TCR signaling (13), SAGA/chromatin (9), Mediator/transcription (3). Each program recovers its
+  curated core and adds **newly assigned neighbors** (non-curated genes placed in the same fingerprint
+  neighborhood) — e.g. the chromatin remodeler **CHD7** is assigned to the SAGA/chromatin program (a
+  related perturbation response, not complex membership) and is **donor-robust**; the donor check flags
+  ATF7IP2/NCAPG2/EIF1AX (TCR) and GLIPR2 (Mediator) as fingerprint artifacts that do not replicate
+  across donors (see `donor_fragile_neighbors` in `program_label_evidence.csv`).
 
 | program_label | n_regulators | n_known_complex_members | assigned_neighbors | mean_centroid_cosine | top_marker_genes |
 | --- | --- | --- | --- | --- | --- |

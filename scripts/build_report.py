@@ -194,6 +194,15 @@ penalty for absent data). Of the top-30 EB, **{len(dem)} are demoted** and **{le
         n_in = int((fnd["program_label"] != "mixed").sum())
         counts = fnd[fnd.program_label != "mixed"]["program_label"].value_counts().to_dict()
         counts_txt = ", ".join(f"{k} ({v})" for k, v in sorted(counts.items(), key=lambda x: -x[1]))
+        # donor-robustness of the assigned set (Tier 1 fold-in): how many assignments fail the donor check
+        assigned = fnd[fnd.program_label != "mixed"]
+        if "donor_robust" in fnd.columns:
+            frag_by = assigned[assigned.donor_robust == False].groupby("program_label").size().to_dict()
+            n_frag = int(sum(frag_by.values()))
+            frag_txt = ("; ".join(f"{k} {v}" for k, v in sorted(frag_by.items(), key=lambda x: -x[1]))
+                        or "none")
+        else:
+            n_frag, frag_txt = 0, "none"
         zline = " · ".join(f"{r.complex} z={r.z_cross}→{r.z_within} (cross→within-condition)"
                             for r in cval.itertuples() if pd.notna(r.z_within))
         ev = evid[evid.program_label != "mixed"][["program_label", "n_regulators", "n_known_complex_members",
@@ -211,14 +220,17 @@ perturbation actually does to the cell. On a balanced panel of 200 top perturbat
 regulator's fingerprint to the curated **SAGA / Mediator / TCR** complexes (nearest-centroid in the
 same space as the validated cosine similarity). These are **candidate program assignments by
 fingerprint similarity — not claims of physical complex membership.** The classifier is conservative:
-only **{n_in} of 200** perturbations are assigned a program; the rest remain *mixed*, by design.
+only **{n_in} of 200** perturbations are assigned a program (**{n_frag} flagged donor-fragile**: {frag_txt});
+the rest remain *mixed*, by design.
 
 - **Fingerprint similarity recovers the known complexes** (permutation test, N=5000): {zline}. The
   latent PC1 is program *identity*, not effect magnitude (|PC1| vs. n_downstream Spearman = {pc1}).
-- **{n_in} assigned**: {counts_txt}. Each program recovers its curated core and adds **newly assigned
-  neighbors** (non-curated genes placed in the same fingerprint neighborhood) — e.g. the chromatin
-  remodeler **CHD7** is assigned to the SAGA/chromatin program (a related perturbation response, not
-  complex membership). Every assignment is auditable below and in `program_label_evidence.csv`.
+- **{n_in} assigned** ({n_frag} donor-fragile — {frag_txt}): {counts_txt}. Each program recovers its
+  curated core and adds **newly assigned neighbors** (non-curated genes placed in the same fingerprint
+  neighborhood) — e.g. the chromatin remodeler **CHD7** is assigned to the SAGA/chromatin program (a
+  related perturbation response, not complex membership) and is **donor-robust**; the donor check flags
+  ATF7IP2/NCAPG2/EIF1AX (TCR) and GLIPR2 (Mediator) as fingerprint artifacts that do not replicate
+  across donors (see `donor_fragile_neighbors` in `program_label_evidence.csv`).
 
 {ev_tbl}
 

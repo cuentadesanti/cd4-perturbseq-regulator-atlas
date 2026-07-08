@@ -68,8 +68,8 @@ they do to the cell, not in how much.
 
 ### 2. Recognizable programs, with newly assigned neighbors
 
-The classifier is conservative: only **25 of 200** regulators are assigned a program; the rest stay
-*mixed*, by design. These are **candidate program assignments by fingerprint similarity — not claims of
+The classifier is conservative: only **25 of 200** regulators are assigned a program (of which **4 are
+donor-fragile**, see † below); the rest stay *mixed*, by design. These are **candidate program assignments by fingerprint similarity — not claims of
 physical complex membership.**
 
 | program | n | curated core recovered | newly assigned neighbors (non-curated) | centroid cosine |

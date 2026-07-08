@@ -101,7 +101,9 @@ claims of physical complex membership.** `scripts/analyze_fingerprints.py` · `m
   each significantly cohesive: **TCR z=11, SAGA z=9, Mediator z=3** (N=5000). The latent PC1 is program
   *identity*, not effect magnitude (|PC1| vs. n_downstream Spearman = 0.25).
 - **The classifier is conservative — only 25 of 200 are assigned; the rest stay *mixed*, by design.**
-  The assigned set: **TCR signaling (13), SAGA/chromatin (9), Mediator/transcription (3)**. Each program
+  The assigned set: **TCR signaling (13), SAGA/chromatin (9), Mediator/transcription (3)** — of which
+  **4 are flagged donor-fragile** by the per-donor check (TCR 3: ATF7IP2/NCAPG2/EIF1AX; Mediator 1:
+  GLIPR2; SAGA 0), so SAGA/chromatin is the most donor-robust program. Each program
   recovers its curated core and adds **newly assigned neighbors** (non-curated genes placed in the same
   fingerprint neighborhood) — e.g. the chromatin remodeler **CHD7 is assigned to the SAGA/chromatin
   program** (cosine 0.84; a related response, not complex membership), and Mediator's **MED12** lands in
