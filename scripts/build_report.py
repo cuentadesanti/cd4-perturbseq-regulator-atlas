@@ -194,7 +194,8 @@ penalty for absent data). Of the top-30 EB, **{len(dem)} are demoted** and **{le
         n_in = int((fnd["program_label"] != "mixed").sum())
         counts = fnd[fnd.program_label != "mixed"]["program_label"].value_counts().to_dict()
         counts_txt = ", ".join(f"{k} ({v})" for k, v in sorted(counts.items(), key=lambda x: -x[1]))
-        zline = " · ".join(f"{r.complex} z={r.z}" for r in cval.itertuples() if pd.notna(r.z))
+        zline = " · ".join(f"{r.complex} z={r.z_cross}→{r.z_within} (cross→within-condition)"
+                            for r in cval.itertuples() if pd.notna(r.z_within))
         ev = evid[evid.program_label != "mixed"][["program_label", "n_regulators", "n_known_complex_members",
                                                   "assigned_neighbors", "mean_centroid_cosine", "top_marker_genes"]]
         ev_tbl = df_to_md(ev)

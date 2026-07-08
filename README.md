@@ -25,7 +25,7 @@ working disk has ~10 GB free) — the entire core runs **from the supplementary 
 3. **80/20 EDA** (`scripts/eda.py`) — effect-size distribution, knockdown quality, hubs, reproducibility.
 4. **Model 2 · empirical Bayes** (`scripts/model_hubs.py`) — regulator ranking with uncertainty.
 5. **Ranking audits** (`scripts/audit_ranking.py`) — baselines, bootstrap stability, global vs.
-   context-specific, and a guide/donor-aware reproducibility audit.
+   context-specific, and a guide-level reproducibility audit (with partial, 19%, donor coverage).
 6. **Transcriptional programs** (`scripts/analyze_fingerprints.py`) — organizes top perturbations by
    the fingerprint they induce, reading `.h5ad` layers *by slice* from S3 **without downloading it**.
 7. **Model 1 · uncertainty-aware effect network** (optional, `scripts/model_edges.py`, bonus).
@@ -56,6 +56,8 @@ working disk has ~10 GB free) — the entire core runs **from the supplementary 
   regulators, extracted from the remote h5ad without downloading it.
 
 Detail: [`docs/report.md`](docs/report.md) · [`docs/EDA.md`](docs/EDA.md) · [`docs/MODELING.md`](docs/MODELING.md).
+Rigor audit / response to reviewer: [`docs/REVIEW_RESPONSE.md`](docs/REVIEW_RESPONSE.md)
+(effect-size metric audit, within-condition null, external concordance).
 
 ## Validating the ranking
 
@@ -132,11 +134,11 @@ fingerprint panel; `scripts/analyze_class_programs.py`).
 - **Programs are condition-dependent.** Across 3 conditions (phase-2 comparison), TCR programs are
   **stimulation-gated** (~4× Rest→Stim) while chromatin programs are **constitutive**; the interferon
   program is stimulation-gated in every class.
-- **Medical bridge (nomination, not discovery).** The module maps onto the clinically-tracked lupus /
-  interferonopathy IFN signature (25×, P<1e-9) and is IFN-*specific* (a T-cell-exhaustion contrast is
-  not enriched); **31/163 module genes are autoimmune GWAS risk genes** (Open Targets), led by
-  **STAT4**. Since the coactivators *restrain* these genes, they are **nominated** as candidate
-  de-repressive control points — heavily caveated by the specificity control above.
+- **Disease link (one hypothesis, not a headline).** The module overlaps the clinically-tracked
+  lupus / interferonopathy IFN signature and 31/163 of its genes are autoimmune GWAS risk genes — but
+  an IFN module overlapping a clinical IFN signature is confirmatory by construction, so we state it as
+  a single untested hypothesis: *coactivator knockdown de-represses ISGs; whether this is a control
+  point in disease is not tested here.* Details in `docs/disease_and_specificity.md`.
 
 These are **candidate convergent-target programs** (ISG-flagged), not causal pathways. UI: the
 **Programs by class** tab (per-class cards, Jaccard heatmap, ISG-flagged target lists). Tables:
@@ -206,7 +208,7 @@ Detail in [`api/README.md`](api/README.md).
 - **Honest naming**: the models are **empirical-Bayes / pseudo-Bayesian**, not a full hierarchical NB
   or MCMC (no PPL, no formal random effects).
 - `xcond_reproducibility` is an **exploratory feature** (cross-condition stability). It is **audited**
-  with a **guide/donor-aware sensitivity analysis** (`make repro-meta` →
+  with a **guide-level sensitivity analysis (partial donor coverage)** (`make repro-meta` →
   `scripts/extract_de_obs_metadata.py`, which extracts only the `.obs`, no `.layers`) that
   **reweights** the EB score with **real** cross-guide (`guide_correlation_all`) and cross-donor
   (`donor_correlation_hits_mean`) reproducibility — it is a **sensitivity analysis, not a new
@@ -221,9 +223,10 @@ Detail in [`api/README.md`](api/README.md).
 A reproducible product that turns a 1.8 TB CD4 Perturb-seq screen into **three explorable objects —
 robust regulators, reproducibility audits, and transcriptional programs** — runnable on a laptop with
 ~10 GB of disk using only 15 MB of data for the core. The **CSV-only** core ranks regulators with
-uncertainty (empirical Bayes) and audits them (bootstrap stability + a guide/donor-aware
-reproducibility audit). On top of that, **fingerprint similarity organizes the top perturbations into
-recognizable programs** — recovering the SAGA, Mediator and TCR complexes (permutation z=9/3/11) and
+uncertainty (empirical Bayes) and audits them (bootstrap stability + a guide-level reproducibility
+audit with partial donor coverage). On top of that, **fingerprint similarity organizes the top perturbations into
+recognizable programs** — recovering the SAGA, Mediator and TCR complexes (permutation z=9/3/11,
+robust to a within-condition null) and
 surfacing candidate neighbors (e.g. CHD7 assigned to the chromatin program by fingerprint) — plus a
 bonus **uncertainty-aware effect network**, both
 streamed from the 17 GB h5ad without downloading it. An explorable **Regulator Atlas** (read-only

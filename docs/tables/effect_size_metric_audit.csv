@@ -1,0 +1,9 @@
+metric,rho_vs_n_downstream,rho_vs_n_cells
+n_downstream,1.0,-0.222
+n_sig,1.0,-0.222
+mag_sig,0.904,-0.205
+mean_sig,-0.761,0.174
+l2_sig,0.691,-0.141
+l2_z,0.735,-0.294
+sabs_z,0.704,-0.305
+l2_all,0.442,-0.683

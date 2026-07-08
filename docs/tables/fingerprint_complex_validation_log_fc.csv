@@ -1,0 +1,4 @@
+complex,n_present,mean_intra_cosine,null_mean_cross,z_cross,p_cross,null_mean_within,z_within,p_within,member_conditions,members
+SAGA,8,0.3044,-0.0043,14.6,0.0002,-0.0026,12.66,0.0002,Stim8hr:7;Stim48hr:1,TADA1;TADA2B;SUPT20H;SUPT7L;TAF6L;SGF29;ATXN7L3;USP22
+Mediator,7,0.1545,-0.0031,6.2,0.0008,-0.0065,6.6,0.0004,Stim8hr:5;Rest:1;Stim48hr:1,MED1;MED12;MED15;MED19;MED23;MED24;CCNC
+TCR,5,0.7022,-0.0034,19.67,0.0002,0.0034,14.94,0.0002,Stim8hr:5,ZAP70;LCK;LAT;CD3E;PLCG1

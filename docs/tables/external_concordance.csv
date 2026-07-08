@@ -1,0 +1,9 @@
+our_metric,reference,n_shared_genes,spearman,spearman_p,topk,topk_overlap,topk_overlap_p
+n_downstream,schmidt2022_screen,7550,0.166,6.2e-48,100,25,5.2e-26
+n_downstream,paper_polarization_coef,3140,0.126,1.6e-12,100,23,1.0e-14
+mag_sig,schmidt2022_screen,7550,0.151,1.7e-39,100,30,5.9e-34
+mag_sig,paper_polarization_coef,3140,0.132,1.0e-13,100,22,1.1e-13
+mean_sig(intensity),schmidt2022_screen,7550,-0.137,7.0e-33,100,0,1.0e+00
+mean_sig(intensity),paper_polarization_coef,3140,-0.094,1.3e-07,100,1,9.6e-01
+l2_z,schmidt2022_screen,7550,0.171,2.4e-50,100,26,1.5e-27
+l2_z,paper_polarization_coef,3140,0.129,4.7e-13,100,23,1.0e-14
