@@ -1,0 +1,29 @@
+{
+  "module_size": 163,
+  "background": 10282,
+  "overlaps": {
+    "Lupus type-I IFN (21-gene core)": {
+      "overlap": 8,
+      "fold": 25.2,
+      "p": 3.5993797155927154e-10
+    },
+    "Interferonopathy IFN score (AGS/SAVI)": {
+      "overlap": 2,
+      "fold": 15.8,
+      "p": 0.006568766779377674
+    },
+    "Type-I IFN response (canonical core)": {
+      "overlap": 15,
+      "fold": 24.9,
+      "p": 5.9047551425851996e-18
+    },
+    "T-cell exhaustion (contrast)": {
+      "overlap": 0,
+      "fold": 0.0,
+      "p": 1.0
+    }
+  },
+  "direction": "de-repressive (knockdown raises ISGs)",
+  "isg_edges_all_positive": true,
+  "framing": "overlap is confirmatory by construction; the payload is the de-repressive direction (coactivators restrain the clinical IFN axis) + upstream nomination. The enrichment magnitude is not SAGA-specific (see chromatin_stress_control) \u2014 nomination, not proven disease control."
+}

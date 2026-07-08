@@ -1,0 +1,4 @@
+group,n_members,median_n_downstream,n_convergent_targets,n_ISG,isg_fold,isg_p,frac_isg_up_on_KD,null_sd,null_p95
+SAGA/chromatin,8,4138.5,1352.0,34.0,5.39,5.70975751217591e-20,0.951,,
+other chromatin/transcription,14,150.0,589.0,8.0,2.91,0.0054613246947597905,0.442,,
+random (effect-size matched),8,2292.0,,15.8,3.14,,0.76,1.22,5.32
