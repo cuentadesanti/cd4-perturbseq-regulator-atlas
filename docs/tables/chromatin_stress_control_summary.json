@@ -1,0 +1,16 @@
+{
+  "saga_fold": 5.39,
+  "other_chromatin_fold": 2.91,
+  "random_null_mean_fold": 3.14,
+  "random_null_sd": 1.22,
+  "saga_z_vs_null": 1.85,
+  "saga_p_vs_null": 0.041916167664670656,
+  "chromatin_p_vs_null": 0.5389221556886228,
+  "n_random_draws": 500,
+  "frac_isg_up_saga": 0.951,
+  "frac_isg_up_chromatin": 0.442,
+  "frac_isg_up_random": 0.76,
+  "magnitude_specific": false,
+  "direction_specific": false,
+  "verdict": "Largely general \u2014 the ISG-enrichment MAGNITUDE is mostly a strong-perturbation-under-stimulation effect (matched random ~3.1x, other-chromatin 2.9x). SAGA is only marginally above random in magnitude (5.4x, p=0.042) but the MOST consistently de-repressive (95% ISG-up on KD vs 76% random, 44% other-chromatin). Requalify: nominate SAGA as a de-repressive control point, do not claim strong specificity."
+}

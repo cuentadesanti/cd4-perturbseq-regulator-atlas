@@ -1,0 +1,41 @@
+{
+  "module_size": 163,
+  "diseases": {
+    "SLE": "MONDO_0007915",
+    "RA": "MONDO_0008383",
+    "MS": "MONDO_0005301",
+    "Sjogren": "MONDO_0010030",
+    "T1D": "MONDO_0005147"
+  },
+  "genetic_score_min": 0.01,
+  "module_genes_with_autoimmune_gwas": 31,
+  "of_which_ISGs": 3,
+  "top_hits": [
+    "STAT4",
+    "IKZF3",
+    "RASGRP3",
+    "ANXA1",
+    "OAS3",
+    "GPR18",
+    "MAML2",
+    "YPEL5",
+    "EVI5",
+    "NOD2",
+    "GPD2",
+    "ZNF704",
+    "NCF4",
+    "MSRA",
+    "OAS1"
+  ],
+  "saga_regulators_max_score": {
+    "SGF29": 0.107,
+    "TADA1": 0.0,
+    "TADA2B": 0.421,
+    "SUPT20H": 0.304,
+    "TAF6L": 0.0,
+    "USP22": 0.0,
+    "SUPT7L": 0.0,
+    "ATXN7L3": 0.0
+  },
+  "framing": "Genetics corollary / nomination, not a novel disease association. An interferon module overlapping autoimmune GWAS genes is expected; the point is that these are restrained by the coactivators (de-repressive direction), giving a mechanistic hypothesis. Enrichment magnitude is not SAGA-specific (see chromatin_stress_control)."
+}

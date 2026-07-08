@@ -119,19 +119,30 @@ fingerprint panel; `scripts/analyze_class_programs.py`).
 - **Classes converge on distinct programs.** The pairwise Jaccard of per-class convergent-target sets
   has a **median off-diagonal of ~0.05** — the classes barely share targets, so the "programs" are
   real, not an artifact of every strong perturbation moving the same genes.
-- **A convergent interferon module answers the "SAGA is expected" critique.** Genes hit by ≥4 of the 6
-  robust SAGA-family regulators form a **163-gene module**, and it is **24× enriched for interferon-
-  stimulated genes** (18/163 ISGs, hypergeometric P≈7.5e-21), **all de-repressive** (knockdown *raises*
-  ISGs). Interferon repression is **most concentrated under SAGA/chromatin (19.2× in the class panel)** —
-  a specific, directional program, not a generic "moves many genes" signature.
+- **A convergent interferon module** (SAGA-family knockdown *de-represses* interferon). Genes hit by
+  ≥4 of the 6 robust SAGA-family regulators form a **163-gene module** enriched for interferon-
+  stimulated genes, **all de-repressive** (knockdown *raises* ISGs).
+  > **Specificity control (important requalification).** A dedicated control
+  > (`make specificity-control`, fig 29) shows the ISG-enrichment *magnitude* is **largely a general
+  > strong-perturbation-under-stimulation effect**: effect-size-matched random regulators already reach
+  > **~3×** and SAGA is only marginally above (**5.4×**, p=0.04 on the uniform-threshold method). SAGA's
+  > real distinction is the **consistency of the de-repressive direction (95% ISG-up on KD vs 76%
+  > random)**, not a unique fold. So the earlier "19–24×" headline is *not* strong SAGA-specific
+  > evidence — read it as a prominent but largely general program that SAGA consistently restrains.
 - **Programs are condition-dependent.** Across 3 conditions (phase-2 comparison), TCR programs are
   **stimulation-gated** (~4× Rest→Stim) while chromatin programs are **constitutive**; the interferon
   program is stimulation-gated in every class.
+- **Medical bridge (nomination, not discovery).** The module maps onto the clinically-tracked lupus /
+  interferonopathy IFN signature (25×, P<1e-9) and is IFN-*specific* (a T-cell-exhaustion contrast is
+  not enriched); **31/163 module genes are autoimmune GWAS risk genes** (Open Targets), led by
+  **STAT4**. Since the coactivators *restrain* these genes, they are **nominated** as candidate
+  de-repressive control points — heavily caveated by the specificity control above.
 
-These are **candidate convergent-target programs** (ISG-flagged, STRING-style interpretation), not
-causal pathways. UI: the **Programs by class** tab (per-class cards, Jaccard heatmap, ISG-flagged
-target lists). Tables: `class_isg_enrichment.csv`, `class_convergent_targets.csv`,
-`convergent_module_*`, `phase2_*`. Figures 26–28. Lit context:
+These are **candidate convergent-target programs** (ISG-flagged), not causal pathways. UI: the
+**Programs by class** tab (per-class cards, Jaccard heatmap, ISG-flagged target lists). Tables:
+`class_isg_enrichment.csv`, `class_convergent_targets.csv`, `chromatin_stress_control.csv`,
+`module_disease_overlap.csv`, `module_gwas_hits.csv`, `convergent_module_*`, `phase2_*`. Figures 26–31.
+Detail: [`docs/disease_and_specificity.md`](docs/disease_and_specificity.md) ·
 [`docs/literature_positioning.md`](docs/literature_positioning.md).
 
 ## How to reproduce

@@ -1,0 +1,5 @@
+signature,sig_genes_total,sig_in_universe,module_size,overlap,fold_enrichment,hypergeom_p,is_contrast,overlap_genes
+Lupus type-I IFN (21-gene core),21,20,163,8,25.2,3.5993797155927154e-10,False,EPSTI1;IFI44;IFI44L;IFI6;LAMP3;MX1;OAS1;OAS3
+Interferonopathy IFN score (AGS/SAVI),9,8,163,2,15.8,0.006568766779377674,False,IFI44;IFI44L
+Type-I IFN response (canonical core),39,38,163,15,24.9,5.9047551425851996e-18,False,BST2;CMPK2;EPSTI1;GBP1;HELZ2;IFI35;IFI44;IFI44L;IFI6;MX1;OAS1;OAS3;SAMD9;SAMD9L;XAF1
+T-cell exhaustion (contrast),16,14,163,0,0.0,1.0,True,

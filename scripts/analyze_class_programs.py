@@ -166,13 +166,12 @@ def _draw_figure(edges, class_targets, jac, iso, sel, classes):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    import _figstyle as S
 
     order = ["SAGA/chromatin", "Mediator", "TCR (context-specific)",
              "Other robust", "Repro-promoted", "Demoted control"]
     order = [c for c in order if c in classes]
-    col = {"SAGA/chromatin": "#8e44ad", "Mediator": "#2980b9",
-           "TCR (context-specific)": "#16a085", "Other robust": "#7f8c8d",
-           "Repro-promoted": "#f39c12", "Demoted control": "#bdbdbd"}
+    col = S.CLASS_COLORS
     short = {"SAGA/chromatin": "SAGA", "Mediator": "Mediator",
              "TCR (context-specific)": "TCR", "Other robust": "Other",
              "Repro-promoted": "Promoted", "Demoted control": "Demoted"}
@@ -195,18 +194,32 @@ def _draw_figure(edges, class_targets, jac, iso, sel, classes):
     axes[0].legend(handles=[Patch(color=col[c], label=short[c]) for c in order],
                    fontsize=5, loc="lower right", frameon=False)
 
-    # B: Jaccard heatmap
+    # B: Jaccard heatmap — mask the trivial diagonal and rescale so the real off-diagonal signal pops
+    from matplotlib.patches import Rectangle
     J = np.array([[jac[a][b] for b in order] for a in order])
-    im = axes[1].imshow(J, cmap="PuBu", vmin=0, vmax=0.3)
+    Jm = np.ma.masked_array(J, mask=np.eye(len(order), dtype=bool))
+    vmax = 0.2
+    cmap = plt.get_cmap("PuBu").copy(); cmap.set_bad("#e8eaed")
+    im = axes[1].imshow(Jm, cmap=cmap, vmin=0, vmax=vmax)
     labs = [short[c] for c in order]
     axes[1].set_xticks(range(len(order))); axes[1].set_xticklabels(labs, rotation=45, ha="right", fontsize=6)
     axes[1].set_yticks(range(len(order))); axes[1].set_yticklabels(labs, fontsize=6)
     for i in range(len(order)):
         for j in range(len(order)):
+            if i == j:
+                axes[1].text(j, i, "—", ha="center", va="center", fontsize=6, color="0.5")
+                continue
             v = J[i, j]
             axes[1].text(j, i, f"{v:.2f}", ha="center", va="center", fontsize=5.5,
-                         color="white" if v > 0.15 else "0.25")
+                         color="white" if v > 0.5 * vmax else "0.25")
+    # box the highest off-diagonal cells (cooperating coactivators — SAGA↔Mediator, SAGA↔Other)
+    off = [(i, j, J[i, j]) for i in range(len(order)) for j in range(len(order)) if i < j]
+    for i, j, _ in sorted(off, key=lambda t: -t[2])[:1]:
+        for (a, b) in ((i, j), (j, i)):
+            axes[1].add_patch(Rectangle((b - 0.5, a - 0.5), 1, 1, fill=False, ec=S.INK, lw=1.6, zorder=5))
     axes[1].set_title("Classes converge on distinct programs", loc="left")
+    axes[1].text(0, 1.10, "diagonal masked; boxed = top overlap (SAGA↔Mediator)",
+                 transform=axes[1].transAxes, fontsize=5.6, color=S.MUTED)
     cb = fig.colorbar(im, ax=axes[1], fraction=0.046, pad=0.04)
     cb.set_label("Jaccard of target sets", fontsize=6); cb.ax.tick_params(labelsize=5.5)
 
@@ -222,6 +235,10 @@ def _draw_figure(edges, class_targets, jac, iso, sel, classes):
         axes[2].text(f + 0.4, y, f"{k}/{n} {sig}", va="center", fontsize=5.2, color="0.3")
     axes[2].set_xlim(0, iso_o["fold"].max() * 1.30)
     axes[2].axvline(1, color="0.6", lw=0.7, ls=":")
+    # harmonise with the PR-#8 specificity control: this magnitude is largely general
+    axes[2].text(0, -0.16, "⚠ magnitude is largely a general strong-perturbation effect — see the\n"
+                 "specificity control (fig 29); SAGA's distinction is the de-repressive direction",
+                 transform=axes[2].transAxes, fontsize=5.4, color="#b03a2e", va="top")
     for ax in axes[::2]:
         for s in ("top", "right"):
             ax.spines[s].set_visible(False)

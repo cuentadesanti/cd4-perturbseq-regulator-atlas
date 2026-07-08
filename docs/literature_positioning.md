@@ -93,10 +93,19 @@ regulators ([Belk et al. 2022](https://doi.org/10.1016/j.ccell.2022.06.001)); he
 a *specific convergent program* rather than a generic hub signature. The condition comparison adds the
 expected axis: TCR-signaling programs are stimulation-gated while the chromatin/interferon program is
 largely constitutive — the same global-vs-context-specific split the ranking draws, now visible at the
-level of downstream targets. This is candidate-program evidence (ISG-flagged convergent targets, not
-causal pathway proof), but it moves the biological claim from "SAGA has many DEGs" to "the SAGA class
-specifically converges on de-repression of an interferon module," which is the part that was *not*
-guaranteed a priori.
+level of downstream targets.
+
+**A specificity control keeps this honest** (`make specificity-control`, `docs/disease_and_specificity.md`,
+fig 29). Comparing SAGA against effect-size-matched *random* strong regulators shows the ISG-enrichment
+*magnitude* is **largely a general strong-perturbation-under-stimulation effect** (matched random ≈ 3×;
+SAGA only marginally higher at 5.4× on the uniform-threshold method, p≈0.04) — so the raw "24×" is not
+strong SAGA-specific evidence. What *is* distinctive is the **direction**: SAGA knockdown de-represses
+ISGs far more consistently (95%) than random (76%) or a heterogeneous chromatin set (44%). So the
+defensible claim is narrower than "SAGA specifically converges on interferon": the interferon axis is a
+prominent, largely general convergent readout that **SAGA-family coactivators consistently restrain**.
+The medical bridge (`docs/disease_and_specificity.md`) then treats the overlap with lupus/interferonopathy
+signatures and autoimmune GWAS genes (STAT4 et al.) as expected/confirmatory and nominates — does not
+prove — these coactivators as upstream control points.
 
 ## The empirical-Bayes ranking, in context
 
