@@ -202,45 +202,60 @@ def main():
 
 
 def _figure(null_folds, saga_fold, chrom_fold, saga_up, chrom_up, null_up_mean):
-    import matplotlib
-    matplotlib.use("Agg")
+    import _figstyle as S
     import matplotlib.pyplot as plt
-    plt.rcParams.update({"font.size": 10, "axes.spines.top": False, "axes.spines.right": False})
-    labels = ["SAGA/\nchromatin", "other chromatin/\ntranscription", "random\n(matched)"]
-    colors = ["#8e44ad", "#e0a441", "#8b95a8"]
+    S.apply_rc()
+    # order: SAGA next to random so the decisive comparison is bar-to-bar; other-chromatin last
+    labels = ["SAGA/\nchromatin", "random\n(matched)", "other chromatin/\ntranscription"]
+    colors = [S.SAGA, S.GENERIC, S.OTHER_CLASS]
     x = np.arange(3)
     nm = float(null_folds.mean())
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.6))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.9))
 
     # A — magnitude (ISG fold): SAGA barely above the matched-random null
-    folds = [saga_fold, chrom_fold, nm]
+    folds = [saga_fold, nm, chrom_fold]
     ax1.bar(x, folds, color=colors, width=0.62, zorder=2)
     p95 = float(np.percentile(null_folds, 95)); p5 = float(np.percentile(null_folds, 5))
-    ax1.errorbar(2, nm, yerr=[[nm - p5], [p95 - nm]], fmt="none", ecolor="#5d6779", capsize=5, lw=1.4, zorder=3)
-    ax1.axhline(p95, color="#5d6779", ls=":", lw=1)
-    ax1.text(2.45, p95, "random 95th", fontsize=7.5, color="#5d6779", va="center")
+    ax1.errorbar(1, nm, yerr=[[nm - p5], [p95 - nm]], fmt="none", ecolor=S.MUTED, capsize=5, lw=1.4, zorder=3)
+    ax1.axhline(p95, color=S.MUTED, ls=":", lw=1)
+    ax1.text(2.48, p95 + 0.16, "random 95th percentile", fontsize=7.5, color=S.MUTED, va="bottom", ha="right")
     for xi, f in zip(x, folds):
         ax1.text(xi, f + max(folds) * 0.02, f"{f:.1f}×", ha="center", fontsize=10, fontweight="bold")
+    S.callout(ax1, "SAGA barely\nclears the null", xy=(0, saga_fold), xytext=(0.75, saga_fold * 1.12),
+              color=S.MUTED, fs=8.5, ha="center")
     ax1.set_xticks(x); ax1.set_xticklabels(labels, fontsize=9)
     ax1.set_ylabel("ISG fold-enrichment of convergent targets")
-    ax1.set_title("Magnitude — mostly a general strong-perturbation effect", fontsize=9.5, fontweight="bold", loc="left")
-    ax1.set_ylim(0, max(folds) * 1.2)
+    ax1.set_title("Magnitude — mostly a general strong-perturbation effect", fontsize=9.5, loc="left")
+    ax1.set_ylim(0, max(folds) * 1.28)
 
-    # B — direction (fraction of ISG edges that are de-repressive on KD): the SAGA-specific signal
-    ups = [saga_up or 0, chrom_up or 0, null_up_mean or 0.5]
-    ax2.bar(x, ups, color=colors, width=0.62, zorder=2)
-    ax2.axhline(0.5, color="#999", ls="--", lw=1); ax2.text(2.45, 0.5, "no bias", fontsize=7.5, color="#999", va="center")
+    # B — direction (fraction of ISG edges that are de-repressive on KD): the SAGA-specific signal.
+    # Keep entity colours consistent (SAGA purple everywhere); thread ISG-red as the de-repression accent.
+    ups = [saga_up or 0, null_up_mean or 0.5, chrom_up or 0]
+    ax2.axhspan(0.5, 1.16, color=S.ISG, alpha=0.06, zorder=0)   # de-repression zone (interferon-red accent)
+    ax2.bar(x, ups, color=[S.SAGA, S.GENERIC, S.OTHER_CLASS], width=0.62, zorder=2)
+    ax2.axhline(0.5, color="#b7bcc4", ls="--", lw=1)
+    ax2.text(2.48, 0.5, "no bias", fontsize=7.5, color=S.MUTED, va="center", ha="right")
+    ax2.text(2.46, 1.12, "↑ de-repression zone", fontsize=7.5,
+             color=S.ISG, va="top", ha="right", fontweight="bold")
     for xi, u in zip(x, ups):
         ax2.text(xi, u + 0.02, f"{u*100:.0f}%", ha="center", fontsize=10, fontweight="bold")
+    # bracket: the +19pp SAGA-vs-random gap is the whole finding
+    gap = (saga_up or 0) - (null_up_mean or 0.5)
+    ytop = (saga_up or 0) + 0.10
+    ax2.plot([0, 0, 1, 1], [(saga_up or 0) + 0.05, ytop, ytop, (null_up_mean or 0.5) + 0.05],
+             color=S.ISG, lw=1.4, zorder=5)
+    ax2.text(0.5, ytop + 0.015, f"+{gap*100:.0f} pp — the finding", ha="center", va="bottom",
+             fontsize=9.5, fontweight="bold", color=S.ISG)
     ax2.set_xticks(x); ax2.set_xticklabels(labels, fontsize=9)
     ax2.set_ylabel("Fraction of ISG hits UP on knockdown (de-repressive)")
-    ax2.set_title("Direction — SAGA is the MOST consistent de-repressor", fontsize=9.5, fontweight="bold", loc="left")
-    ax2.set_ylim(0, 1.05)
+    ax2.set_title("Direction — SAGA is the MOST consistent de-repressor", fontsize=9.5, loc="left")
+    ax2.set_ylim(0, 1.16)
 
-    fig.suptitle("Specificity control — the interferon enrichment is largely generic (magnitude);\n"
-                 "SAGA's distinction is the consistency of de-repression, not a unique magnitude",
+    fig.suptitle("Specificity control — interferon enrichment is largely generic (magnitude);\n"
+                 "SAGA's distinction is the consistency of de-repression, not a unique fold",
                  fontsize=11, fontweight="bold")
-    fig.tight_layout(rect=(0, 0, 1, 0.95))
+    S.footnote(fig, S.ISG_DEF)
+    fig.tight_layout(rect=(0, 0.03, 1, 0.94))
     FIG.mkdir(parents=True, exist_ok=True)
     fig.savefig(FIG / "29_chromatin_stress_control.png", dpi=200, bbox_inches="tight")
     plt.close(fig)

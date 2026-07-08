@@ -100,25 +100,35 @@ def main():
 
 
 def _figure(df):
-    import matplotlib
-    matplotlib.use("Agg")
+    import _figstyle as S
     import matplotlib.pyplot as plt
-    plt.rcParams.update({"font.size": 9.5, "axes.spines.top": False, "axes.spines.right": False})
-    d = df.iloc[::-1]
+    S.apply_rc()
+    # sort by fold so the ns exhaustion contrast sinks to the bottom as a zero bar (shape you see)
+    d = df.sort_values("fold_enrichment", ascending=True).reset_index(drop=True)
     y = np.arange(len(d))
-    colors = ["#8b95a8" if c else "#c0392b" for c in d["is_contrast"]]
-    fig, ax = plt.subplots(figsize=(8.4, 4.2))
-    ax.barh(y, d["fold_enrichment"], color=colors, height=0.66)
-    ax.set_yticks(y); ax.set_yticklabels(d["signature"], fontsize=9)
-    for yi, f, k, K, p in zip(y, d["fold_enrichment"], d["overlap"], d["sig_in_universe"], d["hypergeom_p"]):
+    # the 3 IFN signatures are one claim (interferon-red); the exhaustion contrast is a distinct grey
+    colors = [S.GENERIC if c else S.ISG for c in d["is_contrast"]]
+    fig, ax = plt.subplots(figsize=(8.8, 4.2))
+    ax.barh(y, d["fold_enrichment"], color=colors, height=0.64, zorder=2)
+    xmax = max(d["fold_enrichment"])
+    for yi, f, k, K, p, c in zip(y, d["fold_enrichment"], d["overlap"], d["sig_in_universe"],
+                                 d["hypergeom_p"], d["is_contrast"]):
         sig = "***" if p < 1e-10 else ("**" if p < 1e-4 else ("*" if p < 0.05 else "ns"))
-        ax.text(f + max(d["fold_enrichment"]) * 0.01, yi, f"  {k}/{K}  {sig}", va="center", fontsize=8, color="0.3")
-    ax.axvline(1, color="#999", ls="--", lw=1)
+        ax.text(f + xmax * 0.012, yi, f"  {k}/{K}  {sig}", va="center", fontsize=8.5, color=S.MUTED)
+    # annotate the contrast: this null is the point
+    ci = int(d.index[d["is_contrast"]][0]) if d["is_contrast"].any() else None
+    if ci is not None:
+        S.callout(ax, "specificity check ✓\nIFN-specific, not\ngenerically inflammatory",
+                  xy=(0.1, ci), xytext=(xmax * 0.42, ci), color=S.MUTED, fs=8, ha="left")
+    ax.axvline(1, color="#b7bcc4", ls="--", lw=1)
+    ax.set_yticks(y); ax.set_yticklabels(d["signature"], fontsize=9)
     ax.set_xlabel("Fold-enrichment of the 163-gene convergent module in each signature\n"
                   "(background = 10,282 measured genes)")
-    ax.set_title("Module vs clinical interferon signatures — confirmatory overlap; exhaustion contrast is not enriched",
-                 fontsize=10, fontweight="bold", loc="left")
-    ax.set_xlim(0, max(d["fold_enrichment"]) * 1.25)
+    ax.set_title("Module vs clinical interferon signatures — a confirmatory overlap", fontsize=11,
+                 loc="left", pad=26)
+    ax.text(0, 1.03, "expected by construction; the exhaustion contrast is the real specificity test",
+            transform=ax.transAxes, fontsize=8.5, color=S.MUTED)
+    ax.set_xlim(0, xmax * 1.28)
     fig.tight_layout()
     FIG.mkdir(parents=True, exist_ok=True)
     fig.savefig(FIG / "30_module_disease_overlap.png", dpi=200, bbox_inches="tight")

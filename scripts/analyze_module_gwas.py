@@ -139,40 +139,52 @@ def main():
 
 
 def _figure(hits_df, saga_df):
-    import matplotlib
-    matplotlib.use("Agg")
+    import _figstyle as S
     import matplotlib.pyplot as plt
     from matplotlib.patches import Patch
-    from pathlib import Path as _P
     FIG = ROOT / "docs" / "figures"
-    plt.rcParams.update({"font.size": 9, "axes.spines.top": False, "axes.spines.right": False})
-    top = hits_df.head(16).iloc[::-1]
+    S.apply_rc()
+    # single primary sort: genetic score (n_diseases shown only as a secondary annotation)
+    top = hits_df.sort_values("max_genetic_score", ascending=False).head(15).iloc[::-1]
     y = np.arange(len(top))
-    colors = ["#c0392b" if isg else "#8e44ad" for isg in top["is_ISG"]]
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.8), gridspec_kw={"width_ratios": [2.1, 1]})
-    ax1.barh(y, top["max_genetic_score"], color=colors, height=0.68)
+    colors = [S.ISG if isg else S.GENERIC for isg in top["is_ISG"]]   # ISG red, other module gene grey
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.9), gridspec_kw={"width_ratios": [2.2, 1]})
+    ax1.barh(y, top["max_genetic_score"], color=colors, height=0.7, zorder=2)
     ax1.set_yticks(y); ax1.set_yticklabels(top["gene"], fontsize=8.5)
     for yi, s, n in zip(y, top["max_genetic_score"], top["n_autoimmune_diseases"]):
-        ax1.text(s + 0.01, yi, f"  {n} dz", va="center", fontsize=7.5, color="0.35")
+        ax1.text(s + 0.012, yi, f"{n} dz", va="center", fontsize=7.5, color=S.MUTED)
+    # STAT4 is the headline gene — annotate directly
+    if (top["gene"] == "STAT4").any():
+        si = int(np.where(top["gene"].values == "STAT4")[0][0])
+        S.callout(ax1, "STAT4 — a risk gene in\nall 5 autoimmune diseases",
+                  xy=(top["max_genetic_score"].iloc[si], si), xytext=(0.34, si - 3.2),
+                  color=S.INK, fs=8.5, ha="left")
     ax1.set_xlabel("max Open Targets genetic-association score (autoimmune)")
-    ax1.set_title(f"{len(hits_df)}/163 module genes are autoimmune GWAS risk genes",
-                  fontsize=10, fontweight="bold", loc="left")
-    ax1.legend(handles=[Patch(color="#c0392b", label="ISG"), Patch(color="#8e44ad", label="non-ISG")],
+    ax1.set_title(f"{len(hits_df)}/163 module genes are autoimmune GWAS risk genes", fontsize=10.5, loc="left")
+    ax1.legend(handles=[Patch(color=S.ISG, label="ISG"), Patch(color=S.GENERIC, label="other module gene")],
                fontsize=8, loc="lower right", frameon=False)
     ax1.set_xlim(0, 1.0)
 
-    sd = saga_df.sort_values("max_genetic_score").set_index("regulator")["max_genetic_score"]
+    # SAGA regulators — show only the ones with signal; state the null for the rest
+    sd = saga_df[saga_df["max_genetic_score"] > 0].sort_values("max_genetic_score").set_index("regulator")["max_genetic_score"]
+    n_zero = int((saga_df["max_genetic_score"] == 0).sum())
     yy = np.arange(len(sd))
-    ax2.barh(yy, sd.values, color="#2980b9", height=0.6)
-    ax2.set_yticks(yy); ax2.set_yticklabels(sd.index, fontsize=8.5)
+    ax2.barh(yy, sd.values, color=S.SAGA, height=0.5, zorder=2)
+    ax2.set_yticks(yy); ax2.set_yticklabels(sd.index, fontsize=9)
+    for yi, v in zip(yy, sd.values):
+        ax2.text(v + 0.008, yi, f"{v:.2f}", va="center", fontsize=8, color=S.MUTED)
     ax2.set_xlabel("genetic-association score")
-    ax2.set_title("SAGA regulators' own\nautoimmune genetics", fontsize=9.5, fontweight="bold", loc="left")
-    ax2.set_xlim(0, max(0.5, sd.max() * 1.15))
+    ax2.set_title("SAGA regulators' own\nautoimmune genetics", fontsize=9.5, loc="left")
+    ax2.text(0.0, -0.9, f"({n_zero} others: no reported signal)", fontsize=8, color=S.MUTED, style="italic")
+    ax2.set_ylim(-1.4, len(sd) - 0.4)
+    ax2.set_xlim(0, max(0.5, sd.max() * 1.2))
 
-    fig.suptitle("Genetics corollary — module genes restrained by SAGA/Mediator overlap autoimmune GWAS "
-                 "(e.g. STAT4); nomination, not novel association", fontsize=10.5, fontweight="bold")
-    fig.tight_layout(rect=(0, 0, 1, 0.94))
-    _P(FIG).mkdir(parents=True, exist_ok=True)
+    fig.suptitle("Genetics corollary — module genes the coactivators restrain overlap autoimmune GWAS (STAT4 et al.)",
+                 fontsize=11, fontweight="bold")
+    S.footnote(fig, "Nomination, not a novel disease association — an interferon module overlapping "
+                    "autoimmune GWAS is expected; " + S.ISG_DEF)
+    fig.tight_layout(rect=(0, 0.03, 1, 0.94))
+    FIG.mkdir(parents=True, exist_ok=True)
     fig.savefig(FIG / "31_module_gwas_autoimmune.png", dpi=200, bbox_inches="tight")
     plt.close(fig)
 
