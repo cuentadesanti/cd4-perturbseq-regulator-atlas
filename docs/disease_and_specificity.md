@@ -2,7 +2,13 @@
 
 Two analyses probe the convergent interferon module (the 163 downstream genes hit by ≥4 of the 6
 robust SAGA-family regulators). **Analysis 2 was run first** because it decides how strongly the
-medical framing in Analysis 1 can be stated. Reproduce with `make convergence-extras`.
+medical framing in Analysis 1 can be stated.
+
+**Reproducibility boundary.** `make convergence-extras` (specificity control + disease-signature
+overlap) is **fully offline** from the local caches. The GWAS layer (`make module-gwas`) **needs
+network** (Open Targets) and does **not** re-run in an offline sandbox — the committed
+`module_gwas_hits.csv` / `module_gwas_summary.json` and fig 31 are the record (the script exits
+cleanly and leaves them untouched if the API is unreachable).
 
 ---
 

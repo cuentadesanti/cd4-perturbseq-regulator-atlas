@@ -16,6 +16,7 @@ Outputs: docs/tables/module_gwas_hits.csv · docs/tables/module_gwas_summary.jso
 """
 import json
 import subprocess
+import sys
 import time
 from pathlib import Path
 import numpy as np
@@ -76,10 +77,19 @@ def main():
 
     print("Querying Open Targets genetic associations for 5 autoimmune diseases…")
     dz_scores = {}
-    for name, efo in DISEASES.items():
-        s = disease_genetic_scores(efo)
-        dz_scores[name] = s
-        print(f"  {name:8s} ({efo}): {len(s)} genetically-associated targets")
+    try:
+        for name, efo in DISEASES.items():
+            s = disease_genetic_scores(efo)
+            dz_scores[name] = s
+            print(f"  {name:8s} ({efo}): {len(s)} genetically-associated targets")
+    except RuntimeError as e:
+        # This step needs network (Open Targets). In an offline sandbox it cannot run;
+        # the committed module_gwas_hits.csv is the record. Do NOT overwrite it — exit cleanly.
+        out = TAB / "module_gwas_hits.csv"
+        print(f"\n  [skip] Open Targets unreachable ({e}).")
+        print(f"  This layer is NOT offline-reproducible — the committed {out.name} "
+              f"({'present' if out.exists() else 'MISSING'}) is the record. Left untouched.")
+        sys.exit(0)
 
     # module gene × disease genetic hits
     rows = []

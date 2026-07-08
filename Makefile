@@ -16,7 +16,8 @@ help:
 	@echo "  make fingerprints - transcriptional programs (PCA/similarity/clusters) [remote zscore or log_fc cache]"
 	@echo "  make spectral - spectral sanity check on the program assignments (after fingerprints)"
 	@echo "  make class-programs - balanced 30-regulator panel: distinct classes → distinct programs? (after fingerprints)"
-	@echo "  make convergence-extras - specificity control + disease/GWAS bridge (module-gwas needs network)"
+	@echo "  make convergence-extras - specificity control + disease overlap (fully offline)"
+	@echo "  make module-gwas - autoimmune GWAS overlap via Open Targets (NEEDS NETWORK; committed table is the record)"
 	@echo "  make api      - Regulator Atlas read-only API (uvicorn :8000, Swagger at /docs)"
 	@echo "  make clean    - remove generated outputs (docs/figures, docs/tables, report)"
 
@@ -64,15 +65,17 @@ spectral:
 class-programs:
 	$(PY) scripts/analyze_class_programs.py
 
-# convergence extras: specificity control + disease/GWAS bridge (docs/disease_and_specificity.md)
-# specificity-control + disease-overlap are OFFLINE; module-gwas needs network (Open Targets).
+# convergence extras (docs/disease_and_specificity.md).
+# convergence-extras is FULLY OFFLINE (specificity-control + disease-overlap).
+# module-gwas is SEPARATE because it needs network (Open Targets); the committed
+# module_gwas_hits.csv is the record and is NOT offline-reproducible.
 specificity-control:
 	$(PY) scripts/analyze_chromatin_stress_control.py
 disease-overlap:
 	$(PY) scripts/analyze_disease_overlap.py
-module-gwas:
+convergence-extras: specificity-control disease-overlap
+module-gwas:   # needs network (Open Targets) — see note above
 	$(PY) scripts/analyze_module_gwas.py
-convergence-extras: specificity-control disease-overlap module-gwas
 
 api:
 	$(PY) -m uvicorn api.main:app --reload --port 8000
