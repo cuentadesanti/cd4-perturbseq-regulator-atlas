@@ -115,11 +115,11 @@ def _figure(df):
                                  d["hypergeom_p"], d["is_contrast"]):
         sig = "***" if p < 1e-10 else ("**" if p < 1e-4 else ("*" if p < 0.05 else "ns"))
         ax.text(f + xmax * 0.012, yi, f"  {k}/{K}  {sig}", va="center", fontsize=8.5, color=S.MUTED)
-    # annotate the contrast: this null is the point
+    # annotate the contrast: this null is the point (plain text in the empty row — no strike-through arrow)
     ci = int(d.index[d["is_contrast"]][0]) if d["is_contrast"].any() else None
     if ci is not None:
-        S.callout(ax, "specificity check ✓\nIFN-specific, not\ngenerically inflammatory",
-                  xy=(0.1, ci), xytext=(xmax * 0.42, ci), color=S.MUTED, fs=8, ha="left")
+        ax.text(xmax * 0.14, ci, "← specificity check ✓  —  IFN-specific,\nnot generically inflammatory",
+                color=S.MUTED, fontsize=8.5, ha="left", va="center", fontweight="bold")
     ax.axvline(1, color="#b7bcc4", ls="--", lw=1)
     ax.set_yticks(y); ax.set_yticklabels(d["signature"], fontsize=9)
     ax.set_xlabel("Fold-enrichment of the 163-gene convergent module in each signature\n"

@@ -152,15 +152,15 @@ def _figure(hits_df, saga_df):
     ax1.barh(y, top["max_genetic_score"], color=colors, height=0.7, zorder=2)
     ax1.set_yticks(y); ax1.set_yticklabels(top["gene"], fontsize=8.5)
     for yi, s, n in zip(y, top["max_genetic_score"], top["n_autoimmune_diseases"]):
-        ax1.text(s + 0.012, yi, f"{n} dz", va="center", fontsize=7.5, color=S.MUTED)
-    # STAT4 is the headline gene — annotate directly
+        ax1.text(s + 0.012, yi, f"{n}/5", va="center", fontsize=7.5, color=S.MUTED)
+    # STAT4 is the headline gene — annotate in the open pocket (short bottom bars, above the legend)
     if (top["gene"] == "STAT4").any():
-        si = int(np.where(top["gene"].values == "STAT4")[0][0])
-        S.callout(ax1, "STAT4 — a risk gene in\nall 5 autoimmune diseases",
-                  xy=(top["max_genetic_score"].iloc[si], si), xytext=(0.34, si - 3.2),
-                  color=S.INK, fs=8.5, ha="left")
+        ax1.text(0.47, 3.4, "STAT4 (top): a risk\ngene in all 5 diseases",
+                 color=S.INK, fontsize=8.5, fontweight="bold", ha="left", va="center")
     ax1.set_xlabel("max Open Targets genetic-association score (autoimmune)")
-    ax1.set_title(f"{len(hits_df)}/163 module genes are autoimmune GWAS risk genes", fontsize=10.5, loc="left")
+    ax1.set_title(f"{len(hits_df)}/163 module genes are autoimmune GWAS risk genes", fontsize=10.5, loc="left", pad=18)
+    ax1.text(0, 1.02, "bar = strongest genetic association · n/5 = # of the 5 autoimmune diseases",
+             transform=ax1.transAxes, fontsize=7.6, color=S.MUTED)
     ax1.legend(handles=[Patch(color=S.ISG, label="ISG"), Patch(color=S.GENERIC, label="other module gene")],
                fontsize=8, loc="lower right", frameon=False)
     ax1.set_xlim(0, 1.0)
