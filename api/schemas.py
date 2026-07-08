@@ -20,6 +20,7 @@ class Summary(BaseModel):
     reproducibility_available: bool
     edges_available: bool
     programs_available: bool = False
+    class_programs_available: bool = False
 
 
 class RegulatorSummary(BaseModel):

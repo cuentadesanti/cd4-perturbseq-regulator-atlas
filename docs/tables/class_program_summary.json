@@ -1,0 +1,40 @@
+{
+  "Demoted control": {
+    "n_regulators": 4,
+    "n_convergent_targets": 126,
+    "isg_fold": 11.9,
+    "isg_p": 1.7031672672174833e-06
+  },
+  "Mediator": {
+    "n_regulators": 4,
+    "n_convergent_targets": 183,
+    "isg_fold": 3.5,
+    "isg_p": 0.05352322263307504
+  },
+  "Other robust": {
+    "n_regulators": 4,
+    "n_convergent_targets": 232,
+    "isg_fold": 9.2,
+    "isg_p": 8.694867875477326e-08
+  },
+  "Repro-promoted": {
+    "n_regulators": 5,
+    "n_convergent_targets": 20,
+    "isg_fold": 10.7,
+    "isg_p": 0.08941902180434147
+  },
+  "SAGA/chromatin": {
+    "n_regulators": 8,
+    "n_convergent_targets": 234,
+    "isg_fold": 19.2,
+    "isg_p": 1.662905951324008e-22
+  },
+  "TCR (context-specific)": {
+    "n_regulators": 5,
+    "n_convergent_targets": 1408,
+    "isg_fold": 5.8,
+    "isg_p": 1.615066812351078e-24
+  },
+  "_jaccard_offdiag_median": 0.04792332268370607,
+  "_n_edges_total": 17225
+}

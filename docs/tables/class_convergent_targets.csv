@@ -1,0 +1,2204 @@
+reg_class,target_gene,is_ISG
+Demoted control,ABCA7,False
+Demoted control,ABTB2,False
+Demoted control,ACP6,False
+Demoted control,ADA2,False
+Demoted control,ADGRG5,False
+Demoted control,AIM2,False
+Demoted control,ALDH5A1,False
+Demoted control,ARHGEF12,False
+Demoted control,ATF3,False
+Demoted control,BCL2L11,False
+Demoted control,BEND5,False
+Demoted control,CA2,False
+Demoted control,CA5B,False
+Demoted control,CAMK1D,False
+Demoted control,CASP4,False
+Demoted control,CDKN2C,False
+Demoted control,CEBPB,False
+Demoted control,CKAP4,False
+Demoted control,CLCN2,False
+Demoted control,CLU,False
+Demoted control,CTH,False
+Demoted control,CXCR4,False
+Demoted control,DCBLD2,False
+Demoted control,DHRS3,False
+Demoted control,DHX32,False
+Demoted control,DMWD,False
+Demoted control,EARS2,False
+Demoted control,EGLN1,False
+Demoted control,EIF4A2,False
+Demoted control,ENC1,False
+Demoted control,ENPP2,False
+Demoted control,EPSTI1,True
+Demoted control,ERO1B,False
+Demoted control,FAM169A,False
+Demoted control,FOSL2,False
+Demoted control,GADD45B,False
+Demoted control,GKAP1,False
+Demoted control,GOLGA7B,False
+Demoted control,GOLM1,False
+Demoted control,GPR160,False
+Demoted control,GRB10,False
+Demoted control,GSN,False
+Demoted control,GZMA,False
+Demoted control,GZMK,False
+Demoted control,HHLA2,False
+Demoted control,HSF4,False
+Demoted control,IFI6,True
+Demoted control,IGF2BP3,False
+Demoted control,IL13,False
+Demoted control,IL18R1,False
+Demoted control,IL1RN,False
+Demoted control,IRF7,True
+Demoted control,ITGA1,False
+Demoted control,ITGAL,False
+Demoted control,KIAA0408,False
+Demoted control,KIF7,False
+Demoted control,KIFC2,False
+Demoted control,KLF2,False
+Demoted control,LRP11,False
+Demoted control,LRRC37B,False
+Demoted control,MAGEF1,False
+Demoted control,MAP3K8,False
+Demoted control,MARCKSL1,False
+Demoted control,MAST4,False
+Demoted control,MATK,False
+Demoted control,MDK,False
+Demoted control,METRNL,False
+Demoted control,MSRA,False
+Demoted control,MSTO1,False
+Demoted control,MXD1,False
+Demoted control,NARF,False
+Demoted control,NDRG1,False
+Demoted control,NPC2,False
+Demoted control,NRN1,False
+Demoted control,OBSCN,False
+Demoted control,OSBPL10,False
+Demoted control,P4HA1,False
+Demoted control,PAQR7,False
+Demoted control,PDK1,False
+Demoted control,PGAP1,False
+Demoted control,PHLPP1,False
+Demoted control,PLOD3,False
+Demoted control,PLTP,False
+Demoted control,PPP1R3B,False
+Demoted control,PPP2R5B,False
+Demoted control,PRDM8,False
+Demoted control,PRELID3A,False
+Demoted control,PTP4A3,False
+Demoted control,RAMP1,False
+Demoted control,RBFOX2,False
+Demoted control,RHEBL1,False
+Demoted control,RIGI,True
+Demoted control,RIMKLA,False
+Demoted control,RIPOR1,False
+Demoted control,RUFY3,False
+Demoted control,RXRA,False
+Demoted control,SAMD9,True
+Demoted control,SAMD9L,True
+Demoted control,SAT1,False
+Demoted control,SCARB2,False
+Demoted control,SERPINB6,False
+Demoted control,SERPINB9,False
+Demoted control,SESN2,False
+Demoted control,SLAMF7,False
+Demoted control,SLC26A4,False
+Demoted control,SLC7A11,False
+Demoted control,SOGA3,False
+Demoted control,SORBS3,False
+Demoted control,SPAG4,False
+Demoted control,STC2,False
+Demoted control,TMEM140,False
+Demoted control,TMEM65,False
+Demoted control,TMEM67,False
+Demoted control,TRIB1,False
+Demoted control,TSHZ2,False
+Demoted control,TUBA1A,False
+Demoted control,TUBG2,False
+Demoted control,TWSG1,False
+Demoted control,TXNIP,False
+Demoted control,VEGFA,False
+Demoted control,XAF1,True
+Demoted control,ZIM3,False
+Demoted control,ZNF329,False
+Demoted control,ZNF470,False
+Demoted control,ZNF473,False
+Demoted control,ZSWIM8,False
+Mediator,ACSL6,False
+Mediator,ACTN1,False
+Mediator,ADA2,False
+Mediator,ADAM15,False
+Mediator,ADAMTS1,False
+Mediator,ADGRG1,False
+Mediator,AHI1,False
+Mediator,ANTXR2,False
+Mediator,ANXA3,False
+Mediator,ARSA,False
+Mediator,BAZ2B,False
+Mediator,BCL2L11,False
+Mediator,C15orf48,False
+Mediator,CCDC125,False
+Mediator,CCDC88A,False
+Mediator,CCL1,False
+Mediator,CCR2,False
+Mediator,CCR5,False
+Mediator,CCR7,False
+Mediator,CD2,False
+Mediator,CD27,False
+Mediator,CD38,False
+Mediator,CD59,False
+Mediator,CIDEB,False
+Mediator,CISH,False
+Mediator,CLU,False
+Mediator,COL6A3,False
+Mediator,CPEB2,False
+Mediator,CRYBG1,False
+Mediator,CSF2,False
+Mediator,CST7,False
+Mediator,CTNNA1,False
+Mediator,CTTNBP2NL,False
+Mediator,CXCL10,False
+Mediator,CXCR3,False
+Mediator,CXCR6,False
+Mediator,CYB561,False
+Mediator,CYSLTR2,False
+Mediator,DENND2B,False
+Mediator,DIXDC1,False
+Mediator,DOCK7,False
+Mediator,DPYSL2,False
+Mediator,DUSP4,False
+Mediator,E2F2,False
+Mediator,EFHC1,False
+Mediator,EXTL2,False
+Mediator,FAIM,False
+Mediator,FAM169A,False
+Mediator,FAM241A,False
+Mediator,FASLG,False
+Mediator,FCMR,False
+Mediator,FGF2,False
+Mediator,FHL2,False
+Mediator,FSD1L,False
+Mediator,FZD3,False
+Mediator,G0S2,False
+Mediator,GBP4,True
+Mediator,GCSAM,False
+Mediator,GLB1L2,False
+Mediator,GLIPR1,False
+Mediator,GNA15,False
+Mediator,GPAT3,False
+Mediator,GPR15,False
+Mediator,GPR35,False
+Mediator,GSAP,False
+Mediator,GZMB,False
+Mediator,GZMH,False
+Mediator,H1-0,False
+Mediator,H2BC21,False
+Mediator,HAVCR2,False
+Mediator,HBEGF,False
+Mediator,HHLA2,False
+Mediator,HIVEP3,False
+Mediator,HOPX,False
+Mediator,HRH2,False
+Mediator,HS3ST3B1,False
+Mediator,ID2,False
+Mediator,IFI30,False
+Mediator,IFI44L,True
+Mediator,IFNAR2,False
+Mediator,IGFLR1,False
+Mediator,IKZF3,False
+Mediator,IL10,False
+Mediator,IL13,False
+Mediator,IL16,False
+Mediator,IL18RAP,False
+Mediator,IL26,False
+Mediator,IL3,False
+Mediator,IL6ST,False
+Mediator,INSM1,False
+Mediator,ITGAV,False
+Mediator,ITGAX,False
+Mediator,KAT2B,False
+Mediator,KIAA1217,False
+Mediator,KIF13B,False
+Mediator,LBH,False
+Mediator,LGALS3,False
+Mediator,LPXN,False
+Mediator,LRP12,False
+Mediator,LRRFIP2,False
+Mediator,MATK,False
+Mediator,MICAL2,False
+Mediator,MPP7,False
+Mediator,MPZL2,False
+Mediator,MSRB2,False
+Mediator,MZB1,False
+Mediator,NCKAP1,False
+Mediator,NCR3LG1,False
+Mediator,NIPAL2,False
+Mediator,NKG7,False
+Mediator,NMT2,False
+Mediator,NPTX1,False
+Mediator,NTRK2,False
+Mediator,OAF,False
+Mediator,P4HA2,False
+Mediator,PAQR8,False
+Mediator,PDE7B,False
+Mediator,PFKM,False
+Mediator,PHEX,False
+Mediator,PHLDA1,False
+Mediator,PHLDA2,False
+Mediator,PHLPP1,False
+Mediator,PLAAT4,False
+Mediator,PLAC8,False
+Mediator,POLI,False
+Mediator,PPARGC1B,False
+Mediator,PPP1R15A,False
+Mediator,PRDM8,False
+Mediator,PTGIS,False
+Mediator,PTP4A3,False
+Mediator,PTPRK,False
+Mediator,PYCR1,False
+Mediator,RAMP1,False
+Mediator,RASGEF1A,False
+Mediator,RBMS3,False
+Mediator,RGS1,False
+Mediator,S1PR1,False
+Mediator,SAMD4A,False
+Mediator,SCARB1,False
+Mediator,SCARB2,False
+Mediator,SIK3,False
+Mediator,SIT1,False
+Mediator,SLAMF6,False
+Mediator,SLC26A4,False
+Mediator,SLC35D2,False
+Mediator,SLC35F3,False
+Mediator,SMAD1,False
+Mediator,SMPD1,False
+Mediator,SNX24,False
+Mediator,SOCS2,False
+Mediator,SORT1,False
+Mediator,SPINT2,False
+Mediator,SPRED2,False
+Mediator,STAT2,True
+Mediator,STON1,False
+Mediator,STX11,False
+Mediator,SYNJ2BP,False
+Mediator,TASL,False
+Mediator,TBCEL,False
+Mediator,TCN2,False
+Mediator,TDRD7,False
+Mediator,TEP1,False
+Mediator,TIMD4,False
+Mediator,TIPARP,False
+Mediator,TLCD1,False
+Mediator,TMEM140,False
+Mediator,TMEM97,False
+Mediator,TNFRSF11A,False
+Mediator,TNFSF8,False
+Mediator,TNIP3,False
+Mediator,TP53BP2,False
+Mediator,TRAM2,False
+Mediator,TWSG1,False
+Mediator,TXNIP,False
+Mediator,UBE2F,False
+Mediator,USP6NL,False
+Mediator,WDFY1,False
+Mediator,ZBED2,False
+Mediator,ZC2HC1A,False
+Mediator,ZFYVE28,False
+Mediator,ZHX3,False
+Mediator,ZNF358,False
+Mediator,ZNF704,False
+Other robust,ADA2,False
+Other robust,ADAMTS1,False
+Other robust,ADGRG1,False
+Other robust,ADGRL1,False
+Other robust,AHCYL2,False
+Other robust,AIFM2,False
+Other robust,AKAP7,False
+Other robust,AKT3,False
+Other robust,ALDH5A1,False
+Other robust,ALDOC,False
+Other robust,ALOX5AP,False
+Other robust,ALPK1,False
+Other robust,ANKRD55,False
+Other robust,ANPEP,False
+Other robust,ANXA1,False
+Other robust,ANXA2R,False
+Other robust,APBA1,False
+Other robust,APH1B,False
+Other robust,APOL4,True
+Other robust,ARHGAP5,False
+Other robust,ATP10D,False
+Other robust,B3GALNT1,False
+Other robust,BBS9,False
+Other robust,BCL2L11,False
+Other robust,BEX5,False
+Other robust,BMPR2,False
+Other robust,BSPRY,False
+Other robust,BTLA,False
+Other robust,C2orf15,False
+Other robust,C3AR1,False
+Other robust,C4BPB,False
+Other robust,CA11,False
+Other robust,CA6,False
+Other robust,CALD1,False
+Other robust,CAPG,False
+Other robust,CARD16,False
+Other robust,CARMIL1,False
+Other robust,CCDC141,False
+Other robust,CCDC88A,False
+Other robust,CCR8,False
+Other robust,CD109,False
+Other robust,CD200,False
+Other robust,CD200R1,False
+Other robust,CD27,False
+Other robust,CD33,False
+Other robust,CD70,False
+Other robust,CD84,False
+Other robust,CDC42BPB,False
+Other robust,CEP70,False
+Other robust,CGREF1,False
+Other robust,CHRNA6,False
+Other robust,CKB,False
+Other robust,CLIC4,False
+Other robust,CLIC5,False
+Other robust,CMPK2,True
+Other robust,CTTNBP2NL,False
+Other robust,CXCL10,False
+Other robust,CYBRD1,False
+Other robust,CYFIP1,False
+Other robust,CYP7B1,False
+Other robust,CYSLTR2,False
+Other robust,DBNDD2,False
+Other robust,DCBLD2,False
+Other robust,DDX60L,False
+Other robust,DIXDC1,False
+Other robust,DLG5,False
+Other robust,DLK2,False
+Other robust,DOCK7,False
+Other robust,DYNC2LI1,False
+Other robust,EFCAB2,False
+Other robust,ELOVL4,False
+Other robust,EPSTI1,True
+Other robust,EVI5,False
+Other robust,EXTL2,False
+Other robust,FAIM,False
+Other robust,FAM13A,False
+Other robust,FGL2,False
+Other robust,FOXP3,False
+Other robust,GALNT3,False
+Other robust,GBP1,True
+Other robust,GCSAM,False
+Other robust,GDPD5,False
+Other robust,GIMAP5,False
+Other robust,GLIPR1,False
+Other robust,GLRX,False
+Other robust,GP5,False
+Other robust,GPC1,False
+Other robust,GPR15,False
+Other robust,GPR160,False
+Other robust,GPR18,False
+Other robust,GPR183,False
+Other robust,GPR35,False
+Other robust,GSDMA,False
+Other robust,GSDMB,False
+Other robust,GSN,False
+Other robust,HACD4,False
+Other robust,HEMGN,False
+Other robust,HERC3,False
+Other robust,HHLA2,False
+Other robust,HMGN3,False
+Other robust,HMGN5,False
+Other robust,HMSD,False
+Other robust,HOMER2,False
+Other robust,HOPX,False
+Other robust,HPGDS,False
+Other robust,HSPA4L,False
+Other robust,HYI,False
+Other robust,ID3,False
+Other robust,IFI44,True
+Other robust,IFI44L,True
+Other robust,IL15,False
+Other robust,IL16,False
+Other robust,IL18RAP,False
+Other robust,IL3RA,False
+Other robust,IL6R,False
+Other robust,IL7,False
+Other robust,IL7R,False
+Other robust,IPCEF1,False
+Other robust,IRAG2,False
+Other robust,ITGA1,False
+Other robust,ITGAX,False
+Other robust,JAZF1,False
+Other robust,JHY,False
+Other robust,KANK1,False
+Other robust,KCTD3,False
+Other robust,LACC1,False
+Other robust,LAIR1,False
+Other robust,LRP11,False
+Other robust,MAP1A,False
+Other robust,MEAK7,False
+Other robust,METRNL,False
+Other robust,MGST2,False
+Other robust,MINDY1,False
+Other robust,MMP25,False
+Other robust,MPZL2,False
+Other robust,MT1F,False
+Other robust,MT2A,False
+Other robust,MUC1,False
+Other robust,NCF2,False
+Other robust,NCR3LG1,False
+Other robust,NEDD4L,False
+Other robust,NOL3,False
+Other robust,NPTX1,False
+Other robust,NRIP3,False
+Other robust,NRN1,False
+Other robust,NUCB2,False
+Other robust,NUGGC,False
+Other robust,OAF,False
+Other robust,OAS1,True
+Other robust,P2RY14,False
+Other robust,PDCD1LG2,False
+Other robust,PDE6B,False
+Other robust,PDLIM1,False
+Other robust,PHLDA2,False
+Other robust,PHLPP1,False
+Other robust,PKD2,False
+Other robust,PKIA,False
+Other robust,PLAC8,False
+Other robust,PLAT,False
+Other robust,PLEKHA1,False
+Other robust,PLEKHA5,False
+Other robust,PLEKHA8,False
+Other robust,PLEKHG3,False
+Other robust,PLEKHO1,False
+Other robust,PLXND1,False
+Other robust,PON2,False
+Other robust,PPARG,False
+Other robust,PPP2R5B,False
+Other robust,PROS1,False
+Other robust,RAB11FIP5,False
+Other robust,RAB37,False
+Other robust,RALB,False
+Other robust,RASGRP3,False
+Other robust,RCBTB2,False
+Other robust,RETREG1,False
+Other robust,RIGI,True
+Other robust,RNASE4,False
+Other robust,RNF144A,False
+Other robust,RXRA,False
+Other robust,S100A5,False
+Other robust,S1PR1,False
+Other robust,SAMD4A,False
+Other robust,SAMD9L,True
+Other robust,SCARB1,False
+Other robust,SERPINI1,False
+Other robust,SGCB,False
+Other robust,SH3RF2,False
+Other robust,SIRPG,False
+Other robust,SKAP2,False
+Other robust,SLAMF7,False
+Other robust,SLC7A11,False
+Other robust,SMIM14,False
+Other robust,SNX24,False
+Other robust,SOCS2,False
+Other robust,SORT1,False
+Other robust,SPEF2,False
+Other robust,SPINT2,False
+Other robust,STC2,False
+Other robust,STON1,False
+Other robust,SYDE2,False
+Other robust,SYNJ2BP,False
+Other robust,SYT11,False
+Other robust,TAMALIN,False
+Other robust,TCEAL1,False
+Other robust,TDRD7,False
+Other robust,TEC,False
+Other robust,TGFB1I1,False
+Other robust,TLR1,False
+Other robust,TLR6,False
+Other robust,TMEM273,False
+Other robust,TMIGD2,False
+Other robust,TNFRSF12A,False
+Other robust,TRANK1,False
+Other robust,TRIB3,False
+Other robust,TSC22D1,False
+Other robust,TSKU,False
+Other robust,TTC28,False
+Other robust,TTN,False
+Other robust,ULBP2,False
+Other robust,VAMP5,False
+Other robust,VLDLR,False
+Other robust,VNN2,False
+Other robust,WNT10B,False
+Other robust,WWTR1,False
+Other robust,XAF1,True
+Other robust,ZC2HC1A,False
+Other robust,ZCCHC24,False
+Other robust,ZEB2,False
+Other robust,ZNF329,False
+Other robust,ZNF358,False
+Other robust,ZNF516,False
+Other robust,ZNF620,False
+Repro-promoted,ADA2,False
+Repro-promoted,BACH2,False
+Repro-promoted,CD4,False
+Repro-promoted,CHI3L2,False
+Repro-promoted,CPM,False
+Repro-promoted,CTNS,False
+Repro-promoted,FEZ1,False
+Repro-promoted,GZMB,False
+Repro-promoted,KLF10,False
+Repro-promoted,LGALS1,False
+Repro-promoted,N4BP3,False
+Repro-promoted,NCALD,False
+Repro-promoted,NUCB2,False
+Repro-promoted,RASGEF1B,False
+Repro-promoted,SGCB,False
+Repro-promoted,STAT1,True
+Repro-promoted,STMN3,False
+Repro-promoted,TYMP,False
+Repro-promoted,ZNF329,False
+Repro-promoted,ZNRF3,False
+SAGA/chromatin,ABCB1,False
+SAGA/chromatin,ACSL6,False
+SAGA/chromatin,ACTN1,False
+SAGA/chromatin,ACVR1C,False
+SAGA/chromatin,ADA2,False
+SAGA/chromatin,ADPRH,False
+SAGA/chromatin,AKAP5,False
+SAGA/chromatin,AKAP7,False
+SAGA/chromatin,ALPK1,False
+SAGA/chromatin,ANTKMT,False
+SAGA/chromatin,ANTXR2,False
+SAGA/chromatin,ANXA1,False
+SAGA/chromatin,ANXA2R,False
+SAGA/chromatin,APH1B,False
+SAGA/chromatin,APOBEC3B,False
+SAGA/chromatin,APOBR,False
+SAGA/chromatin,APOL1,True
+SAGA/chromatin,APOL4,True
+SAGA/chromatin,AQP3,False
+SAGA/chromatin,ARHGAP18,False
+SAGA/chromatin,ARMC9,False
+SAGA/chromatin,B3GNT5,False
+SAGA/chromatin,BMF,False
+SAGA/chromatin,BST2,True
+SAGA/chromatin,C15orf48,False
+SAGA/chromatin,C4orf33,False
+SAGA/chromatin,CAPG,False
+SAGA/chromatin,CASP10,False
+SAGA/chromatin,CBY1,False
+SAGA/chromatin,CCDC141,False
+SAGA/chromatin,CCDC92,False
+SAGA/chromatin,CCR2,False
+SAGA/chromatin,CCR4,False
+SAGA/chromatin,CCR7,False
+SAGA/chromatin,CD27,False
+SAGA/chromatin,CD276,False
+SAGA/chromatin,CD38,False
+SAGA/chromatin,CD74,False
+SAGA/chromatin,CD96,False
+SAGA/chromatin,CGREF1,False
+SAGA/chromatin,CLEC2B,False
+SAGA/chromatin,CLU,False
+SAGA/chromatin,CMTM8,False
+SAGA/chromatin,CNKSR2,False
+SAGA/chromatin,COL9A2,False
+SAGA/chromatin,CORO1B,False
+SAGA/chromatin,CPM,False
+SAGA/chromatin,CTSO,False
+SAGA/chromatin,CTSW,False
+SAGA/chromatin,CXCL10,False
+SAGA/chromatin,CYFIP1,False
+SAGA/chromatin,DDX60,False
+SAGA/chromatin,DENND10,False
+SAGA/chromatin,DHRS3,False
+SAGA/chromatin,DLG4,False
+SAGA/chromatin,DOCK7,False
+SAGA/chromatin,DPYSL2,False
+SAGA/chromatin,DTX3L,True
+SAGA/chromatin,EBI3,False
+SAGA/chromatin,EPSTI1,True
+SAGA/chromatin,ERI2,False
+SAGA/chromatin,EVI2A,False
+SAGA/chromatin,EVI2B,False
+SAGA/chromatin,EVI5,False
+SAGA/chromatin,EXTL2,False
+SAGA/chromatin,F2R,False
+SAGA/chromatin,FAIM,False
+SAGA/chromatin,FBXO32,False
+SAGA/chromatin,FCER1G,False
+SAGA/chromatin,FOXP3,False
+SAGA/chromatin,FZD3,False
+SAGA/chromatin,GBP1,True
+SAGA/chromatin,GCSAM,False
+SAGA/chromatin,GIMAP7,False
+SAGA/chromatin,GLIPR1,False
+SAGA/chromatin,GLRX,False
+SAGA/chromatin,GMPR,False
+SAGA/chromatin,GPD2,False
+SAGA/chromatin,GPR15,False
+SAGA/chromatin,GPR18,False
+SAGA/chromatin,GSAP,False
+SAGA/chromatin,H1-0,False
+SAGA/chromatin,H2BC21,False
+SAGA/chromatin,H3C10,False
+SAGA/chromatin,H6PD,False
+SAGA/chromatin,HELZ2,True
+SAGA/chromatin,HHLA2,False
+SAGA/chromatin,HMSD,False
+SAGA/chromatin,HPSE,False
+SAGA/chromatin,ICAM1,False
+SAGA/chromatin,ID2,False
+SAGA/chromatin,IFI35,True
+SAGA/chromatin,IFI44,True
+SAGA/chromatin,IFI44L,True
+SAGA/chromatin,IFI6,True
+SAGA/chromatin,IFIT5,False
+SAGA/chromatin,IKZF3,False
+SAGA/chromatin,IL3,False
+SAGA/chromatin,IL3RA,False
+SAGA/chromatin,IL4I1,False
+SAGA/chromatin,INSM1,False
+SAGA/chromatin,IPCEF1,False
+SAGA/chromatin,IQCN,False
+SAGA/chromatin,IRAG2,False
+SAGA/chromatin,IRF7,True
+SAGA/chromatin,ISG20,False
+SAGA/chromatin,ITGA2,False
+SAGA/chromatin,ITGAX,False
+SAGA/chromatin,KANSL1L,False
+SAGA/chromatin,KAT2B,False
+SAGA/chromatin,KCTD3,False
+SAGA/chromatin,KIAA1217,False
+SAGA/chromatin,KIAA1671,False
+SAGA/chromatin,KIF13B,False
+SAGA/chromatin,KIFBP,False
+SAGA/chromatin,LAT2,False
+SAGA/chromatin,LDLRAD4,False
+SAGA/chromatin,LIMA1,False
+SAGA/chromatin,LRATD2,False
+SAGA/chromatin,LRRCC1,False
+SAGA/chromatin,MAGEF1,False
+SAGA/chromatin,MAML2,False
+SAGA/chromatin,MAP1A,False
+SAGA/chromatin,MBOAT1,False
+SAGA/chromatin,MFGE8,False
+SAGA/chromatin,MIEN1,False
+SAGA/chromatin,MOV10,False
+SAGA/chromatin,MSRB2,False
+SAGA/chromatin,MTUS1,False
+SAGA/chromatin,MUC1,False
+SAGA/chromatin,MX1,True
+SAGA/chromatin,MX2,True
+SAGA/chromatin,N4BP3,False
+SAGA/chromatin,NCF4,False
+SAGA/chromatin,NCR3LG1,False
+SAGA/chromatin,NIPAL2,False
+SAGA/chromatin,NIPSNAP3A,False
+SAGA/chromatin,NOD2,False
+SAGA/chromatin,NPC2,False
+SAGA/chromatin,NQO1,False
+SAGA/chromatin,NRP2,False
+SAGA/chromatin,NT5E,False
+SAGA/chromatin,NUB1,False
+SAGA/chromatin,NUCB2,False
+SAGA/chromatin,NUDT12,False
+SAGA/chromatin,OAS1,True
+SAGA/chromatin,OAS3,True
+SAGA/chromatin,OPTN,False
+SAGA/chromatin,PACSIN3,False
+SAGA/chromatin,PARP9,True
+SAGA/chromatin,PATL2,False
+SAGA/chromatin,PDCD1LG2,False
+SAGA/chromatin,PHLDA2,False
+SAGA/chromatin,PIK3CG,False
+SAGA/chromatin,PINK1,False
+SAGA/chromatin,PIP4P2,False
+SAGA/chromatin,PJA2,False
+SAGA/chromatin,PLAAT3,False
+SAGA/chromatin,PLAAT4,False
+SAGA/chromatin,PLAT,False
+SAGA/chromatin,POGLUT3,False
+SAGA/chromatin,POLI,False
+SAGA/chromatin,POLR3G,False
+SAGA/chromatin,PON2,False
+SAGA/chromatin,PRDM8,False
+SAGA/chromatin,PRR5,False
+SAGA/chromatin,PRR7,False
+SAGA/chromatin,PTP4A3,False
+SAGA/chromatin,RASGEF1A,False
+SAGA/chromatin,RASGRP3,False
+SAGA/chromatin,RCBTB2,False
+SAGA/chromatin,RGS16,False
+SAGA/chromatin,RHOC,False
+SAGA/chromatin,RIGI,True
+SAGA/chromatin,RIPOR1,False
+SAGA/chromatin,RNF24,False
+SAGA/chromatin,RTP4,False
+SAGA/chromatin,SAMD9,True
+SAGA/chromatin,SAMD9L,True
+SAGA/chromatin,SCARB2,False
+SAGA/chromatin,SDSL,False
+SAGA/chromatin,SERPINB8,False
+SAGA/chromatin,SERPINH1,False
+SAGA/chromatin,SH2D1A,False
+SAGA/chromatin,SH3TC1,False
+SAGA/chromatin,SLAMF6,False
+SAGA/chromatin,SLC25A45,False
+SAGA/chromatin,SLC29A1,False
+SAGA/chromatin,SLC35D2,False
+SAGA/chromatin,SLC35F3,False
+SAGA/chromatin,SLC9A9,False
+SAGA/chromatin,SLFN11,False
+SAGA/chromatin,SMAD1,False
+SAGA/chromatin,SMPD1,False
+SAGA/chromatin,SORT1,False
+SAGA/chromatin,SPINT2,False
+SAGA/chromatin,STAT4,False
+SAGA/chromatin,STK3,False
+SAGA/chromatin,SUSD1,False
+SAGA/chromatin,SWT1,False
+SAGA/chromatin,SYNJ2BP,False
+SAGA/chromatin,TADA3,False
+SAGA/chromatin,TBC1D4,False
+SAGA/chromatin,TCN2,False
+SAGA/chromatin,TDRD7,False
+SAGA/chromatin,TENT5C,False
+SAGA/chromatin,TK2,False
+SAGA/chromatin,TLR1,False
+SAGA/chromatin,TMEM140,False
+SAGA/chromatin,TMEM169,False
+SAGA/chromatin,TMEM30B,False
+SAGA/chromatin,TMEM63A,False
+SAGA/chromatin,TMEM71,False
+SAGA/chromatin,TNFRSF12A,False
+SAGA/chromatin,TNFSF11,False
+SAGA/chromatin,TNFSF8,False
+SAGA/chromatin,TPM4,False
+SAGA/chromatin,TRAM2,False
+SAGA/chromatin,TRANK1,False
+SAGA/chromatin,TSTD1,False
+SAGA/chromatin,TTN,False
+SAGA/chromatin,TWSG1,False
+SAGA/chromatin,UEVLD,False
+SAGA/chromatin,USP11,False
+SAGA/chromatin,USP6NL,False
+SAGA/chromatin,VNN2,False
+SAGA/chromatin,XAF1,True
+SAGA/chromatin,XCL1,False
+SAGA/chromatin,YPEL5,False
+SAGA/chromatin,ZBTB7C,False
+SAGA/chromatin,ZCCHC24,False
+SAGA/chromatin,ZFYVE28,False
+SAGA/chromatin,ZNF704,False
+SAGA/chromatin,ZSCAN31,False
+TCR (context-specific),AAMDC,False
+TCR (context-specific),ABAT,False
+TCR (context-specific),ABCA5,False
+TCR (context-specific),ABCA7,False
+TCR (context-specific),ABCD2,False
+TCR (context-specific),ABHD3,False
+TCR (context-specific),ABHD4,False
+TCR (context-specific),ABHD8,False
+TCR (context-specific),ABR,False
+TCR (context-specific),ACAP1,False
+TCR (context-specific),ACAP2,False
+TCR (context-specific),ACCS,False
+TCR (context-specific),ACOT8,False
+TCR (context-specific),ACOX1,False
+TCR (context-specific),ACP5,False
+TCR (context-specific),ACSS1,False
+TCR (context-specific),ACSS2,False
+TCR (context-specific),ACTG1,False
+TCR (context-specific),ACTR2,False
+TCR (context-specific),ACTR3,False
+TCR (context-specific),ACYP2,False
+TCR (context-specific),ADA,False
+TCR (context-specific),ADA2,False
+TCR (context-specific),ADAM19,False
+TCR (context-specific),ADAM8,False
+TCR (context-specific),ADAT2,False
+TCR (context-specific),ADCY3,False
+TCR (context-specific),ADCY7,False
+TCR (context-specific),ADD1,False
+TCR (context-specific),ADD3,False
+TCR (context-specific),ADGRA3,False
+TCR (context-specific),AGAP2,False
+TCR (context-specific),AGFG1,False
+TCR (context-specific),AGFG2,False
+TCR (context-specific),AGK,False
+TCR (context-specific),AGPAT1,False
+TCR (context-specific),AGPAT4,False
+TCR (context-specific),AGTRAP,False
+TCR (context-specific),AHCYL2,False
+TCR (context-specific),AHI1,False
+TCR (context-specific),AHNAK,False
+TCR (context-specific),AIDA,False
+TCR (context-specific),AK1,False
+TCR (context-specific),AK4,False
+TCR (context-specific),AKAP13,False
+TCR (context-specific),AKAP7,False
+TCR (context-specific),AKNA,False
+TCR (context-specific),AKTIP,False
+TCR (context-specific),ALDOC,False
+TCR (context-specific),ALKBH7,False
+TCR (context-specific),ALOX5,False
+TCR (context-specific),ALOX5AP,False
+TCR (context-specific),ALPK1,False
+TCR (context-specific),AMDHD2,False
+TCR (context-specific),AMN1,False
+TCR (context-specific),AMPD3,False
+TCR (context-specific),ANKDD1A,False
+TCR (context-specific),ANKEF1,False
+TCR (context-specific),ANKRD13A,False
+TCR (context-specific),ANKRD13B,False
+TCR (context-specific),ANKRD13D,False
+TCR (context-specific),ANKRD44,False
+TCR (context-specific),ANO10,False
+TCR (context-specific),ANO8,False
+TCR (context-specific),ANO9,False
+TCR (context-specific),ANTKMT,False
+TCR (context-specific),ANXA1,False
+TCR (context-specific),ANXA2,False
+TCR (context-specific),ANXA2R,False
+TCR (context-specific),ANXA4,False
+TCR (context-specific),AP1G2,False
+TCR (context-specific),APAF1,False
+TCR (context-specific),APBB1,False
+TCR (context-specific),APH1A,False
+TCR (context-specific),APH1B,False
+TCR (context-specific),APOBEC3C,False
+TCR (context-specific),APOBEC3F,False
+TCR (context-specific),APOBEC3G,False
+TCR (context-specific),APOBEC3H,False
+TCR (context-specific),APOBR,False
+TCR (context-specific),APOL3,True
+TCR (context-specific),APOL6,True
+TCR (context-specific),AQP3,False
+TCR (context-specific),ARHGAP15,False
+TCR (context-specific),ARHGAP25,False
+TCR (context-specific),ARHGAP26,False
+TCR (context-specific),ARHGAP27,False
+TCR (context-specific),ARHGAP30,False
+TCR (context-specific),ARHGAP33,False
+TCR (context-specific),ARHGAP45,False
+TCR (context-specific),ARHGAP9,False
+TCR (context-specific),ARHGDIB,False
+TCR (context-specific),ARHGEF1,False
+TCR (context-specific),ARHGEF11,False
+TCR (context-specific),ARHGEF6,False
+TCR (context-specific),ARID5A,False
+TCR (context-specific),ARL2BP,False
+TCR (context-specific),ARL4C,False
+TCR (context-specific),ARL6IP1,False
+TCR (context-specific),ARL6IP5,False
+TCR (context-specific),ARL6IP6,False
+TCR (context-specific),ARL8A,False
+TCR (context-specific),ARPC1B,False
+TCR (context-specific),ARPC3,False
+TCR (context-specific),ARPC5,False
+TCR (context-specific),ARRB2,False
+TCR (context-specific),ARRDC2,False
+TCR (context-specific),ARRDC3,False
+TCR (context-specific),ARSA,False
+TCR (context-specific),ATAD3A,False
+TCR (context-specific),ATF6B,False
+TCR (context-specific),ATG16L2,False
+TCR (context-specific),ATM,False
+TCR (context-specific),ATOSA,False
+TCR (context-specific),ATOSB,False
+TCR (context-specific),ATP13A3,False
+TCR (context-specific),ATP1B3,False
+TCR (context-specific),ATP23,False
+TCR (context-specific),ATP2A3,False
+TCR (context-specific),ATP2B4,False
+TCR (context-specific),ATP6V1D,False
+TCR (context-specific),ATP6V1H,False
+TCR (context-specific),ATP8B2,False
+TCR (context-specific),ATP8B3,False
+TCR (context-specific),ATP8B4,False
+TCR (context-specific),B3GALT2,False
+TCR (context-specific),B3GALT4,False
+TCR (context-specific),B3GNT9,False
+TCR (context-specific),B4GALT2,False
+TCR (context-specific),B9D2,False
+TCR (context-specific),BACH2,False
+TCR (context-specific),BAD,False
+TCR (context-specific),BAX,False
+TCR (context-specific),BBC3,False
+TCR (context-specific),BBS9,False
+TCR (context-specific),BCAS3,False
+TCR (context-specific),BCL2,False
+TCR (context-specific),BCL2L1,False
+TCR (context-specific),BCL3,False
+TCR (context-specific),BCL9L,False
+TCR (context-specific),BDH2,False
+TCR (context-specific),BEND3,False
+TCR (context-specific),BHLHE40,False
+TCR (context-specific),BIN1,False
+TCR (context-specific),BIN2,False
+TCR (context-specific),BLOC1S1,False
+TCR (context-specific),BMAL2,False
+TCR (context-specific),BNIP3L,False
+TCR (context-specific),BORCS6,False
+TCR (context-specific),BRI3,False
+TCR (context-specific),BRIX1,False
+TCR (context-specific),BST2,True
+TCR (context-specific),BTBD2,False
+TCR (context-specific),BTG1,False
+TCR (context-specific),BTN2A2,False
+TCR (context-specific),BTN3A1,False
+TCR (context-specific),BTN3A2,False
+TCR (context-specific),BZW2,False
+TCR (context-specific),C11orf21,False
+TCR (context-specific),C11orf68,False
+TCR (context-specific),C15orf39,False
+TCR (context-specific),C15orf48,False
+TCR (context-specific),C16orf54,False
+TCR (context-specific),C16orf87,False
+TCR (context-specific),C17orf49,False
+TCR (context-specific),C17orf58,False
+TCR (context-specific),C1RL,False
+TCR (context-specific),C1orf162,False
+TCR (context-specific),C3AR1,False
+TCR (context-specific),C3orf18,False
+TCR (context-specific),C4BPB,False
+TCR (context-specific),C4orf33,False
+TCR (context-specific),C6orf89,False
+TCR (context-specific),C9orf72,False
+TCR (context-specific),CA5B,False
+TCR (context-specific),CA6,False
+TCR (context-specific),CALCOCO1,False
+TCR (context-specific),CALCOCO2,False
+TCR (context-specific),CALHM2,False
+TCR (context-specific),CAMK2G,False
+TCR (context-specific),CAP1,False
+TCR (context-specific),CAPG,False
+TCR (context-specific),CAPN1,False
+TCR (context-specific),CAPN2,False
+TCR (context-specific),CAPNS1,False
+TCR (context-specific),CARD16,False
+TCR (context-specific),CARD19,False
+TCR (context-specific),CARHSP1,False
+TCR (context-specific),CASP10,False
+TCR (context-specific),CASP4,False
+TCR (context-specific),CASP6,False
+TCR (context-specific),CASP7,False
+TCR (context-specific),CASP8,False
+TCR (context-specific),CAST,False
+TCR (context-specific),CASTOR1,False
+TCR (context-specific),CASZ1,False
+TCR (context-specific),CAT,False
+TCR (context-specific),CBFA2T2,False
+TCR (context-specific),CBLN3,False
+TCR (context-specific),CBX4,False
+TCR (context-specific),CCDC107,False
+TCR (context-specific),CCDC186,False
+TCR (context-specific),CCDC69,False
+TCR (context-specific),CCDC7,False
+TCR (context-specific),CCDC88B,False
+TCR (context-specific),CCDC92,False
+TCR (context-specific),CCDC97,False
+TCR (context-specific),CCL1,False
+TCR (context-specific),CCL3,False
+TCR (context-specific),CCL4,False
+TCR (context-specific),CCNDBP1,False
+TCR (context-specific),CCNG1,False
+TCR (context-specific),CCNG2,False
+TCR (context-specific),CCR2,False
+TCR (context-specific),CCR5,False
+TCR (context-specific),CCSER2,False
+TCR (context-specific),CD109,False
+TCR (context-specific),CD151,False
+TCR (context-specific),CD200,False
+TCR (context-specific),CD200R1,False
+TCR (context-specific),CD300A,False
+TCR (context-specific),CD37,False
+TCR (context-specific),CD5,False
+TCR (context-specific),CD52,False
+TCR (context-specific),CD53,False
+TCR (context-specific),CD96,False
+TCR (context-specific),CDC14A,False
+TCR (context-specific),CDC25B,False
+TCR (context-specific),CDC42SE1,False
+TCR (context-specific),CDC42SE2,False
+TCR (context-specific),CDCA7L,False
+TCR (context-specific),CDK2AP2,False
+TCR (context-specific),CDK4,False
+TCR (context-specific),CDKN1A,False
+TCR (context-specific),CDKN2A,False
+TCR (context-specific),CDKN2D,False
+TCR (context-specific),CDS2,False
+TCR (context-specific),CEACAM1,False
+TCR (context-specific),CENPI,False
+TCR (context-specific),CENPV,False
+TCR (context-specific),CEP70,False
+TCR (context-specific),CERS4,False
+TCR (context-specific),CFL1,False
+TCR (context-specific),CFP,False
+TCR (context-specific),CHD2,False
+TCR (context-specific),CHI3L2,False
+TCR (context-specific),CHID1,False
+TCR (context-specific),CHKB,False
+TCR (context-specific),CHMP7,False
+TCR (context-specific),CHP1,False
+TCR (context-specific),CIC,False
+TCR (context-specific),CISH,False
+TCR (context-specific),CITED4,False
+TCR (context-specific),CLDND1,False
+TCR (context-specific),CLEC2B,False
+TCR (context-specific),CLN3,False
+TCR (context-specific),CLU,False
+TCR (context-specific),CLUH,False
+TCR (context-specific),CMIP,False
+TCR (context-specific),CMPK2,True
+TCR (context-specific),CMSS1,False
+TCR (context-specific),CMTM3,False
+TCR (context-specific),CNN2,False
+TCR (context-specific),CNPY4,False
+TCR (context-specific),COMMD4,False
+TCR (context-specific),COMMD7,False
+TCR (context-specific),CORO1A,False
+TCR (context-specific),CORO2A,False
+TCR (context-specific),CORO7,False
+TCR (context-specific),CPEB4,False
+TCR (context-specific),CPM,False
+TCR (context-specific),CPNE3,False
+TCR (context-specific),CPOX,False
+TCR (context-specific),CPPED1,False
+TCR (context-specific),CPQ,False
+TCR (context-specific),CRAT,False
+TCR (context-specific),CRBN,False
+TCR (context-specific),CREBRF,False
+TCR (context-specific),CRIM1,False
+TCR (context-specific),CRTC3,False
+TCR (context-specific),CRYZ,False
+TCR (context-specific),CSF2,False
+TCR (context-specific),CSGALNACT2,False
+TCR (context-specific),CSNK1G2,False
+TCR (context-specific),CSTB,False
+TCR (context-specific),CTDSP2,False
+TCR (context-specific),CTLA4,False
+TCR (context-specific),CTSC,False
+TCR (context-specific),CTSD,False
+TCR (context-specific),CTSO,False
+TCR (context-specific),CTSS,False
+TCR (context-specific),CTU2,False
+TCR (context-specific),CXCR4,False
+TCR (context-specific),CYB561,False
+TCR (context-specific),CYB5A,False
+TCR (context-specific),CYBA,False
+TCR (context-specific),CYFIP2,False
+TCR (context-specific),CYLD,False
+TCR (context-specific),CYP4V2,False
+TCR (context-specific),CYSLTR1,False
+TCR (context-specific),CYSLTR2,False
+TCR (context-specific),CYSTM1,False
+TCR (context-specific),CYTH1,False
+TCR (context-specific),CYTH2,False
+TCR (context-specific),CYTH4,False
+TCR (context-specific),CYTIP,False
+TCR (context-specific),DAAM1,False
+TCR (context-specific),DACT1,False
+TCR (context-specific),DCAF11,False
+TCR (context-specific),DCK,False
+TCR (context-specific),DCTN2,False
+TCR (context-specific),DCTN3,False
+TCR (context-specific),DCTPP1,False
+TCR (context-specific),DCUN1D3,False
+TCR (context-specific),DCUN1D5,False
+TCR (context-specific),DDAH2,False
+TCR (context-specific),DDIT4,False
+TCR (context-specific),DDX60,False
+TCR (context-specific),DDX60L,False
+TCR (context-specific),DECR1,False
+TCR (context-specific),DEDD2,False
+TCR (context-specific),DEF6,False
+TCR (context-specific),DEGS1,False
+TCR (context-specific),DENND10,False
+TCR (context-specific),DENND1C,False
+TCR (context-specific),DENND3,False
+TCR (context-specific),DENND4A,False
+TCR (context-specific),DENND4C,False
+TCR (context-specific),DGKA,False
+TCR (context-specific),DGLUCY,False
+TCR (context-specific),DHRS1,False
+TCR (context-specific),DHRS12,False
+TCR (context-specific),DHTKD1,False
+TCR (context-specific),DHX58,False
+TCR (context-specific),DISC1,False
+TCR (context-specific),DKC1,False
+TCR (context-specific),DNAAF2,False
+TCR (context-specific),DNAAF9,False
+TCR (context-specific),DNAJC4,False
+TCR (context-specific),DNASE1,False
+TCR (context-specific),DNASE1L1,False
+TCR (context-specific),DNASE2,False
+TCR (context-specific),DOCK11,False
+TCR (context-specific),DOCK2,False
+TCR (context-specific),DOCK8,False
+TCR (context-specific),DOCK9,False
+TCR (context-specific),DPP4,False
+TCR (context-specific),DPYD,False
+TCR (context-specific),DPYSL2,False
+TCR (context-specific),DRAP1,False
+TCR (context-specific),DSTYK,False
+TCR (context-specific),DTX3L,True
+TCR (context-specific),DUSP2,False
+TCR (context-specific),DUSP4,False
+TCR (context-specific),DYRK1B,False
+TCR (context-specific),DZIP3,False
+TCR (context-specific),E2F6,False
+TCR (context-specific),EBP,False
+TCR (context-specific),ECH1,False
+TCR (context-specific),EDARADD,False
+TCR (context-specific),EED,False
+TCR (context-specific),EEIG1,False
+TCR (context-specific),EEIG2,False
+TCR (context-specific),EGLN3,False
+TCR (context-specific),EGR2,False
+TCR (context-specific),EIF2AK2,False
+TCR (context-specific),EIF4E3,False
+TCR (context-specific),ELL2,False
+TCR (context-specific),ELOVL6,False
+TCR (context-specific),EMB,False
+TCR (context-specific),EML4,False
+TCR (context-specific),EMP1,False
+TCR (context-specific),EMP3,False
+TCR (context-specific),ENDOV,False
+TCR (context-specific),EPB41,False
+TCR (context-specific),EPOP,False
+TCR (context-specific),EPSTI1,True
+TCR (context-specific),ERAP2,False
+TCR (context-specific),ERBIN,False
+TCR (context-specific),ERC1,False
+TCR (context-specific),ERGIC3,False
+TCR (context-specific),ERMP1,False
+TCR (context-specific),ERN1,False
+TCR (context-specific),ERP27,False
+TCR (context-specific),ERP29,False
+TCR (context-specific),ESYT1,False
+TCR (context-specific),ETHE1,False
+TCR (context-specific),EVI2A,False
+TCR (context-specific),EVI2B,False
+TCR (context-specific),EVI5L,False
+TCR (context-specific),EVL,False
+TCR (context-specific),EXOC6B,False
+TCR (context-specific),EXOC7,False
+TCR (context-specific),F11R,False
+TCR (context-specific),F5,False
+TCR (context-specific),FAAH2,False
+TCR (context-specific),FABP5,False
+TCR (context-specific),FADS2,False
+TCR (context-specific),FAM117A,False
+TCR (context-specific),FAM13A,False
+TCR (context-specific),FAM168A,False
+TCR (context-specific),FAM200B,False
+TCR (context-specific),FAM216A,False
+TCR (context-specific),FAM3C,False
+TCR (context-specific),FAS,False
+TCR (context-specific),FASLG,False
+TCR (context-specific),FBRS,False
+TCR (context-specific),FBXL8,False
+TCR (context-specific),FBXO30,False
+TCR (context-specific),FBXO6,False
+TCR (context-specific),FBXW5,False
+TCR (context-specific),FCGBP,False
+TCR (context-specific),FCGRT,False
+TCR (context-specific),FDXR,False
+TCR (context-specific),FES,False
+TCR (context-specific),FGD3,False
+TCR (context-specific),FGFR1OP2,False
+TCR (context-specific),FHL3,False
+TCR (context-specific),FIG4,False
+TCR (context-specific),FILIP1L,False
+TCR (context-specific),FKBP4,False
+TCR (context-specific),FKBP8,False
+TCR (context-specific),FLACC1,False
+TCR (context-specific),FLCN,False
+TCR (context-specific),FLNA,False
+TCR (context-specific),FLNB,False
+TCR (context-specific),FLOT2,False
+TCR (context-specific),FLT1,False
+TCR (context-specific),FLT3LG,False
+TCR (context-specific),FMNL1,False
+TCR (context-specific),FMNL2,False
+TCR (context-specific),FNIP1,False
+TCR (context-specific),FOSL1,False
+TCR (context-specific),FOSL2,False
+TCR (context-specific),FOXP1,False
+TCR (context-specific),FTH1,False
+TCR (context-specific),FUCA1,False
+TCR (context-specific),FURIN,False
+TCR (context-specific),FUT7,False
+TCR (context-specific),FXN,False
+TCR (context-specific),FYB1,False
+TCR (context-specific),FYN,False
+TCR (context-specific),FZD3,False
+TCR (context-specific),G0S2,False
+TCR (context-specific),GAB2,False
+TCR (context-specific),GAB3,False
+TCR (context-specific),GABARAP,False
+TCR (context-specific),GALC,False
+TCR (context-specific),GALNT3,False
+TCR (context-specific),GALNT4,False
+TCR (context-specific),GALT,False
+TCR (context-specific),GBA1,False
+TCR (context-specific),GBP1,True
+TCR (context-specific),GBP3,False
+TCR (context-specific),GBP5,False
+TCR (context-specific),GDPD5,False
+TCR (context-specific),GEMIN4,False
+TCR (context-specific),GFOD1,False
+TCR (context-specific),GIMAP2,False
+TCR (context-specific),GIMAP4,False
+TCR (context-specific),GIMAP5,False
+TCR (context-specific),GIMAP6,False
+TCR (context-specific),GIMAP7,False
+TCR (context-specific),GIMAP8,False
+TCR (context-specific),GIPC1,False
+TCR (context-specific),GLG1,False
+TCR (context-specific),GLI4,False
+TCR (context-specific),GLIPR1,False
+TCR (context-specific),GLIPR2,False
+TCR (context-specific),GLMP,False
+TCR (context-specific),GLRX,False
+TCR (context-specific),GMFG,False
+TCR (context-specific),GNA15,False
+TCR (context-specific),GNAI1,False
+TCR (context-specific),GNAI2,False
+TCR (context-specific),GNB2,False
+TCR (context-specific),GNB5,False
+TCR (context-specific),GNG2,False
+TCR (context-specific),GNG4,False
+TCR (context-specific),GNS,False
+TCR (context-specific),GOLGA7B,False
+TCR (context-specific),GOLGA8B,False
+TCR (context-specific),GOLGB1,False
+TCR (context-specific),GOLIM4,False
+TCR (context-specific),GPR132,False
+TCR (context-specific),GPR137,False
+TCR (context-specific),GPR155,False
+TCR (context-specific),GPR65,False
+TCR (context-specific),GPR68,False
+TCR (context-specific),GPRIN3,False
+TCR (context-specific),GPSM2,False
+TCR (context-specific),GPSM3,False
+TCR (context-specific),GRAP2,False
+TCR (context-specific),GRN,False
+TCR (context-specific),GSAP,False
+TCR (context-specific),GSDMB,False
+TCR (context-specific),GSDMD,False
+TCR (context-specific),GSTK1,False
+TCR (context-specific),GZMA,False
+TCR (context-specific),GZMB,False
+TCR (context-specific),GZMK,False
+TCR (context-specific),H1-10,False
+TCR (context-specific),H2AJ,False
+TCR (context-specific),H2BC21,False
+TCR (context-specific),HACD4,False
+TCR (context-specific),HAGH,False
+TCR (context-specific),HAPLN3,False
+TCR (context-specific),HBEGF,False
+TCR (context-specific),HBP1,False
+TCR (context-specific),HCFC2,False
+TCR (context-specific),HCLS1,False
+TCR (context-specific),HDAC6,False
+TCR (context-specific),HEBP2,False
+TCR (context-specific),HECTD2,False
+TCR (context-specific),HELB,False
+TCR (context-specific),HELZ2,True
+TCR (context-specific),HEMK1,False
+TCR (context-specific),HERC3,False
+TCR (context-specific),HERC5,True
+TCR (context-specific),HERC6,True
+TCR (context-specific),HERPUD2,False
+TCR (context-specific),HEXD,False
+TCR (context-specific),HGSNAT,False
+TCR (context-specific),HILPDA,False
+TCR (context-specific),HIPK1,False
+TCR (context-specific),HIVEP3,False
+TCR (context-specific),HK2,False
+TCR (context-specific),HKDC1,False
+TCR (context-specific),HMGB2,False
+TCR (context-specific),HNRNPH2,False
+TCR (context-specific),HOMER1,False
+TCR (context-specific),HOMER2,False
+TCR (context-specific),HPDL,False
+TCR (context-specific),HPGD,False
+TCR (context-specific),HPS1,False
+TCR (context-specific),HS1BP3,False
+TCR (context-specific),HSBP1L1,False
+TCR (context-specific),HSDL2,False
+TCR (context-specific),HSPD1,False
+TCR (context-specific),ICAM3,False
+TCR (context-specific),IDH2,False
+TCR (context-specific),IDS,False
+TCR (context-specific),IER2,False
+TCR (context-specific),IER3,False
+TCR (context-specific),IFI27L2,False
+TCR (context-specific),IFI30,False
+TCR (context-specific),IFI35,True
+TCR (context-specific),IFI44,True
+TCR (context-specific),IFI44L,True
+TCR (context-specific),IFI6,True
+TCR (context-specific),IFIH1,False
+TCR (context-specific),IFIT5,False
+TCR (context-specific),IFITM1,True
+TCR (context-specific),IFITM2,False
+TCR (context-specific),IFITM3,True
+TCR (context-specific),IFNG,False
+TCR (context-specific),IFNGR1,False
+TCR (context-specific),IFRD2,False
+TCR (context-specific),IKBKE,False
+TCR (context-specific),IL10RA,False
+TCR (context-specific),IL10RB,False
+TCR (context-specific),IL11RA,False
+TCR (context-specific),IL12RB1,False
+TCR (context-specific),IL15,False
+TCR (context-specific),IL16,False
+TCR (context-specific),IL17RA,False
+TCR (context-specific),IL2,False
+TCR (context-specific),IL2RA,False
+TCR (context-specific),IL3,False
+TCR (context-specific),IL32,False
+TCR (context-specific),IL3RA,False
+TCR (context-specific),IL4R,False
+TCR (context-specific),IL7R,False
+TCR (context-specific),IL9R,False
+TCR (context-specific),ILK,False
+TCR (context-specific),IMMT,False
+TCR (context-specific),INPP4A,False
+TCR (context-specific),INPP5D,False
+TCR (context-specific),INPP5F,False
+TCR (context-specific),INPP5K,False
+TCR (context-specific),IPO11,False
+TCR (context-specific),IQSEC1,False
+TCR (context-specific),IRF1,False
+TCR (context-specific),IRF4,False
+TCR (context-specific),IRF7,True
+TCR (context-specific),IRF8,False
+TCR (context-specific),IRF9,False
+TCR (context-specific),IRS1,False
+TCR (context-specific),IRX3,False
+TCR (context-specific),ISG15,True
+TCR (context-specific),ISG20,False
+TCR (context-specific),ITGA5,False
+TCR (context-specific),ITGA6,False
+TCR (context-specific),ITGAL,False
+TCR (context-specific),ITGAM,False
+TCR (context-specific),ITGB7,False
+TCR (context-specific),ITM2B,False
+TCR (context-specific),ITPRIPL2,False
+TCR (context-specific),ITSN2,False
+TCR (context-specific),IZUMO4,False
+TCR (context-specific),JUNB,False
+TCR (context-specific),KAT2B,False
+TCR (context-specific),KATNAL1,False
+TCR (context-specific),KCNA3,False
+TCR (context-specific),KCNK5,False
+TCR (context-specific),KCNQ1,False
+TCR (context-specific),KCTD21,False
+TCR (context-specific),KDM3A,False
+TCR (context-specific),KDM6B,False
+TCR (context-specific),KDM7A,False
+TCR (context-specific),KIAA0040,False
+TCR (context-specific),KIF16B,False
+TCR (context-specific),KIF21B,False
+TCR (context-specific),KIFAP3,False
+TCR (context-specific),KLF13,False
+TCR (context-specific),KLF2,False
+TCR (context-specific),KLF3,False
+TCR (context-specific),KLF6,False
+TCR (context-specific),KLHL22,False
+TCR (context-specific),KLHL24,False
+TCR (context-specific),KLHL28,False
+TCR (context-specific),KLHL36,False
+TCR (context-specific),KLHL5,False
+TCR (context-specific),KRBA2,False
+TCR (context-specific),KRBOX4,False
+TCR (context-specific),LACTB,False
+TCR (context-specific),LAG3,False
+TCR (context-specific),LAIR1,False
+TCR (context-specific),LAPTM5,False
+TCR (context-specific),LBH,False
+TCR (context-specific),LCP1,False
+TCR (context-specific),LCP2,False
+TCR (context-specific),LDLR,False
+TCR (context-specific),LFNG,False
+TCR (context-specific),LGALS1,False
+TCR (context-specific),LGALS3,False
+TCR (context-specific),LGALS3BP,False
+TCR (context-specific),LGALS9,False
+TCR (context-specific),LHPP,False
+TCR (context-specific),LIF,False
+TCR (context-specific),LIMD2,False
+TCR (context-specific),LIME1,False
+TCR (context-specific),LIMK2,False
+TCR (context-specific),LIMS2,False
+TCR (context-specific),LINC02694,False
+TCR (context-specific),LINS1,False
+TCR (context-specific),LIPA,False
+TCR (context-specific),LIX1L,False
+TCR (context-specific),LMF2,False
+TCR (context-specific),LNPEP,False
+TCR (context-specific),LPAR2,False
+TCR (context-specific),LPAR6,False
+TCR (context-specific),LPXN,False
+TCR (context-specific),LRCH4,False
+TCR (context-specific),LRP10,False
+TCR (context-specific),LRRC37B,False
+TCR (context-specific),LRRC8A,False
+TCR (context-specific),LRRC8B,False
+TCR (context-specific),LRRFIP1,False
+TCR (context-specific),LRRN3,False
+TCR (context-specific),LSS,False
+TCR (context-specific),LST1,False
+TCR (context-specific),LTB,False
+TCR (context-specific),LY6E,True
+TCR (context-specific),LY96,False
+TCR (context-specific),LYAR,False
+TCR (context-specific),LYRM9,False
+TCR (context-specific),LYSMD3,False
+TCR (context-specific),LZTS1,False
+TCR (context-specific),MACIR,False
+TCR (context-specific),MAD1L1,False
+TCR (context-specific),MAGED2,False
+TCR (context-specific),MAGI3,False
+TCR (context-specific),MAK16,False
+TCR (context-specific),MAL,False
+TCR (context-specific),MAMLD1,False
+TCR (context-specific),MAN1A1,False
+TCR (context-specific),MAN1C1,False
+TCR (context-specific),MAN2B1,False
+TCR (context-specific),MAN2B2,False
+TCR (context-specific),MANBA,False
+TCR (context-specific),MAP1A,False
+TCR (context-specific),MAP1LC3B,False
+TCR (context-specific),MAP2K6,False
+TCR (context-specific),MAP3K1,False
+TCR (context-specific),MAP3K12,False
+TCR (context-specific),MAP3K3,False
+TCR (context-specific),MAP4K1,False
+TCR (context-specific),MAP4K2,False
+TCR (context-specific),MAPK11,False
+TCR (context-specific),MAPK3,False
+TCR (context-specific),MAPK7,False
+TCR (context-specific),MAPKBP1,False
+TCR (context-specific),MARCHF8,False
+TCR (context-specific),MAST3,False
+TCR (context-specific),MAST4,False
+TCR (context-specific),MATCAP1,False
+TCR (context-specific),MB21D2,False
+TCR (context-specific),MBD5,False
+TCR (context-specific),MBNL1,False
+TCR (context-specific),MBOAT7,False
+TCR (context-specific),MCOLN3,False
+TCR (context-specific),MCUB,False
+TCR (context-specific),MEAK7,False
+TCR (context-specific),METTL1,False
+TCR (context-specific),MFSD2A,False
+TCR (context-specific),MGAT4A,False
+TCR (context-specific),MGST3,False
+TCR (context-specific),MICAL1,False
+TCR (context-specific),MICU1,False
+TCR (context-specific),MIDN,False
+TCR (context-specific),MIIP,False
+TCR (context-specific),MINDY2,False
+TCR (context-specific),MITD1,False
+TCR (context-specific),MIX23,False
+TCR (context-specific),MKNK1,False
+TCR (context-specific),MKNK2,False
+TCR (context-specific),MKRN1,False
+TCR (context-specific),MMP25,False
+TCR (context-specific),MOAP1,False
+TCR (context-specific),MOB3A,False
+TCR (context-specific),MOB3C,False
+TCR (context-specific),MOSPD3,False
+TCR (context-specific),MOV10,False
+TCR (context-specific),MSN,False
+TCR (context-specific),MSRB1,False
+TCR (context-specific),MSRB2,False
+TCR (context-specific),MT1F,False
+TCR (context-specific),MTHFR,False
+TCR (context-specific),MUC1,False
+TCR (context-specific),MVB12B,False
+TCR (context-specific),MVD,False
+TCR (context-specific),MVP,False
+TCR (context-specific),MX1,True
+TCR (context-specific),MX2,True
+TCR (context-specific),MXD1,False
+TCR (context-specific),MXD4,False
+TCR (context-specific),MYADM,False
+TCR (context-specific),MYB,False
+TCR (context-specific),MYBL1,False
+TCR (context-specific),MYC,False
+TCR (context-specific),MYD88,False
+TCR (context-specific),MYH9,False
+TCR (context-specific),MYL12A,False
+TCR (context-specific),MYL6,False
+TCR (context-specific),MYO18A,False
+TCR (context-specific),MYO1F,False
+TCR (context-specific),MYOF,False
+TCR (context-specific),N4BP2L2,False
+TCR (context-specific),NAA80,False
+TCR (context-specific),NAB2,False
+TCR (context-specific),NAGA,False
+TCR (context-specific),NAGK,False
+TCR (context-specific),NAMPT,False
+TCR (context-specific),NAPA,False
+TCR (context-specific),NAPRT,False
+TCR (context-specific),NARF,False
+TCR (context-specific),NBEAL1,False
+TCR (context-specific),NBEAL2,False
+TCR (context-specific),NBR1,False
+TCR (context-specific),NCF2,False
+TCR (context-specific),NCF4,False
+TCR (context-specific),NCKAP1L,False
+TCR (context-specific),NCOA2,False
+TCR (context-specific),NDRG1,False
+TCR (context-specific),NDRG3,False
+TCR (context-specific),NDUFB1,False
+TCR (context-specific),NECAB3,False
+TCR (context-specific),NECAP2,False
+TCR (context-specific),NEK2,False
+TCR (context-specific),NEK6,False
+TCR (context-specific),NETO2,False
+TCR (context-specific),NEU1,False
+TCR (context-specific),NFKB2,False
+TCR (context-specific),NFKBID,False
+TCR (context-specific),NFKBIZ,False
+TCR (context-specific),NHERF1,False
+TCR (context-specific),NIBAN1,False
+TCR (context-specific),NIBAN2,False
+TCR (context-specific),NIPAL3,False
+TCR (context-specific),NIPSNAP3A,False
+TCR (context-specific),NLRC5,False
+TCR (context-specific),NLRP1,False
+TCR (context-specific),NME1,False
+TCR (context-specific),NMRK1,False
+TCR (context-specific),NMT2,False
+TCR (context-specific),NOL3,False
+TCR (context-specific),NOL4L,False
+TCR (context-specific),NOLC1,False
+TCR (context-specific),NOP53,False
+TCR (context-specific),NOSIP,False
+TCR (context-specific),NPC2,False
+TCR (context-specific),NPM3,False
+TCR (context-specific),NPTX1,False
+TCR (context-specific),NR4A3,False
+TCR (context-specific),NSG1,False
+TCR (context-specific),NTAN1,False
+TCR (context-specific),NUB1,False
+TCR (context-specific),NUCB1,False
+TCR (context-specific),NUDT14,False
+TCR (context-specific),NXPE3,False
+TCR (context-specific),OAS1,True
+TCR (context-specific),OAS2,True
+TCR (context-specific),OAS3,True
+TCR (context-specific),OASL,True
+TCR (context-specific),OCEL1,False
+TCR (context-specific),OCIAD2,False
+TCR (context-specific),ODC1,False
+TCR (context-specific),ODF2L,False
+TCR (context-specific),ODF3B,False
+TCR (context-specific),OGDH,False
+TCR (context-specific),OPTN,False
+TCR (context-specific),ORMDL3,False
+TCR (context-specific),OS9,False
+TCR (context-specific),OSBPL1A,False
+TCR (context-specific),OSTF1,False
+TCR (context-specific),OSTM1,False
+TCR (context-specific),OXNAD1,False
+TCR (context-specific),P2RY10,False
+TCR (context-specific),P2RY11,False
+TCR (context-specific),P2RY8,False
+TCR (context-specific),PABIR3,False
+TCR (context-specific),PAG1,False
+TCR (context-specific),PAICS,False
+TCR (context-specific),PAQR8,False
+TCR (context-specific),PARP10,False
+TCR (context-specific),PARP11,False
+TCR (context-specific),PARP12,True
+TCR (context-specific),PARP14,False
+TCR (context-specific),PARP15,False
+TCR (context-specific),PARP8,False
+TCR (context-specific),PARP9,True
+TCR (context-specific),PARVG,False
+TCR (context-specific),PATJ,False
+TCR (context-specific),PATL2,False
+TCR (context-specific),PBX4,False
+TCR (context-specific),PBXIP1,False
+TCR (context-specific),PCCA,False
+TCR (context-specific),PCMTD1,False
+TCR (context-specific),PCYT1A,False
+TCR (context-specific),PCYT2,False
+TCR (context-specific),PDCD1,False
+TCR (context-specific),PDCD1LG2,False
+TCR (context-specific),PDCD4,False
+TCR (context-specific),PDE3B,False
+TCR (context-specific),PDE4B,False
+TCR (context-specific),PDE6D,False
+TCR (context-specific),PDE6G,False
+TCR (context-specific),PDE7A,False
+TCR (context-specific),PDK2,False
+TCR (context-specific),PDLIM2,False
+TCR (context-specific),PDP1,False
+TCR (context-specific),PDSS1,False
+TCR (context-specific),PDXP,False
+TCR (context-specific),PECR,False
+TCR (context-specific),PEPD,False
+TCR (context-specific),PFN1,False
+TCR (context-specific),PGAP6,False
+TCR (context-specific),PHF1,False
+TCR (context-specific),PHF11,False
+TCR (context-specific),PHF6,False
+TCR (context-specific),PHKA1,False
+TCR (context-specific),PHKB,False
+TCR (context-specific),PHLDA3,False
+TCR (context-specific),PHYKPL,False
+TCR (context-specific),PI16,False
+TCR (context-specific),PI4KA,False
+TCR (context-specific),PIAS3,False
+TCR (context-specific),PIK3IP1,False
+TCR (context-specific),PIM1,False
+TCR (context-specific),PINK1,False
+TCR (context-specific),PIP4P2,False
+TCR (context-specific),PITPNC1,False
+TCR (context-specific),PJA2,False
+TCR (context-specific),PLA2G4C,False
+TCR (context-specific),PLAAT4,False
+TCR (context-specific),PLAC8,False
+TCR (context-specific),PLCB2,False
+TCR (context-specific),PLCL1,False
+TCR (context-specific),PLCL2,False
+TCR (context-specific),PLD2,False
+TCR (context-specific),PLD3,False
+TCR (context-specific),PLEC,False
+TCR (context-specific),PLEKHA2,False
+TCR (context-specific),PLEKHG2,False
+TCR (context-specific),PLEKHG3,False
+TCR (context-specific),PLEKHO1,False
+TCR (context-specific),PLEKHO2,False
+TCR (context-specific),PLOD3,False
+TCR (context-specific),PLP2,False
+TCR (context-specific),PLPP1,False
+TCR (context-specific),PLSCR1,True
+TCR (context-specific),PLXNA4,False
+TCR (context-specific),PML,False
+TCR (context-specific),PMM1,False
+TCR (context-specific),PNRC1,False
+TCR (context-specific),POC1B,False
+TCR (context-specific),POLD4,False
+TCR (context-specific),POLH,False
+TCR (context-specific),POLR3G,False
+TCR (context-specific),POLR3H,False
+TCR (context-specific),POU2AF1,False
+TCR (context-specific),PPARA,False
+TCR (context-specific),PPCDC,False
+TCR (context-specific),PPM1K,False
+TCR (context-specific),PPM1M,False
+TCR (context-specific),PPP1CA,False
+TCR (context-specific),PPP1R18,False
+TCR (context-specific),PPP1R3B,False
+TCR (context-specific),PPP2R5B,False
+TCR (context-specific),PRAG1,False
+TCR (context-specific),PRDX5,False
+TCR (context-specific),PRKACB,False
+TCR (context-specific),PRKCQ,False
+TCR (context-specific),PRKD2,False
+TCR (context-specific),PRKX,False
+TCR (context-specific),PRMT2,False
+TCR (context-specific),PRMT5,False
+TCR (context-specific),PRNP,False
+TCR (context-specific),PRR7,False
+TCR (context-specific),PRSS23,False
+TCR (context-specific),PRXL2B,False
+TCR (context-specific),PSMB10,False
+TCR (context-specific),PSMB9,False
+TCR (context-specific),PSME1,False
+TCR (context-specific),PTGER2,False
+TCR (context-specific),PTGFRN,False
+TCR (context-specific),PTK2B,False
+TCR (context-specific),PTMS,False
+TCR (context-specific),PTPN12,False
+TCR (context-specific),PTPN4,False
+TCR (context-specific),PTPN7,False
+TCR (context-specific),PTPRC,False
+TCR (context-specific),PTPRK,False
+TCR (context-specific),PTTG1IP,False
+TCR (context-specific),PUS7,False
+TCR (context-specific),PWWP2B,False
+TCR (context-specific),PXMP4,False
+TCR (context-specific),PXN,False
+TCR (context-specific),PYCARD,False
+TCR (context-specific),PYCR1,False
+TCR (context-specific),PYCR3,False
+TCR (context-specific),RAB11A,False
+TCR (context-specific),RAB11FIP4,False
+TCR (context-specific),RAB19,False
+TCR (context-specific),RAB1B,False
+TCR (context-specific),RAB27B,False
+TCR (context-specific),RAB29,False
+TCR (context-specific),RAB37,False
+TCR (context-specific),RAB5B,False
+TCR (context-specific),RABAC1,False
+TCR (context-specific),RABGAP1L,False
+TCR (context-specific),RAC2,False
+TCR (context-specific),RALB,False
+TCR (context-specific),RAMP1,False
+TCR (context-specific),RAP2A,False
+TCR (context-specific),RASA3,False
+TCR (context-specific),RASAL3,False
+TCR (context-specific),RASGEF1A,False
+TCR (context-specific),RASGRF2,False
+TCR (context-specific),RASGRP1,False
+TCR (context-specific),RASGRP2,False
+TCR (context-specific),RASGRP3,False
+TCR (context-specific),RASSF2,False
+TCR (context-specific),RASSF7,False
+TCR (context-specific),RB1,False
+TCR (context-specific),RBKS,False
+TCR (context-specific),RBL2,False
+TCR (context-specific),RBM38,False
+TCR (context-specific),RBM43,False
+TCR (context-specific),RBPJ,False
+TCR (context-specific),RCAN3,False
+TCR (context-specific),RCBTB1,False
+TCR (context-specific),RCBTB2,False
+TCR (context-specific),RCC1,False
+TCR (context-specific),RDH10,False
+TCR (context-specific),RECK,False
+TCR (context-specific),REEP5,False
+TCR (context-specific),RENBP,False
+TCR (context-specific),RESF1,False
+TCR (context-specific),RETREG1,False
+TCR (context-specific),RETREG3,False
+TCR (context-specific),RFFL,False
+TCR (context-specific),RGCC,False
+TCR (context-specific),RGL4,False
+TCR (context-specific),RGP1,False
+TCR (context-specific),RGS14,False
+TCR (context-specific),RGS16,False
+TCR (context-specific),RGS19,False
+TCR (context-specific),RGS3,False
+TCR (context-specific),RHOF,False
+TCR (context-specific),RHOU,False
+TCR (context-specific),RIGI,True
+TCR (context-specific),RILP,False
+TCR (context-specific),RILPL2,False
+TCR (context-specific),RIPK1,False
+TCR (context-specific),RIPK3,False
+TCR (context-specific),RIPOR1,False
+TCR (context-specific),RIT1,False
+TCR (context-specific),RNASEK,False
+TCR (context-specific),RNF125,False
+TCR (context-specific),RNF144A,False
+TCR (context-specific),RNF157,False
+TCR (context-specific),RNF166,False
+TCR (context-specific),RNF19A,False
+TCR (context-specific),RNF19B,False
+TCR (context-specific),RNF213,False
+TCR (context-specific),RNF44,False
+TCR (context-specific),RNPEPL1,False
+TCR (context-specific),ROPN1L,False
+TCR (context-specific),RPP25,False
+TCR (context-specific),RRAGC,False
+TCR (context-specific),RRAGD,False
+TCR (context-specific),RRAS,False
+TCR (context-specific),RRP9,False
+TCR (context-specific),RSAD2,True
+TCR (context-specific),RSRP1,False
+TCR (context-specific),RSU1,False
+TCR (context-specific),RTP4,False
+TCR (context-specific),S100A10,False
+TCR (context-specific),S100A11,False
+TCR (context-specific),S100A4,False
+TCR (context-specific),S100A6,False
+TCR (context-specific),S100P,False
+TCR (context-specific),S1PR1,False
+TCR (context-specific),S1PR4,False
+TCR (context-specific),SAMD3,False
+TCR (context-specific),SAMD9,True
+TCR (context-specific),SAMD9L,True
+TCR (context-specific),SAMHD1,False
+TCR (context-specific),SANBR,False
+TCR (context-specific),SARAF,False
+TCR (context-specific),SASH3,False
+TCR (context-specific),SAT1,False
+TCR (context-specific),SAT2,False
+TCR (context-specific),SATB1,False
+TCR (context-specific),SBK1,False
+TCR (context-specific),SCARB2,False
+TCR (context-specific),SCARF1,False
+TCR (context-specific),SCLY,False
+TCR (context-specific),SCN9A,False
+TCR (context-specific),SCP2,False
+TCR (context-specific),SDC4,False
+TCR (context-specific),SDCBP,False
+TCR (context-specific),SEC31B,False
+TCR (context-specific),SELPLG,False
+TCR (context-specific),SEMA4C,False
+TCR (context-specific),SENP7,False
+TCR (context-specific),SEPTIN1,False
+TCR (context-specific),SEPTIN6,False
+TCR (context-specific),SEPTIN9,False
+TCR (context-specific),SERINC1,False
+TCR (context-specific),SERINC3,False
+TCR (context-specific),SERINC5,False
+TCR (context-specific),SERPINB1,False
+TCR (context-specific),SERPINE2,False
+TCR (context-specific),SFXN2,False
+TCR (context-specific),SFXN3,False
+TCR (context-specific),SGK3,False
+TCR (context-specific),SGSH,False
+TCR (context-specific),SGTB,False
+TCR (context-specific),SH2D3A,False
+TCR (context-specific),SH2D3C,False
+TCR (context-specific),SH3BGRL,False
+TCR (context-specific),SH3BGRL3,False
+TCR (context-specific),SH3BP1,False
+TCR (context-specific),SH3BP5,False
+TCR (context-specific),SH3KBP1,False
+TCR (context-specific),SH3TC1,False
+TCR (context-specific),SHC1,False
+TCR (context-specific),SHFL,False
+TCR (context-specific),SHISA5,False
+TCR (context-specific),SIAH2,False
+TCR (context-specific),SIDT1,False
+TCR (context-specific),SIGIRR,False
+TCR (context-specific),SIPA1,False
+TCR (context-specific),SIRT2,False
+TCR (context-specific),SIT1,False
+TCR (context-specific),SKAP1,False
+TCR (context-specific),SLC12A7,False
+TCR (context-specific),SLC16A3,False
+TCR (context-specific),SLC19A2,False
+TCR (context-specific),SLC1A4,False
+TCR (context-specific),SLC1A5,False
+TCR (context-specific),SLC22A18,False
+TCR (context-specific),SLC25A19,False
+TCR (context-specific),SLC25A20,False
+TCR (context-specific),SLC25A23,False
+TCR (context-specific),SLC25A24,False
+TCR (context-specific),SLC25A32,False
+TCR (context-specific),SLC25A35,False
+TCR (context-specific),SLC25A42,False
+TCR (context-specific),SLC26A11,False
+TCR (context-specific),SLC26A4,False
+TCR (context-specific),SLC27A2,False
+TCR (context-specific),SLC29A1,False
+TCR (context-specific),SLC2A3,False
+TCR (context-specific),SLC2A4RG,False
+TCR (context-specific),SLC30A4,False
+TCR (context-specific),SLC35D2,False
+TCR (context-specific),SLC35F2,False
+TCR (context-specific),SLC37A3,False
+TCR (context-specific),SLC38A9,False
+TCR (context-specific),SLC39A14,False
+TCR (context-specific),SLC39A8,False
+TCR (context-specific),SLC43A3,False
+TCR (context-specific),SLC44A2,False
+TCR (context-specific),SLC46A3,False
+TCR (context-specific),SLC5A3,False
+TCR (context-specific),SLC5A6,False
+TCR (context-specific),SLC7A5,False
+TCR (context-specific),SLC9A7,False
+TCR (context-specific),SLC9A9,False
+TCR (context-specific),SLCO3A1,False
+TCR (context-specific),SLFN12L,False
+TCR (context-specific),SLFN5,False
+TCR (context-specific),SMAD3,False
+TCR (context-specific),SMAP2,False
+TCR (context-specific),SMARCA2,False
+TCR (context-specific),SMDT1,False
+TCR (context-specific),SMIM14,False
+TCR (context-specific),SMIM29,False
+TCR (context-specific),SMKR1,False
+TCR (context-specific),SMOX,False
+TCR (context-specific),SMPD1,False
+TCR (context-specific),SMPD3,False
+TCR (context-specific),SMS,False
+TCR (context-specific),SNAI3,False
+TCR (context-specific),SNPH,False
+TCR (context-specific),SNRK,False
+TCR (context-specific),SNRPN,False
+TCR (context-specific),SNTA1,False
+TCR (context-specific),SNTB1,False
+TCR (context-specific),SNX20,False
+TCR (context-specific),SNX30,False
+TCR (context-specific),SNX9,False
+TCR (context-specific),SOCS1,False
+TCR (context-specific),SOCS3,False
+TCR (context-specific),SORL1,False
+TCR (context-specific),SORT1,False
+TCR (context-specific),SOS1,False
+TCR (context-specific),SP100,True
+TCR (context-specific),SP4,False
+TCR (context-specific),SPATS2L,False
+TCR (context-specific),SPHK1,False
+TCR (context-specific),SPINT2,False
+TCR (context-specific),SPN,False
+TCR (context-specific),SPOCK2,False
+TCR (context-specific),SPR,False
+TCR (context-specific),SPRY1,False
+TCR (context-specific),SPSB2,False
+TCR (context-specific),SPTBN1,False
+TCR (context-specific),SPTLC2,False
+TCR (context-specific),SQSTM1,False
+TCR (context-specific),SRD5A3,False
+TCR (context-specific),SREBF1,False
+TCR (context-specific),SRGN,False
+TCR (context-specific),SRM,False
+TCR (context-specific),SSBP2,False
+TCR (context-specific),ST3GAL1,False
+TCR (context-specific),ST3GAL5,False
+TCR (context-specific),ST8SIA6,False
+TCR (context-specific),STARD10,False
+TCR (context-specific),STAT1,True
+TCR (context-specific),STAT2,True
+TCR (context-specific),STAT4,False
+TCR (context-specific),STAT5A,False
+TCR (context-specific),STK10,False
+TCR (context-specific),STK17A,False
+TCR (context-specific),STK17B,False
+TCR (context-specific),STK38,False
+TCR (context-specific),STK40,False
+TCR (context-specific),STN1,False
+TCR (context-specific),STOM,False
+TCR (context-specific),STRIP2,False
+TCR (context-specific),STX17,False
+TCR (context-specific),STX3,False
+TCR (context-specific),STX5,False
+TCR (context-specific),STXBP2,False
+TCR (context-specific),STXBP3,False
+TCR (context-specific),STYX,False
+TCR (context-specific),SULT1B1,False
+TCR (context-specific),SUN2,False
+TCR (context-specific),SUSD1,False
+TCR (context-specific),SUSD3,False
+TCR (context-specific),SUV39H2,False
+TCR (context-specific),SWAP70,False
+TCR (context-specific),SWT1,False
+TCR (context-specific),SYNE1,False
+TCR (context-specific),SYNE2,False
+TCR (context-specific),SYNJ1,False
+TCR (context-specific),SYNJ2BP,False
+TCR (context-specific),SYNRG,False
+TCR (context-specific),SYTL1,False
+TCR (context-specific),SYTL2,False
+TCR (context-specific),TAF9B,False
+TCR (context-specific),TAGAP,False
+TCR (context-specific),TANK,False
+TCR (context-specific),TAPBP,False
+TCR (context-specific),TAPBPL,False
+TCR (context-specific),TBC1D1,False
+TCR (context-specific),TBC1D10A,False
+TCR (context-specific),TBC1D10C,False
+TCR (context-specific),TBC1D17,False
+TCR (context-specific),TBC1D2,False
+TCR (context-specific),TBC1D2B,False
+TCR (context-specific),TBC1D4,False
+TCR (context-specific),TBC1D5,False
+TCR (context-specific),TBCB,False
+TCR (context-specific),TBKBP1,False
+TCR (context-specific),TBX21,False
+TCR (context-specific),TC2N,False
+TCR (context-specific),TCEA2,False
+TCR (context-specific),TCEAL8,False
+TCR (context-specific),TCIRG1,False
+TCR (context-specific),TCP11L2,False
+TCR (context-specific),TDRD7,False
+TCR (context-specific),TECPR1,False
+TCR (context-specific),TENT5C,False
+TCR (context-specific),TES,False
+TCR (context-specific),TFAP4,False
+TCR (context-specific),TFE3,False
+TCR (context-specific),TGFBR1,False
+TCR (context-specific),TGIF1,False
+TCR (context-specific),THBS3,False
+TCR (context-specific),THEMIS,False
+TCR (context-specific),THEMIS2,False
+TCR (context-specific),TIAM1,False
+TCR (context-specific),TIAM2,False
+TCR (context-specific),TIFA,False
+TCR (context-specific),TIMM8A,False
+TCR (context-specific),TIPARP,False
+TCR (context-specific),TK2,False
+TCR (context-specific),TLCD3A,False
+TCR (context-specific),TLE5,False
+TCR (context-specific),TLN1,False
+TCR (context-specific),TLR1,False
+TCR (context-specific),TM6SF1,False
+TCR (context-specific),TMC6,False
+TCR (context-specific),TMEM107,False
+TCR (context-specific),TMEM120A,False
+TCR (context-specific),TMEM120B,False
+TCR (context-specific),TMEM140,False
+TCR (context-specific),TMEM154,False
+TCR (context-specific),TMEM156,False
+TCR (context-specific),TMEM200A,False
+TCR (context-specific),TMEM201,False
+TCR (context-specific),TMEM219,False
+TCR (context-specific),TMEM229B,False
+TCR (context-specific),TMEM41B,False
+TCR (context-specific),TMEM50A,False
+TCR (context-specific),TMEM50B,False
+TCR (context-specific),TMEM59,False
+TCR (context-specific),TMEM63A,False
+TCR (context-specific),TMEM65,False
+TCR (context-specific),TMEM71,False
+TCR (context-specific),TMOD2,False
+TCR (context-specific),TMSB10,False
+TCR (context-specific),TNFAIP3,False
+TCR (context-specific),TNFAIP8,False
+TCR (context-specific),TNFAIP8L1,False
+TCR (context-specific),TNFRSF14,False
+TCR (context-specific),TNFRSF9,False
+TCR (context-specific),TNFSF14,False
+TCR (context-specific),TNIK,False
+TCR (context-specific),TNIP3,False
+TCR (context-specific),TNRC6B,False
+TCR (context-specific),TOB1,False
+TCR (context-specific),TOM1L2,False
+TCR (context-specific),TOMM40,False
+TCR (context-specific),TP53INP1,False
+TCR (context-specific),TPK1,False
+TCR (context-specific),TPM4,False
+TCR (context-specific),TPP1,False
+TCR (context-specific),TPRG1L,False
+TCR (context-specific),TRADD,False
+TCR (context-specific),TRAFD1,False
+TCR (context-specific),TRAM2,False
+TCR (context-specific),TRANK1,False
+TCR (context-specific),TRAP1,False
+TCR (context-specific),TRAPPC6B,False
+TCR (context-specific),TRDMT1,False
+TCR (context-specific),TREML2,False
+TCR (context-specific),TRIM14,False
+TCR (context-specific),TRIM21,False
+TCR (context-specific),TRIM22,True
+TCR (context-specific),TRIM3,False
+TCR (context-specific),TRIM38,False
+TCR (context-specific),TRIM46,False
+TCR (context-specific),TRIM5,False
+TCR (context-specific),TRIM8,False
+TCR (context-specific),TRIT1,False
+TCR (context-specific),TRMT1,False
+TCR (context-specific),TRMT61A,False
+TCR (context-specific),TRPV2,False
+TCR (context-specific),TSC22D1,False
+TCR (context-specific),TSPAN14,False
+TCR (context-specific),TSPAN15,False
+TCR (context-specific),TSPAN18,False
+TCR (context-specific),TSPAN3,False
+TCR (context-specific),TSPAN32,False
+TCR (context-specific),TTC22,False
+TCR (context-specific),TTC39B,False
+TCR (context-specific),TTC7A,False
+TCR (context-specific),TTC9,False
+TCR (context-specific),TTLL12,False
+TCR (context-specific),TTLL3,False
+TCR (context-specific),TUBA1A,False
+TCR (context-specific),TUBA4A,False
+TCR (context-specific),TWF2,False
+TCR (context-specific),TWNK,False
+TCR (context-specific),TXK,False
+TCR (context-specific),TXNDC16,False
+TCR (context-specific),TXNIP,False
+TCR (context-specific),TYMP,False
+TCR (context-specific),UBA7,False
+TCR (context-specific),UBASH3B,False
+TCR (context-specific),UBC,False
+TCR (context-specific),UBE2F,False
+TCR (context-specific),UBE2H,False
+TCR (context-specific),UBL3,False
+TCR (context-specific),UBQLN2,False
+TCR (context-specific),UCK2,False
+TCR (context-specific),UGP2,False
+TCR (context-specific),UNC119,False
+TCR (context-specific),UPP1,False
+TCR (context-specific),UQCRB,False
+TCR (context-specific),USP18,True
+TCR (context-specific),USP20,False
+TCR (context-specific),USP28,False
+TCR (context-specific),USP32,False
+TCR (context-specific),USP35,False
+TCR (context-specific),VAMP3,False
+TCR (context-specific),VAMP4,False
+TCR (context-specific),VAMP5,False
+TCR (context-specific),VAMP8,False
+TCR (context-specific),VAV1,False
+TCR (context-specific),VCPIP1,False
+TCR (context-specific),VIM,False
+TCR (context-specific),VMAC,False
+TCR (context-specific),VPS13C,False
+TCR (context-specific),VPS8,False
+TCR (context-specific),WAS,False
+TCR (context-specific),WASF2,False
+TCR (context-specific),WASHC3,False
+TCR (context-specific),WASHC4,False
+TCR (context-specific),WBP1,False
+TCR (context-specific),WBP2,False
+TCR (context-specific),WDR81,False
+TCR (context-specific),WHAMM,False
+TCR (context-specific),WIPF1,False
+TCR (context-specific),WIPI1,False
+TCR (context-specific),WWC3,False
+TCR (context-specific),XAF1,True
+TCR (context-specific),XBP1,False
+TCR (context-specific),XIRP1,False
+TCR (context-specific),XRN1,False
+TCR (context-specific),XYLT2,False
+TCR (context-specific),YBX3,False
+TCR (context-specific),YPEL3,False
+TCR (context-specific),YPEL5,False
+TCR (context-specific),YRDC,False
+TCR (context-specific),YWHAZ,False
+TCR (context-specific),ZBED2,False
+TCR (context-specific),ZBP1,False
+TCR (context-specific),ZBTB1,False
+TCR (context-specific),ZBTB32,False
+TCR (context-specific),ZC3H12A,False
+TCR (context-specific),ZC3H12C,False
+TCR (context-specific),ZC3H3,False
+TCR (context-specific),ZC3HAV1,False
+TCR (context-specific),ZDHHC12,False
+TCR (context-specific),ZDHHC2,False
+TCR (context-specific),ZEB2,False
+TCR (context-specific),ZFAND2B,False
+TCR (context-specific),ZFAND4,False
+TCR (context-specific),ZFP14,False
+TCR (context-specific),ZFP3,False
+TCR (context-specific),ZFP36,False
+TCR (context-specific),ZFP36L1,False
+TCR (context-specific),ZFP90,False
+TCR (context-specific),ZFYVE1,False
+TCR (context-specific),ZFYVE28,False
+TCR (context-specific),ZHX2,False
+TCR (context-specific),ZMAT3,False
+TCR (context-specific),ZMIZ2,False
+TCR (context-specific),ZMYM1,False
+TCR (context-specific),ZMYND19,False
+TCR (context-specific),ZNF101,False
+TCR (context-specific),ZNF217,False
+TCR (context-specific),ZNF224,False
+TCR (context-specific),ZNF33A,False
+TCR (context-specific),ZNF33B,False
+TCR (context-specific),ZNF44,False
+TCR (context-specific),ZNF449,False
+TCR (context-specific),ZNF480,False
+TCR (context-specific),ZNF548,False
+TCR (context-specific),ZNF593,False
+TCR (context-specific),ZNF613,False
+TCR (context-specific),ZNF641,False
+TCR (context-specific),ZNF652,False
+TCR (context-specific),ZNF704,False
+TCR (context-specific),ZNF792,False
+TCR (context-specific),ZNF83,False
+TCR (context-specific),ZNF836,False
+TCR (context-specific),ZSWIM8,False
+TCR (context-specific),ZYG11B,False
+TCR (context-specific),ZYX,False

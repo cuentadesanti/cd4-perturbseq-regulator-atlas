@@ -1,0 +1,61 @@
+{
+  "genes": [
+    "SGF29",
+    "TADA2B",
+    "SUPT20H",
+    "ZAP70",
+    "LCK",
+    "CD3E",
+    "MED12",
+    "CCNC",
+    "SENP5",
+    "KDM1A"
+  ],
+  "n_genes": 10,
+  "conditions": [
+    "Rest",
+    "Stim8hr",
+    "Stim48hr"
+  ],
+  "method": "uniform |log2FC|>log2(1.5) threshold on cached log_fc; offline; self/other-regulator edges removed",
+  "by_class_isg_fold": {
+    "SAGA/chromatin": {
+      "Rest": 1.0,
+      "Stim8hr": 4.6,
+      "Stim48hr": 2.4
+    },
+    "Mediator": {
+      "Rest": 1.8,
+      "Stim8hr": 3.3,
+      "Stim48hr": 3.1
+    },
+    "Other robust": {
+      "Rest": 0.8,
+      "Stim8hr": 2.8,
+      "Stim48hr": 2.8
+    },
+    "TCR (context-specific)": {
+      "Rest": 0.8,
+      "Stim8hr": 2.5,
+      "Stim48hr": 2.6
+    }
+  },
+  "n_downstream_stim_vs_rest_ratio_median": {
+    "SAGA/chromatin": 1.18,
+    "Mediator": 1.11,
+    "Other robust": 1.17,
+    "TCR (context-specific)": 4.07
+  },
+  "self_jaccard_rest_vs_stim8hr": {
+    "SGF29": 0.378,
+    "TADA2B": 0.42,
+    "SUPT20H": 0.333,
+    "ZAP70": 0.187,
+    "LCK": 0.189,
+    "CD3E": 0.147,
+    "MED12": 0.312,
+    "CCNC": 0.391,
+    "SENP5": 0.396,
+    "KDM1A": 0.387
+  }
+}

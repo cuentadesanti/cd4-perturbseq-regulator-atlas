@@ -149,6 +149,35 @@ assignments and hypotheses, not de-novo pathway discovery or novel complex membe
 genes" are consistently-moved downstream genes (relative to the panel), not baseline markers; PCA is a
 view, not the proof. `make fingerprints` · detail in `docs/FINGERPRINT_ANALYSIS.md`.*
 
+
+## Convergent programs by regulator class
+
+Is "chromatin machinery recovers as top hubs" just the expected result of perturbing coactivators? A
+**balanced 30-regulator panel** — chosen by *class*, not by rank — tests whether classes converge on
+*distinct* downstream programs (`make class-programs`, fully offline).
+
+- **Classes converge on distinct programs**: median off-diagonal Jaccard of per-class convergent-target
+  sets ≈ **0.05** — classes barely share targets.
+- **A convergent interferon module** answers the "SAGA is expected" critique: genes hit by ≥4 of the 6
+  robust SAGA-family regulators form a **163-gene module**,
+  **23.7× enriched for interferon-stimulated genes**
+  (P≈7.5e-21), **all de-repressive** (knockdown raises ISGs).
+- Interferon repression is **most concentrated under SAGA/chromatin (19.2× in the class panel)**.
+
+| class | targets | ISGs | fold | p | frac_up_on_KD |
+| --- | --- | --- | --- | --- | --- |
+| SAGA/chromatin | 234 | 21 | 19.2× | 1.7e-22 | 0.985 |
+| Demoted control | 126 | 7 | 11.9× | 1.7e-06 | 1.0 |
+| Repro-promoted | 20 | 1 | 10.7× | 8.9e-02 | 0.394 |
+| Other robust | 232 | 10 | 9.2× | 8.7e-08 | 0.967 |
+| TCR (context-specific) | 1408 | 38 | 5.8× | 1.6e-24 | 1.0 |
+| Mediator | 183 | 3 | 3.5× | 5.4e-02 | 0.956 |
+
+![class programs](figures/27_regulator_class_programs.png)
+
+*Candidate convergent-target programs (ISG-flagged), not causal pathways. Detail:
+`docs/literature_positioning.md`; per-class target lists in the **Programs by class** UI tab.*
+
 ## EDA findings
 
 ![degs](figures/01_distribution_n_total_de_genes.png)

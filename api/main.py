@@ -138,6 +138,22 @@ def programs_findings():
     return get_store().programs_findings()
 
 
+@app.get("/programs/classes", tags=["programs"])
+def programs_classes():
+    """Balanced 30-regulator panel: do different regulator classes converge on different
+    downstream programs? Returns per-class target counts, interferon specificity, and the
+    pairwise Jaccard of class target sets."""
+    return get_store().programs_classes()
+
+
+@app.get("/programs/class-targets", tags=["programs"])
+def programs_class_targets(regulator_class: str = Query(..., alias="class",
+                           description="regulator class name (e.g. 'SAGA/chromatin')")):
+    """Convergent target list (ISG-flagged) for one regulator class. Uses a query parameter so
+    class names containing '/' (e.g. SAGA/chromatin) work."""
+    return get_store().class_targets(regulator_class)
+
+
 @app.get("/edges/summary", tags=["edges"])
 def edges_summary():
     s = get_store()

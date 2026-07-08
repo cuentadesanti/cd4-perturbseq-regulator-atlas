@@ -1,0 +1,31 @@
+gene,condition,logfc_row,zrow,reg_class,regpower_eb_mean,n_downstream
+SGF29,Stim48hr,25092,0,SAGA/chromatin,2.5012,4868
+TADA2B,Stim8hr,27692,1,SAGA/chromatin,2.446,5919
+SENP5,Stim8hr,24873,2,Other robust,2.4291,5171
+SUPT20H,Stim8hr,27516,3,SAGA/chromatin,2.3911,3947
+TADA1,Stim8hr,27686,4,SAGA/chromatin,2.3527,3648
+CCNC,Stim48hr,4479,5,Mediator,2.2948,4090
+MED12,Stim8hr,16379,6,Mediator,2.2839,4141
+NFRKB,Rest,18585,7,Other robust,2.265,3019
+TAF6L,Stim8hr,27732,8,SAGA/chromatin,2.2397,4638
+ARNT,Stim48hr,1951,9,Other robust,2.2236,2946
+KDM1A,Stim48hr,14303,13,Other robust,2.1629,2912
+ELOF1,Stim48hr,8564,14,Demoted control,2.1495,4257
+SMARCE1,Stim8hr,26218,15,Repro-promoted,2.1436,3266
+ELOB,Stim8hr,8559,16,Demoted control,2.1128,3051
+SUPT7L,Stim8hr,27525,19,SAGA/chromatin,2.0977,4330
+EIF4G2,Stim8hr,8487,22,Demoted control,2.085,2529
+SMG1,Stim8hr,26233,23,Demoted control,2.0846,2683
+USP22,Stim8hr,30959,26,SAGA/chromatin,2.0489,2380
+CPSF6,Stim8hr,6234,30,Repro-promoted,2.0382,2486
+WAC,Stim8hr,31344,34,Repro-promoted,1.9464,2475
+SETDB1,Rest,25018,36,Repro-promoted,1.8826,2290
+WDR82,Stim8hr,31500,37,Repro-promoted,1.8802,1791
+MED24,Stim8hr,16406,48,Mediator,1.807,2794
+ZAP70,Stim8hr,31840,78,TCR (context-specific),1.6234,5021
+LCK,Stim8hr,15018,80,TCR (context-specific),1.537,2413
+ATXN7L3,Stim8hr,2460,81,SAGA/chromatin,1.4847,1941
+LAT,Stim8hr,14982,114,TCR (context-specific),1.0337,5535
+MED1,Stim8hr,16374,122,Mediator,0.9795,818
+CD3E,Stim8hr,4694,141,TCR (context-specific),0.894,5710
+PLCG1,Stim8hr,21058,146,TCR (context-specific),0.8673,5032

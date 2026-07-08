@@ -1,6 +1,6 @@
 PY := python3
 
-.PHONY: all eda model audit report spike edges eda-edges repro-meta fingerprints spectral api clean pipeline help
+.PHONY: all eda model audit report spike edges eda-edges repro-meta fingerprints spectral class-programs api clean pipeline help
 
 help:
 	@echo "Targets:"
@@ -15,6 +15,7 @@ help:
 	@echo "  make repro-meta - extract reproducibility .obs from the h5ad (OPTIONAL, remote)"
 	@echo "  make fingerprints - transcriptional programs (PCA/similarity/clusters) [remote zscore or log_fc cache]"
 	@echo "  make spectral - spectral sanity check on the program assignments (after fingerprints)"
+	@echo "  make class-programs - balanced 30-regulator panel: distinct classes → distinct programs? (after fingerprints)"
 	@echo "  make api      - Regulator Atlas read-only API (uvicorn :8000, Swagger at /docs)"
 	@echo "  make clean    - remove generated outputs (docs/figures, docs/tables, report)"
 
@@ -56,6 +57,11 @@ fingerprints:
 # spectral sanity check on the program assignments (needs `make fingerprints` first)
 spectral:
 	$(PY) scripts/spectral_sanity_check.py
+
+# balanced 30-regulator class programs: do distinct classes hit distinct programs?
+# NEEDS `make fingerprints` first (uses the cached panel + log_fc/zscore; fully offline).
+class-programs:
+	$(PY) scripts/analyze_class_programs.py
 
 api:
 	$(PY) -m uvicorn api.main:app --reload --port 8000
