@@ -61,7 +61,19 @@ Rigor audit / response to reviewer: [`docs/REVIEW_RESPONSE.md`](docs/REVIEW_RESP
 
 ## Validating the ranking
 
-Before trusting the ranking, we audit it (`scripts/audit_ranking.py`, no new dependencies).
+Before trusting the ranking, we audit it (`scripts/audit_ranking.py`, no new dependencies). It is
+further pressure-tested against a senior-researcher critique in [`docs/REVIEW_RESPONSE.md`](docs/REVIEW_RESPONSE.md)
+(effect-size metric vs. DE-count, within-condition null, external concordance) and against the true
+replication unit in [`docs/DONOR_ROBUSTNESS.md`](docs/DONOR_ROBUSTNESS.md).
+
+**Donor robustness (the replication unit that matters).** From the dedicated per-donor DE object
+(`by_donors.h5mu`, 100% cross-donor coverage on KD-gated contrasts) we add a `donor_robust` flag
+(worst of 6 pairwise donor correlations ≥ 0.5) as a **column, not a re-sort** — a large-effect hub
+that fails replication stays visible at its rank (e.g. **SMG1, rank 24, 2,683 DEGs, fails donor
+concordance**). The top regulators are donor-robust as a class (29/30). The same check over the
+fingerprint programs flags **4 assigned-neighbor false positives** (TCR: ATF7IP2/NCAPG2/EIF1AX;
+Mediator: GLIPR2) while the SAGA/chromatin neighbor **CHD7 survives** — so the programs are now
+internally consistent with the donor-audited ranking.
 
 **Naive hubs vs. quality-aware regulators.** Ranking by raw `n_downstream` rewards hubs that don't
 survive the controls: of the top 30 raw hubs, **2 fall out at the knockdown gate** (no validated
@@ -89,7 +101,9 @@ claims of physical complex membership.** `scripts/analyze_fingerprints.py` · `m
   each significantly cohesive: **TCR z=11, SAGA z=9, Mediator z=3** (N=5000). The latent PC1 is program
   *identity*, not effect magnitude (|PC1| vs. n_downstream Spearman = 0.25).
 - **The classifier is conservative — only 25 of 200 are assigned; the rest stay *mixed*, by design.**
-  The assigned set: **TCR signaling (13), SAGA/chromatin (9), Mediator/transcription (3)**. Each program
+  The assigned set: **TCR signaling (13), SAGA/chromatin (9), Mediator/transcription (3)** — of which
+  **4 are flagged donor-fragile** by the per-donor check (TCR 3: ATF7IP2/NCAPG2/EIF1AX; Mediator 1:
+  GLIPR2; SAGA 0), so SAGA/chromatin is the most donor-robust program. Each program
   recovers its curated core and adds **newly assigned neighbors** (non-curated genes placed in the same
   fingerprint neighborhood) — e.g. the chromatin remodeler **CHD7 is assigned to the SAGA/chromatin
   program** (cosine 0.84; a related response, not complex membership), and Mediator's **MED12** lands in

@@ -65,7 +65,8 @@ runs from the **15 MB supplementary CSV tables alone**, and the heavier objects 
   curated complexes are each significantly cohesive by permutation test (**TCR z=11, SAGA z=9, Mediator
   z=3**), and the latent axis is program *identity*, not magnitude (|PC1| vs. n_downstream = 0.25). The
   classifier is conservative — only **25 of 200** perturbations are assigned a program (**TCR signaling
-  13, SAGA/chromatin 9, Mediator/transcription 3**); the rest stay *mixed*, by design. Each program
+  13, SAGA/chromatin 9, Mediator/transcription 3**), of which **4 are flagged donor-fragile** by the
+  per-donor check (TCR 3, Mediator 1, SAGA 0); the rest stay *mixed*, by design. Each program
   recovers its curated core and surfaces candidate neighbors — most strikingly the chromatin remodeler
   **CHD7, assigned to the SAGA/chromatin program by fingerprint similarity** (cosine 0.84; a related
   perturbation response, not a complex-membership claim). The reproducibility-promoted hits have

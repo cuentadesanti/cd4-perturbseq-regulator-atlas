@@ -68,15 +68,22 @@ they do to the cell, not in how much.
 
 ### 2. Recognizable programs, with newly assigned neighbors
 
-The classifier is conservative: only **25 of 200** regulators are assigned a program; the rest stay
-*mixed*, by design. These are **candidate program assignments by fingerprint similarity — not claims of
+The classifier is conservative: only **25 of 200** regulators are assigned a program (of which **4 are
+donor-fragile**, see † below); the rest stay *mixed*, by design. These are **candidate program assignments by fingerprint similarity — not claims of
 physical complex membership.**
 
 | program | n | curated core recovered | newly assigned neighbors (non-curated) | centroid cosine |
 |---|---|---|---|---|
-| **TCR signaling** | 13 | ZAP70, LCK, LAT, CD3E, PLCG1 | ATF7IP2, NCAPG2, CLCC1, EIF1AX, PGGT1B… | 0.77 |
+| **TCR signaling** | 13 | ZAP70, LCK, LAT, CD3E, PLCG1 | ATF7IP2†, NCAPG2†, CLCC1, EIF1AX†, PGGT1B… | 0.77 |
 | **SAGA/chromatin** | 9 | TADA2B, SUPT20H, TADA1, TAF6L, SUPT7L, USP22 | **CHD7**, TSPYL5 | 0.81 |
-| **Mediator/transcription** | 3 | MED1 | POGLUT3, GLIPR2 | 0.59 |
+| **Mediator/transcription** | 3 | MED1 | POGLUT3, GLIPR2† | 0.59 |
+
+> **† Not donor-reproducible.** A per-donor check (`docs/DONOR_ROBUSTNESS.md`,
+> `scripts/annotate_donor_robust.py`) flags these assigned neighbors as **donor-fragile** (worst-pair
+> donor correlation < 0.5): ATF7IP2, NCAPG2, EIF1AX (TCR) and GLIPR2 (Mediator). Read them as
+> fingerprint-similarity artifacts, **not** donor-reproducible program members. The curated cores and
+> the SAGA/chromatin neighbors (CHD7 0.70, TSPYL5 0.65) are donor-robust. See the
+> `donor_fragile_neighbors` column in `program_label_evidence.csv`.
 
 Each program recovers its curated core and places non-curated genes in the same fingerprint
 neighborhood. The most interesting is the chromatin remodeler **CHD7**, assigned to the SAGA/chromatin

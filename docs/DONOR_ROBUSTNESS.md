@@ -55,3 +55,28 @@ donor-collapsed vector compared to itself. (Those six full DE matrices are what 
 `donor_robust` (worst-pair donor correlation ≥ 0.5) is a **hard survival flag**, not a continuous
 reweight — a binary call on real per-donor data beats a weight that was inert for 81% of genes. Read
 the ranking as: a large effect that is *also* donor-robust. The six hubs above fail that second test.
+
+## Propagation into the ranking and programs (`scripts/annotate_donor_robust.py`)
+
+The flag is folded in as a **column, not a re-sort** — a hub that fails replication stays visible at
+its rank (e.g. SMG1 at rank 24 in `top_regulators_for_review.csv`, flagged `donor_robust=False`);
+hiding it by re-sorting would hide the finding. Columns added: `donor_corr_hits_{mean,min}`,
+`donor_robust` on `hub_ranking_bayes.csv`, `top_robust_regulators.csv`,
+`top_regulators_for_review.csv`, `top_regulators_reproducibility_aware.csv`, and
+`fingerprint_findings.csv`.
+
+**Program consistency.** Running the same donor check over *every* fingerprint assigned-neighbor
+(not just the ranking) keeps the programs internally consistent with the ranking. It surfaces
+**4 assigned neighbors that were program-level false positives** — genes placed in a program by
+fingerprint similarity that do **not** replicate across donors (`program_label_evidence.csv`,
+column `donor_fragile_neighbors`):
+
+| program | fragile assigned-neighbors | worst-pair ρ |
+|---|---|---|
+| TCR signaling | ATF7IP2 (0.27), NCAPG2 (0.33), **EIF1AX (−0.02)** | 3 of 8 |
+| Mediator/transcription | GLIPR2 (0.12) | 1 of 2 |
+| SAGA/chromatin | — (CHD7, TSPYL5 both donor-robust) | 0 of 2 |
+
+So the SAGA/chromatin headline neighbor **CHD7 survives** (worst-pair 0.70), but three of TCR's eight
+assigned neighbors do not — those assignments should be read as fingerprint-similarity artifacts, not
+donor-reproducible program members.

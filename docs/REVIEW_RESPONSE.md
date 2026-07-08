@@ -123,11 +123,23 @@ assays agree on the strong regulators," not as an absolute, power-free ground tr
   The interferon/disease bridge is reduced to a single hypothesis line; its nested requalifications
   are removed (if a claim needs three caveats to survive, we cut the claim).
 
+## Tier 1 — done (#4, the real donor axis)
+
+Shipped: `scripts/donor_concordance.py` + `docs/DONOR_ROBUSTNESS.md`. The dedicated per-donor DE
+object (`by_donors.h5mu`) carries cross-donor reproducibility on **100%** of KD-gated contrasts (vs
+14.4% in the summary object), computed from real per-donor-pair effect vectors (6 full DE matrices,
+4,880 × 10,273). The `donor_robust` flag (worst of 6 pairwise donor correlations ≥ 0.5) is folded
+into the ranking as a **column, not a re-sort** (`scripts/annotate_donor_robust.py`), so a
+large-effect hub that fails replication stays visible at its rank — e.g. **SMG1 (rank 24, 2,683 DEGs,
+worst-pair ρ=0.37)**. Propagating the same check to the fingerprint programs flags **4 assigned
+neighbors that were program-level false positives**: GLIPR2 (Mediator), ATF7IP2/NCAPG2/EIF1AX (TCR);
+the SAGA/chromatin neighbors (CHD7, TSPYL5) survive.
+
 ## What we deliberately did NOT do (and why)
 
-- **True cell-level E-distance (Tier 2).** It is the field-standard metric and needs a ~140 GB
-  cell file. We gate it behind the evidence: the summary-level metrics are mutually indistinguishable
-  *and* externally validated (#1, #6), so cell-level E-distance is very unlikely to overturn the
-  ranking. We do not stage 140 GB to defend a point already made — that would be the scope sprawl of #5.
-- **The real donor axis (#4, Tier 1)** is a bounded next step: stream `GWCD4i.DE_stats.by_donors.h5mu`
-  (15.7 GB) for per-regulator cross-donor concordance and a hard "concordant in ≥3/4 donors" flag.
+- **True cell-level E-distance (Tier 2) — deferred, and now likely unnecessary.** It is the
+  field-standard metric and needs a ~140 GB cell file. Three independent lines now converge on the same
+  ranking without it: (1) the summary-level metrics are mutually indistinguishable (#1), (2) they are
+  externally validated against an independent screen and the paper's own hits (#6), and (3) the
+  ranking's top regulators are donor-robust on a **fully-covered** donor axis (#4). Staging 140 GB to
+  re-confirm a three-way-convergent result would be the scope sprawl of #5, so Tier 2 stays deferred.
