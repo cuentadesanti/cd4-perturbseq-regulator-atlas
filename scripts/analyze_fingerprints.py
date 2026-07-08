@@ -251,30 +251,59 @@ def main():
     edges_df = edges_df.sort_values("similarity", ascending=False)
 
     # ---- complex validation (permutation) ----
+    # Two nulls (critique #3 fix): the CROSS-condition null draws random panel genes from any
+    # condition; the WITHIN-condition null matches the observed members' condition composition
+    # (e.g. all-Stim8hr TCR is compared only against other Stim8hr genes). The gap between the
+    # two z-scores is how much of the "cohesion" was really shared stimulation state, not the
+    # complex: intra-cosine among same-condition genes is inflated by the shared condition axis.
+    def _mean_intra(idx):
+        return float(S[np.ix_(idx, idx)][np.triu_indices(len(idx), 1)].mean())
+
+    allidx = np.arange(len(reg))
+    cond_pools = {c: np.where(cond == c)[0] for c in np.unique(cond)}
     reg_set = set(reg)
     comp_recs = []
+    NPERM = 5000
     for name, members in COMPLEXES.items():
         present = [g for g in members if g in reg_set]
         if len(present) < 2:
             comp_recs.append({"complex": name, "n_present": len(present),
-                              "mean_intra_cosine": None, "null_mean": None, "z": None,
-                              "p_perm": None, "members": ";".join(present)})
+                              "mean_intra_cosine": None,
+                              "null_mean_cross": None, "z_cross": None, "p_cross": None,
+                              "null_mean_within": None, "z_within": None, "p_within": None,
+                              "member_conditions": "", "members": ";".join(present)})
             continue
         ii = [idx_of[g] for g in present]
-        obs_mean = float(S[np.ix_(ii, ii)][np.triu_indices(len(ii), 1)].mean())
-        null = np.empty(5000)
-        allidx = np.arange(len(reg))
-        for p in range(5000):
-            jj = RNG.choice(allidx, size=len(ii), replace=False)
-            null[p] = S[np.ix_(jj, jj)][np.triu_indices(len(jj), 1)].mean()
-        z = (obs_mean - null.mean()) / (null.std() + 1e-9)
-        p_perm = float((np.sum(null >= obs_mean) + 1) / 5001)
+        obs_mean = _mean_intra(ii)
+        cond_counts = pd.Series(cond[ii]).value_counts().to_dict()
+
+        null_cross = np.empty(NPERM)
+        null_within = np.empty(NPERM)
+        for p in range(NPERM):
+            # cross-condition: random panel genes (original behaviour)
+            null_cross[p] = _mean_intra(RNG.choice(allidx, size=len(ii), replace=False))
+            # within-condition: sample per-condition to match the members' condition mix
+            pick = []
+            for c, k in cond_counts.items():
+                pool = cond_pools[c]
+                pick.append(RNG.choice(pool, size=min(k, len(pool)), replace=False))
+            null_within[p] = _mean_intra(np.concatenate(pick))
+
+        z_cross = (obs_mean - null_cross.mean()) / (null_cross.std() + 1e-9)
+        z_within = (obs_mean - null_within.mean()) / (null_within.std() + 1e-9)
+        p_cross = float((np.sum(null_cross >= obs_mean) + 1) / (NPERM + 1))
+        p_within = float((np.sum(null_within >= obs_mean) + 1) / (NPERM + 1))
         comp_recs.append({"complex": name, "n_present": len(present),
                           "mean_intra_cosine": round(obs_mean, 4),
-                          "null_mean": round(float(null.mean()), 4), "z": round(float(z), 2),
-                          "p_perm": round(p_perm, 5), "members": ";".join(present)})
-        print(f"  [{name}] n={len(present)} intra={obs_mean:.3f} null={null.mean():.3f} "
-              f"z={z:.2f} p={p_perm:.4f}")
+                          "null_mean_cross": round(float(null_cross.mean()), 4),
+                          "z_cross": round(float(z_cross), 2), "p_cross": round(p_cross, 5),
+                          "null_mean_within": round(float(null_within.mean()), 4),
+                          "z_within": round(float(z_within), 2), "p_within": round(p_within, 5),
+                          "member_conditions": ";".join(f"{c}:{k}" for c, k in cond_counts.items()),
+                          "members": ";".join(present)})
+        print(f"  [{name}] n={len(present)} intra={obs_mean:.3f} | "
+              f"cross: null={null_cross.mean():.3f} z={z_cross:.2f} | "
+              f"within: null={null_within.mean():.3f} z={z_within:.2f}")
 
     # ---- program assignment: nearest known-complex centroid per regulator ----
     # Programs are ANCHORED to the permutation-validated complexes (SAGA/Mediator/TCR): each
