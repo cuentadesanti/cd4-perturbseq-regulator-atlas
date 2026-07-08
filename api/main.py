@@ -154,6 +154,13 @@ def programs_class_targets(regulator_class: str = Query(..., alias="class",
     return get_store().class_targets(regulator_class)
 
 
+@app.get("/programs/phase2", tags=["programs"])
+def programs_phase2():
+    """Condition dependence of the class programs: per-class interferon-fold across Rest/Stim8hr/
+    Stim48hr and the stimulation-vs-rest downstream-breadth ratio (gated vs constitutive)."""
+    return get_store().programs_phase2()
+
+
 @app.get("/edges/summary", tags=["edges"])
 def edges_summary():
     s = get_store()
