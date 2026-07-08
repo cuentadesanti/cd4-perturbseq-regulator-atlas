@@ -1,4 +1,4 @@
-# Datos crudos: NO versionar (son de decenas de GB a TB)
+# Raw data: do NOT version (tens of GB to TB)
 /data/
 *.h5ad
 *.h5mu
@@ -10,5 +10,12 @@ __pycache__/
 venv/
 .ipynb_checkpoints/
 
-# OS
+# Agent state / local tooling
+.claude/
+
+# Build/demo artifacts (uploaded elsewhere, not versioned)
+*.mp4
+
+# OS / stray images
 .DS_Store
+*.jpg
