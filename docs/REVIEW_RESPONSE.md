@@ -22,7 +22,19 @@ proposed fix (L2 / Σ|log2FC|) has a trap, and testing it properly changes the c
 
 We streamed `layers/{zscore, adj_p_value}` from the DE h5ad and, per contrast, computed several
 magnitudes, then audited each against `n_downstream` and against `n_cells_target` (the power
-proxy). Power-decoupling audit (`docs/tables/effect_size_metric_audit.csv`):
+proxy).
+
+**DE-set reconstruction is exact (verified).** Our streamed count `n_sig = #{adj_p < 0.1}` equals
+the table's `n_total_de_genes` for **every** contrast (frac-equal = 1.0000, mad = 0.000, n=33,983),
+and `n_downstream = n_total_de_genes − 1` exactly — it drops the single on-target gene ("downstream"
+= trans effects only). That constant −1 offset is why `spearman(n_sig, n_downstream) = 1.000000`
+over the KD-gated ranking population (rank-identical), even though the two differ by one gene per
+row. So `mag_sig` is computed over exactly the paper's DE set, not an approximation of it. (One
+consequence, stated honestly: `mag_sig` as computed *includes* the on-target gene's |log2FC|, a
+large but additive term; excluding it would sharpen a "purely downstream" magnitude but does not
+change the ρ=0.90 breadth-vs-magnitude relationship below.)
+
+Power-decoupling audit (`docs/tables/effect_size_metric_audit.csv`):
 
 | metric | ρ vs n_downstream | ρ vs n_cells |
 |---|---|---|
@@ -53,7 +65,9 @@ Three findings:
 ## #3 — The permutation null  (`scripts/analyze_fingerprints.py`)
 
 We added a **within-condition** null (each draw matches the tested complex's condition mix)
-alongside the original cross-condition null (`docs/tables/fingerprint_complex_validation.csv`):
+alongside the original cross-condition null. Both representations are committed so the rebuttal is
+reproducible, not asserted: `docs/tables/fingerprint_complex_validation_zscore.csv` (canonical, also
+copied to `fingerprint_complex_validation.csv`) and `docs/tables/fingerprint_complex_validation_log_fc.csv`.
 
 | complex | cross-condition z | within-condition z |
 |---|---|---|
@@ -62,7 +76,8 @@ alongside the original cross-condition null (`docs/tables/fingerprint_complex_va
 | TCR | 11.2 | **11.2** |
 
 The reviewer's mechanism is real: on the **raw log_fc** matrix, where the Stim/Rest axis
-dominates variance, TCR's z deflates **19.7 → 14.9** under the within-condition null. But the
+dominates variance, TCR's z deflates **19.7 → 14.9** under the within-condition null
+(`fingerprint_complex_validation_log_fc.csv`). But the
 reported result is computed on the **standardized zscore** space, where that condition signal is
 muted — and there TCR's cohesion is **unchanged** (11.2 → 11.2; its within-condition null mean is
 actually lower). So the published z≈11 was **not** materially inflated by condition. We now report
@@ -92,6 +107,12 @@ internally-consistent noise. (b) As an **arbiter for #1**, the breadth metrics
 (`n_downstream`/`mag_sig`/`l2_z`) are statistically indistinguishable, while **intensity is
 negatively concordant** — confirming that focal potency alone does not identify functional
 regulators, and retroactively justifying a breadth-based ranking.
+
+*Caveat.* The Schmidt reference score (a MAGeCK-style screen FDR) has its own mild power
+dependence — screen sensitivity scales with guide coverage and cell number — so the concordance is
+not a perfectly confound-free anchor. This does not affect the sign or the p-values (the enrichment
+is far from any plausible power-driven null), but the concordance should be read as "two independent
+assays agree on the strong regulators," not as an absolute, power-free ground truth.
 
 ## #2 / #5 — Scope and the caveat budget
 

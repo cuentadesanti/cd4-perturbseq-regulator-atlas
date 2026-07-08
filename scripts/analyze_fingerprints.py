@@ -446,7 +446,12 @@ def main():
                         "members": ";".join(mem[:25])})
     pd.DataFrame(cl_recs).to_csv(TAB / "fingerprint_clusters.csv", index=False)
 
-    pd.DataFrame(comp_recs).to_csv(TAB / "fingerprint_complex_validation.csv", index=False)
+    # Canonical (zscore) file for the report, plus a matrix-suffixed copy so the cross- vs
+    # within-condition null is a committed artifact for BOTH representations (critique #3: the
+    # confound is visible on log_fc, absorbed on zscore -- both tables let a reviewer reproduce it).
+    comp_df = pd.DataFrame(comp_recs)
+    comp_df.to_csv(TAB / "fingerprint_complex_validation.csv", index=False)
+    comp_df.to_csv(TAB / f"fingerprint_complex_validation_{args.matrix}.csv", index=False)
 
     load_recs = []
     for k in range(min(6, pca.components_.shape[0])):

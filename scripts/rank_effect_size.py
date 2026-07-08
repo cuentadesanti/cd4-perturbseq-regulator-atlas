@@ -84,11 +84,18 @@ def main():
     summ = stream_summaries(args.fdr, args.block)
     df = pd.concat([obs.reset_index(drop=True), summ], axis=1)
 
-    # sanity: our streamed n_sig(adj_p<fdr) should track the provided n_downstream
-    m = df.n_downstream.notna() & df.n_sig.notna()
+    # sanity: our streamed DE set must equal theirs. n_sig(adj_p<fdr) matches n_total_de_genes
+    # EXACTLY; n_downstream = n_total_de_genes - 1 (drops the on-target gene), so it is rank-identical
+    # to n_sig (spearman 1.0) but offset by one per row. We verify both explicitly.
+    if "n_total_de_genes" in df:
+        ok = df.n_total_de_genes.notna() & df.n_sig.notna()
+        frac_exact = float((df.n_sig[ok] == df.n_total_de_genes[ok]).mean())
+        print(f"sanity  n_sig == n_total_de_genes: frac_equal={frac_exact:.4f} "
+              f"(expect 1.0000 -> our FDR DE set is exactly theirs)")
+    m = df.n_downstream.notna() & df.n_sig.notna() & (df.ontarget_significant == True)
     rho_nsig = spearmanr(df.n_sig[m], df.n_downstream[m]).correlation
-    print(f"sanity  spearman(n_sig@fdr<{args.fdr}, n_downstream) = {rho_nsig:.3f} "
-          f"(should be high -> our DE set matches theirs)")
+    print(f"sanity  spearman(n_sig, n_downstream | sig-KD) = {rho_nsig:.6f} "
+          f"(expect 1.000000 -> rank-identical over the ranking population)")
 
     # ---- power-decoupling audit: contrast-level, within significant-KD contrasts ----
     sig = df[df.ontarget_significant == True].copy()
