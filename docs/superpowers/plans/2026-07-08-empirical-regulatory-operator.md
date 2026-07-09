@@ -4,7 +4,7 @@
 
 **Goal:** Recover the gene-program, condition-modulation, and predictive structure of the regulatory operator `L` (effect of every gene on every gene under regulator KD) that the fingerprint PCA computed but discarded — via tensor decomposition, low-rank completion, and donor-subspace stability, **built in precision-decoupled z-score space** so the leading factors are biology and not the −0.68 power-magnitude confound.
 
-**Architecture:** One 3-way tensor `T[regulator, gene, condition]` is assembled once, in **z-score space**, over an **expanded ~800-regulator panel** (Step 0). Everything after is a question about that one object: its right factors (Step 1, gene programs), its CP decomposition (Step 2, `regulator ⊗ gene ⊗ condition` — where "gated vs constitutive" is the shape of one factor, now with a bootstrap CI), its recoverability by low rank (Step 3, held-out prediction — **3b out-of-panel condition extrapolation is the flagship**), and the reproducibility of its program subspace across donors (Step 4). Pure kernels live in a unit-tested `scripts/_operator.py` (mirroring the `scripts/_figstyle.py` helper convention); one driver per step follows the repo's analysis-script idiom (argparse → `docs/tables/*.csv|json` + `docs/figures/*.png`), each with a Makefile target.
+**Architecture:** One 3-way tensor `T[regulator, gene, condition]` is assembled once, in **z-score space**, over an **expanded ~800-regulator panel** (Step 0). Everything after is a question about that one object: its right factors (Step 1, gene programs), its CP decomposition (Step 2, `regulator ⊗ gene ⊗ condition` — where "gated vs constitutive" is the shape of one factor, now with a bootstrap CI), its recoverability by low rank (Step 3, held-out prediction — **3b out-of-panel condition extrapolation is the flagship**), and the reproducibility of its program subspace across donors (Step 4). Pure kernels live in a unit-tested `scripts/_opkernels.py` (mirroring the `scripts/_figstyle.py` helper convention); one driver per step follows the repo's analysis-script idiom (argparse → `docs/tables/*.csv|json` + `docs/figures/*.png`), each with a Makefile target.
 
 **Tech Stack:** Python 3, numpy, scipy, statsmodels, pandas, matplotlib (in `requirements.txt`); adds `tensorly` (CP), `pytest` (kernel tests), and `h5py`+`s3fs`+`fsspec` (the one-time z-score fetch — already the repo's optional Model-1 deps). scikit-learn 1.9 is installed.
 
@@ -30,7 +30,7 @@ The full regulatory operator has **6209** regulators KD-significant in all 3 con
 
 ## File Structure
 
-**Shared kernel module (pure, unit-tested):** `scripts/_operator.py`
+**Shared kernel module (pure, unit-tested):** `scripts/_opkernels.py`
 - `assemble_tensor`, `rms_normalize_conditions`, `spearman_power`, `varimax`, `hypergeometric_enrichment`, `cp_fit_masked`, `fix_cp_gauge`, `cp_degeneracy`, `match_factors`, `split_half_stability`, `gene_mode_cosine`, `bootstrap_cp_conditions`, `train_test_standardize`, `soft_impute`, `principal_angles`, `random_subspace_null`. No I/O, no argparse, no plotting.
 
 **Driver scripts (one per step):**
@@ -41,7 +41,7 @@ The full regulatory operator has **6209** regulators KD-significant in all 3 con
 - `scripts/operator_donor_angles.py` — Step 4 (principal angles, disjoint donor pairs).
 - `scripts/operator_deconvolution.py` — Step 5 stretch.
 
-**Tests:** `tests/test_operator.py` (pytest, synthetic-data unit tests for every kernel).
+**Tests:** `tests/test_opkernels.py` (pytest, synthetic-data unit tests for every kernel).
 
 **Config/docs:** `requirements.txt` (+`tensorly`,`pytest`), `Makefile` (targets `operator-*` + umbrella `operator`), `docs/OPERATOR_ANALYSIS.md`.
 
@@ -52,9 +52,9 @@ The full regulatory operator has **6209** regulators KD-significant in all 3 con
 ## Task 1: Kernel — tensor assembly + RMS condition normalization + confound meter
 
 **Files:**
-- Create: `scripts/_operator.py`, `tests/conftest.py`, `tests/test_operator.py`
+- Create: `scripts/_opkernels.py`, `tests/conftest.py`, `tests/test_opkernels.py`
 - Modify: `requirements.txt`
-- Test: `tests/test_operator.py`
+- Test: `tests/test_opkernels.py`
 
 **Interfaces (produces):**
 - `assemble_tensor(matrix, obs, gene_idx, cond_order) -> (tensor, mask, regulators, n_cells)` — `matrix` is any `(N, G_all)` array (here the fetched z-score, row-aligned so `obs["row"]` indexes into it); `obs` has `target_contrast_gene_name, culture_condition, n_cells_target, ontarget_significant_bool, row`. Returns `tensor (R,G,3) float32` (NaN unobserved), `mask` bool, `regulators` object, `n_cells (R,3)`.
@@ -64,11 +64,11 @@ The full regulatory operator has **6209** regulators KD-significant in all 3 con
 - [ ] **Step 1: Write the failing tests**
 
 ```python
-# tests/test_operator.py  (tests/conftest.py puts scripts/ on sys.path)
+# tests/test_opkernels.py  (tests/conftest.py puts scripts/ on sys.path)
 import numpy as np
 import pandas as pd
 import pytest
-import _operator as op
+import _opkernels as op
 
 
 def _toy_obs():
@@ -123,24 +123,24 @@ def test_spearman_power_detects_planted_confound():
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `python -m pytest tests/test_operator.py -q`
+Run: `python -m pytest tests/test_opkernels.py -q`
 Expected: FAIL — `ModuleNotFoundError` / `AttributeError: ... 'assemble_tensor'`.
 
 - [ ] **Step 3: Create the conftest shim and kernel module**
 
-Create `tests/conftest.py` (puts `scripts/` on `sys.path` so tests can `import _operator`; drivers run from `scripts/` and import it bare too — matching the repo's `import _figstyle` convention):
+Create `tests/conftest.py` (puts `scripts/` on `sys.path` so tests can `import _opkernels`; drivers run from `scripts/` and import it bare too — matching the repo's `import _figstyle` convention):
 ```python
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 ```
 
-Create `scripts/_operator.py`:
+Create `scripts/_opkernels.py`:
 ```python
 #!/usr/bin/env python3
 """Pure numerical kernels for the empirical regulatory operator analysis.
 
-No I/O, no argparse, no plotting — unit-tested in tests/test_operator.py.
+No I/O, no argparse, no plotting — unit-tested in tests/test_opkernels.py.
 Mirrors the shared-helper convention of scripts/_figstyle.py.
 """
 from __future__ import annotations
@@ -214,13 +214,13 @@ Append to `requirements.txt` (optional block):
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `python -m pytest tests/test_operator.py -q`
+Run: `python -m pytest tests/test_opkernels.py -q`
 Expected: PASS (3 passed).
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add tests/conftest.py scripts/_operator.py tests/test_operator.py requirements.txt
+git add tests/conftest.py scripts/_opkernels.py tests/test_opkernels.py requirements.txt
 git commit -m "feat(operator): tensor assembly, RMS condition normalization, confound meter kernels"
 ```
 
@@ -234,7 +234,7 @@ git commit -m "feat(operator): tensor assembly, RMS condition normalization, con
 - Test: run on real data; acceptance = all three representation assertions pass + artifact cached.
 
 **Interfaces:**
-- Consumes: `_operator.assemble_tensor`, `spearman_power`; reuses `read_matrix`, `build_panel` from `scripts.analyze_fingerprints`.
+- Consumes: `_opkernels.assemble_tensor`, `spearman_power`; reuses `read_matrix`, `build_panel` from `analyze_fingerprints`.
 - Produces: `data/cache/operator_tensor.npz` and `docs/tables/operator_tensor_summary.json` (`n_regulators, n_new_regulators, n_genes, conditions, n_cells_confound_rho, rownorm_cv, anchor_cross_cond_cv, observed_cells, representation, passed_assertions`).
 
 **Blocker controls (fail-closed — the driver `raise`s and does NOT cache if any fail):**
@@ -263,7 +263,7 @@ import json
 from pathlib import Path
 import numpy as np
 import pandas as pd
-import _operator as op
+import _opkernels as op
 from analyze_fingerprints import read_matrix, build_panel
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -408,8 +408,8 @@ git commit -m "feat(operator): Step 0 driver — z-score expanded-panel tensor w
 ## Task 3: Kernel — varimax rotation + offline hypergeometric enrichment
 
 **Files:**
-- Modify: `scripts/_operator.py`, `tests/test_operator.py`
-- Test: `tests/test_operator.py`
+- Modify: `scripts/_opkernels.py`, `tests/test_opkernels.py`
+- Test: `tests/test_opkernels.py`
 
 **Interfaces (produces):**
 - `varimax(loadings, gamma=1.0, max_iter=100, tol=1e-6) -> (rotated, rotmat)` — Kaiser-normalized varimax of `(G,k)`.
@@ -439,12 +439,12 @@ def test_hypergeometric_enrichment_flags_planted_set():
 
 - [ ] **Step 2: Run to verify fail**
 
-Run: `python -m pytest tests/test_operator.py -q`
+Run: `python -m pytest tests/test_opkernels.py -q`
 Expected: FAIL — `AttributeError: ... 'varimax'`.
 
 - [ ] **Step 3: Implement**
 
-Append to `scripts/_operator.py`:
+Append to `scripts/_opkernels.py`:
 ```python
 import pandas as pd
 from scipy.stats import hypergeom
@@ -490,13 +490,13 @@ def hypergeometric_enrichment(gene_list, gene_sets, background):
 
 - [ ] **Step 4: Run to verify pass**
 
-Run: `python -m pytest tests/test_operator.py -q`
+Run: `python -m pytest tests/test_opkernels.py -q`
 Expected: PASS (5 passed).
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add scripts/_operator.py tests/test_operator.py
+git add scripts/_opkernels.py tests/test_opkernels.py
 git commit -m "feat(operator): varimax + offline hypergeometric enrichment kernels"
 ```
 
@@ -512,7 +512,7 @@ git commit -m "feat(operator): varimax + offline hypergeometric enrichment kerne
 **Note (controller fix):** gene sets are an **inline `FALLBACK_GENESETS` dict** in the driver (matching the existing `COMPLEXES` dict convention in `analyze_fingerprints.py`), NOT a committed file — `/data/` is gitignored so a `data/genesets/*.gmt` could not be committed. `load_genesets()` starts from the inline dict and merges any `.gmt` files found in an optional (gitignored) `data/genesets/` dir if present.
 
 **Interfaces:**
-- Consumes: `data/cache/operator_tensor.npz`; `_operator.varimax`, `hypergeometric_enrichment`.
+- Consumes: `data/cache/operator_tensor.npz`; `_opkernels.varimax`, `hypergeometric_enrichment`.
 - Produces: `docs/tables/operator_svd_programs.csv` (`rotation, pc, gene, loading, tail`), `docs/tables/operator_svd_enrichment.csv` (`rotation, pc, tail, set_name, ..., fdr`), `docs/tables/operator_svd_power.csv` (`pc, power_rho, power_confounded`), `docs/figures/32_operator_svd_scree.png`. Exports `load_genesets()` (reused by Tasks 6, 12).
 
 - [ ] **Step 1: Write the driver (gene sets inline; optional `.gmt` merge)**
@@ -539,7 +539,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from scipy.stats import spearmanr
-import _operator as op
+import _opkernels as op
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE = ROOT / "data" / "cache"
@@ -691,8 +691,8 @@ git commit -m "feat(operator): Step 1 driver — SVD gene programs with power ga
 ## Task 5: Kernel — masked CP, gauge, degeneracy, stability, inter-factor cosine, bootstrap CI
 
 **Files:**
-- Modify: `scripts/_operator.py`, `tests/test_operator.py`
-- Test: `tests/test_operator.py`
+- Modify: `scripts/_opkernels.py`, `tests/test_opkernels.py`
+- Test: `tests/test_opkernels.py`
 
 **Interfaces (produces):**
 - `cp_fit_masked(tensor, mask, rank, n_iter_max=400, n_init=10, random_state=0) -> (lam, factors)` — best-of-`n_init` masked CP via `tensorly.decomposition.parafac(mask=...)`; NaNs zeroed. **No weight argument** — precision is handled at the representation level (z-score); the old `mask*w` hack is removed because tensorly's `mask` is an observed/missing indicator (`tensor*mask + estimate*(1-mask)`), so a fractional mask blends observed values with model estimates rather than doing WLS. `factors = [A(R,rank), B(G,rank), C(3,rank)]`.
@@ -769,12 +769,12 @@ def test_bootstrap_cp_conditions_ci_brackets_truth():
 
 - [ ] **Step 2: Run to verify fail**
 
-Run: `pip install tensorly && python -m pytest tests/test_operator.py -q`
+Run: `pip install tensorly && python -m pytest tests/test_opkernels.py -q`
 Expected: FAIL — `AttributeError: ... 'cp_fit_masked'`.
 
 - [ ] **Step 3: Implement**
 
-Append to `scripts/_operator.py`:
+Append to `scripts/_opkernels.py`:
 ```python
 from scipy.optimize import linear_sum_assignment
 
@@ -868,13 +868,13 @@ def bootstrap_cp_conditions(tensor, mask, rank, n_boot=100, random_state=0, subs
 
 - [ ] **Step 4: Run to verify pass**
 
-Run: `python -m pytest tests/test_operator.py -q`
+Run: `python -m pytest tests/test_opkernels.py -q`
 Expected: PASS (11 passed). If `test_split_half_stability_high_for_true_rank` is boundary-flaky, `s3 > 0.65` may relax to `> 0.60`, but `s3 > s8` must hold.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add scripts/_operator.py tests/test_operator.py
+git add scripts/_opkernels.py tests/test_opkernels.py
 git commit -m "feat(operator): CP kernels — masked fit, gauge, degeneracy, stability, cosine matrix, bootstrap CI"
 ```
 
@@ -926,7 +926,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from scipy.stats import spearmanr
-import _operator as op
+import _opkernels as op
 from decompose_operator_svd import load_genesets
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -1081,8 +1081,8 @@ git commit -m "feat(operator): Step 2 driver — CP with RMS control, stability 
 ## Task 7: Kernel — soft-impute completion + train-only standardization
 
 **Files:**
-- Modify: `scripts/_operator.py`, `tests/test_operator.py`
-- Test: `tests/test_operator.py`
+- Modify: `scripts/_opkernels.py`, `tests/test_opkernels.py`
+- Test: `tests/test_opkernels.py`
 
 **Interfaces (produces):**
 - `train_test_standardize(M, train_mask) -> (Mc, mu)` — per-column mean over **train entries only**; test entries centered by the train mean. Never fits on test.
@@ -1110,12 +1110,12 @@ def test_soft_impute_recovers_low_rank():
 
 - [ ] **Step 2: Run to verify fail**
 
-Run: `python -m pytest tests/test_operator.py -q`
+Run: `python -m pytest tests/test_opkernels.py -q`
 Expected: FAIL — `AttributeError: ... 'train_test_standardize'`.
 
 - [ ] **Step 3: Implement**
 
-Append to `scripts/_operator.py`:
+Append to `scripts/_opkernels.py`:
 ```python
 def train_test_standardize(M, train_mask):
     M = np.asarray(M, float); mu = np.zeros(M.shape[1])
@@ -1140,13 +1140,13 @@ def soft_impute(M, observed_mask, rank, n_iter=100, tol=1e-4):
 
 - [ ] **Step 4: Run to verify pass**
 
-Run: `python -m pytest tests/test_operator.py -q`
+Run: `python -m pytest tests/test_opkernels.py -q`
 Expected: PASS (13 passed).
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add scripts/_operator.py tests/test_operator.py
+git add scripts/_opkernels.py tests/test_opkernels.py
 git commit -m "feat(operator): soft-impute + train-only standardization kernels"
 ```
 
@@ -1160,7 +1160,7 @@ git commit -m "feat(operator): soft-impute + train-only standardization kernels"
 - Test: run on real data; acceptance = **3b beats persistence on out-of-panel regulators** (the escalation-worthy result); 3a is a sanity check only.
 
 **Interfaces:**
-- Consumes: `data/cache/operator_tensor.npz` (incl. `in_original_panel`); `_operator.train_test_standardize`, `soft_impute`.
+- Consumes: `data/cache/operator_tensor.npz` (incl. `in_original_panel`); `_opkernels.train_test_standardize`, `soft_impute`.
 - Produces: `docs/tables/operator_completion_condition.csv` (`rank, r2_model, r2_persistence, beats_persistence, r2_model_novel, r2_persistence_novel, beats_persistence_novel, n_test, n_test_novel`), `docs/tables/operator_completion_entrywise.csv` (`rank, r2_vs_geneMean, r2_vs_rank1, beats_rank1`), `docs/figures/35_operator_completion_curve.png`.
 
 **Ordering and honesty (per audit):**
@@ -1192,7 +1192,7 @@ import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import _operator as op
+import _opkernels as op
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE = ROOT / "data" / "cache"; TAB = ROOT / "docs" / "tables"; FIG = ROOT / "docs" / "figures"
@@ -1333,8 +1333,8 @@ git commit -m "feat(operator): Step 3 driver — out-of-panel condition extrapol
 ## Task 9: Kernel — principal angles + random-subspace null
 
 **Files:**
-- Modify: `scripts/_operator.py`, `tests/test_operator.py`
-- Test: `tests/test_operator.py`
+- Modify: `scripts/_opkernels.py`, `tests/test_opkernels.py`
+- Test: `tests/test_opkernels.py`
 
 **Interfaces (produces):**
 - `principal_angles(Va, Vb) -> cos2` — QR-orthonormalize two `(G,k)` bases, return `cos²θ` descending (via `scipy.linalg.subspace_angles`).
@@ -1361,12 +1361,12 @@ def test_random_subspace_null_small_for_high_dim():
 
 - [ ] **Step 2: Run to verify fail**
 
-Run: `python -m pytest tests/test_operator.py -q`
+Run: `python -m pytest tests/test_opkernels.py -q`
 Expected: FAIL — `AttributeError: ... 'principal_angles'`.
 
 - [ ] **Step 3: Implement**
 
-Append to `scripts/_operator.py`:
+Append to `scripts/_opkernels.py`:
 ```python
 from scipy.linalg import subspace_angles, qr
 
@@ -1386,13 +1386,13 @@ def random_subspace_null(G, k, n=1000, random_state=0):
 
 - [ ] **Step 4: Run to verify pass**
 
-Run: `python -m pytest tests/test_operator.py -q`
+Run: `python -m pytest tests/test_opkernels.py -q`
 Expected: PASS (16 passed).
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add scripts/_operator.py tests/test_operator.py
+git add scripts/_opkernels.py tests/test_opkernels.py
 git commit -m "feat(operator): principal angles + random-subspace null kernels"
 ```
 
@@ -1431,7 +1431,7 @@ import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import _operator as op
+import _opkernels as op
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE = ROOT / "data" / "cache"; TAB = ROOT / "docs" / "tables"; FIG = ROOT / "docs" / "figures"
@@ -1545,7 +1545,7 @@ Expected: Steps 0→1→2→3 complete (Step 0 fetch is cached after first run);
 
 - [ ] **Step 3: Full test suite green**
 
-Run: `python -m pytest tests/test_operator.py -q`
+Run: `python -m pytest tests/test_opkernels.py -q`
 Expected: PASS (16 passed).
 
 - [ ] **Step 4: Write `docs/OPERATOR_ANALYSIS.md` from real numbers**
