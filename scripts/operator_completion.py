@@ -44,6 +44,7 @@ def entrywise(M, max_rank, holdout, seed):
     base_r1 = float(np.mean((yt - r1[hide]) ** 2))
     rows = []
     for r in range(1, max_rank + 1):
+        print(f"[3a] entry-wise rank {r}/{max_rank}", flush=True)
         yp = op.soft_impute(Mc, train, r, n_iter=200)[hide]
         mse = float(np.mean((yt - yp) ** 2))
         rows.append(dict(rank=r, r2_vs_geneMean=1 - mse / (base_gm + 1e-12),
@@ -73,6 +74,7 @@ def condition_extrap(d, max_rank, seed):
     Xc, _ = op.train_test_standardize(X, obs)
     rows = []
     for r in range(1, max_rank + 1):
+        print(f"[3b] condition rank {r}/{max_rank}", flush=True)
         Xhat = op.soft_impute(Xc, obs, r, n_iter=200)
         def block(posmask):
             yt = Xc[np.ix_(posmask, np.arange(2 * G, 3 * G))]
