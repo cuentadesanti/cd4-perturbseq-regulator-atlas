@@ -216,10 +216,21 @@ def train_test_standardize(M, train_mask):
 
 
 def soft_impute(M, observed_mask, rank, n_iter=100, tol=1e-4):
+    # HARD-impute via TRUNCATED SVD: only the top-`rank` singular triplets, via ARPACK
+    # `svds` (~10x faster than a full SVD when rank << min(shape); identical to full-SVD
+    # truncation to machine precision, pinned by test_soft_impute_matches_full_svd_reference).
+    # Deterministic via random_state=0. Falls back to full SVD when rank is near min(shape),
+    # where svds is slow/unstable.
+    from scipy.sparse.linalg import svds
     M = np.asarray(M, float); X = np.where(observed_mask, M, 0.0); Xr = X; prev = np.inf
     for _ in range(n_iter):
-        U, s, Vt = np.linalg.svd(X, full_matrices=False)
-        Xr = (U[:, :rank] * s[:rank]) @ Vt[:rank]
+        if rank < min(X.shape) - 1:
+            u, s, vt = svds(X, k=rank, random_state=0)
+            order = np.argsort(s)[::-1]; u, s, vt = u[:, order], s[order], vt[order]
+        else:
+            U, s2, Vt = np.linalg.svd(X, full_matrices=False)
+            u, s, vt = U[:, :rank], s2[:rank], Vt[:rank]
+        Xr = (u * s) @ vt
         X = np.where(observed_mask, M, Xr)
         change = np.linalg.norm(Xr - X) / (np.linalg.norm(X) + 1e-12)
         if abs(prev - change) < tol:

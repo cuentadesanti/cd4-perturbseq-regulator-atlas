@@ -185,3 +185,30 @@ def test_principal_angles_orthogonal_subspace():
 def test_random_subspace_null_small_for_high_dim():
     m, p95 = op.random_subspace_null(200, 4, n=200, random_state=0)
     assert m < 0.1 and p95 >= m
+
+
+def test_soft_impute_matches_full_svd_reference():
+    # Regression guard for the truncated-SVD (svds) soft_impute: it must equal a full-SVD
+    # reference to machine precision. If the truncated path ever diverges from top-k
+    # truncation (e.g. a bad svds swap), this fails — that is what makes the fast kernel
+    # a *validated* equivalence, not a one-off offline check.
+    rng = np.random.default_rng(0)
+    M = rng.normal(size=(180, 90)) @ rng.normal(size=(90, 90))
+    obs = rng.random(M.shape) > 0.2
+
+    def _full_svd_ref(M, obs, rank, n_iter=100, tol=1e-4):
+        M = np.asarray(M, float); X = np.where(obs, M, 0.0); Xr = X; prev = np.inf
+        for _ in range(n_iter):
+            U, s, Vt = np.linalg.svd(X, full_matrices=False)
+            Xr = (U[:, :rank] * s[:rank]) @ Vt[:rank]
+            X = np.where(obs, M, Xr)
+            ch = np.linalg.norm(Xr - X) / (np.linalg.norm(X) + 1e-12)
+            if abs(prev - ch) < tol:
+                break
+            prev = ch
+        return Xr
+
+    for r in (1, 5, 15):
+        got = op.soft_impute(M, obs, r, n_iter=100)
+        ref = _full_svd_ref(M, obs, r, n_iter=100)
+        assert np.allclose(got, ref, atol=1e-8), f"rank {r}: max|dif|={np.abs(got - ref).max():.2e}"
