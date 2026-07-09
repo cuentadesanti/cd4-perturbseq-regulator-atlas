@@ -108,6 +108,8 @@ later gave **100%** cross-donor coverage — see `DONOR_ROBUSTNESS.md`); where i
 
 - **Survivors** (large effect + reproducible): TADA2B, SGF29, MED12, TAF6L, TADA1… — SAGA + Mediator.
 
+  > **Cis-off-target caveat (see [OPERATOR_ANALYSIS.md](OPERATOR_ANALYSIS.md#cis-off-target-gate-audit-step-1-insurance) · `offtarget_gate_sensitivity.csv`).** `offtarget_flag` is the *cis* flag (99.4% == neighbouring-gene KD). Under a hard cis exclusion the global ranking is stable (Spearman 0.99, 25/30 of the top-30), but three of the leading SAGA subunits were partly cis-inflated and fall — **TADA2B #2→#93, TAF6L #9→#130, SUPT7L #20→out** — while the cis-clean subunits **SUPT20H, TADA1, USP22** rise and anchor the program. The SAGA *identity* holds; the leading-subunit list is corrected. The ranking already covariate-adjusts, annotates, and penalises off-target (`off_i`, `any_offtarget`, `robust_score ×0.6`), so this affects a few named individuals, not the structure.
+
 ![reproshift](figures/19_reproducibility_aware_ranking_shift.png)
 
 **The core ranking still works without this file** — the audit lives separately in

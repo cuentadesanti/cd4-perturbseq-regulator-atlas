@@ -1,0 +1,16 @@
+check,metric,value
+semantics,offtarget_flag==neighboring_gene_KD (cis) agreement %,99.4
+semantics,"of flagged rows, % that are cis (neighboring)",92.0
+semantics,sig rows that are cis-flagged %,11.6
+ranking(a),spearman rank corr (all common genes),0.9897
+ranking(a),top-30 overlap (of 30),25
+SAGA(b),TADA2B rank base->cisclean,2->93
+SAGA(b),SUPT20H rank base->cisclean,4->3
+SAGA(b),TADA1 rank base->cisclean,5->4
+SAGA(b),TAF6L rank base->cisclean,9->130
+SAGA(b),SUPT7L rank base->cisclean,20->out
+SAGA(b),USP22 rank base->cisclean,27->22
+operator(c),regs cis-flagged / total,404/3106
+operator(c),out-of-panel test regs base->cisclean,621->540
+operator(c),3b predictive margin base (rank),+0.379 (r7)
+operator(c),3b predictive margin cisclean (rank),+0.390 (r6)
