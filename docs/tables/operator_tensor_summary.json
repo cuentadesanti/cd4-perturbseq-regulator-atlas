@@ -1,0 +1,15 @@
+{
+  "n_regulators": 800,
+  "n_new_regulators": 733,
+  "n_genes": 2000,
+  "conditions": [
+    "Rest",
+    "Stim8hr",
+    "Stim48hr"
+  ],
+  "n_cells_confound_rho": 0.07957512506833177,
+  "rownorm_cv": 0.2290889024734497,
+  "observed_cells": 2400,
+  "representation": "pooled_zscore",
+  "passed_confound_guard": true
+}
