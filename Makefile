@@ -1,6 +1,6 @@
 PY := python3
 
-.PHONY: all eda model audit report spike edges eda-edges repro-meta fingerprints operator-tensor operator-svd operator-cp operator-completion spectral class-programs specificity-control disease-overlap module-gwas convergence-extras convergence-figures api clean pipeline help
+.PHONY: all eda model audit report spike edges eda-edges repro-meta fingerprints operator-tensor operator-svd operator-cp operator-completion operator-donors spectral class-programs specificity-control disease-overlap module-gwas convergence-extras convergence-figures api clean pipeline help
 
 help:
 	@echo "Targets:"
@@ -78,6 +78,11 @@ operator-svd:
 # 3a (sanity) is random entry-wise completion (elbow only; needs `make operator-tensor` first).
 operator-completion:
 	$(PY) scripts/operator_completion.py --max-rank 12 --holdout 0.2
+
+# Step 4: are the gene programs donor-reproducible AS SUBSPACES?
+# Principal angles between top-k gene-program subspaces of DISJOINT donor pairs only.
+operator-donors:
+	$(PY) scripts/operator_donor_angles.py --k 5
 
 # spectral sanity check on the program assignments (needs `make fingerprints` first)
 spectral:
