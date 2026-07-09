@@ -1,0 +1,241 @@
+#!/usr/bin/env python3
+"""Pure numerical kernels for the empirical regulatory operator analysis.
+
+No I/O, no argparse, no plotting — unit-tested in tests/test_opkernels.py.
+Mirrors the shared-helper convention of scripts/_figstyle.py.
+"""
+from __future__ import annotations
+import numpy as np
+import pandas as pd
+from scipy.stats import spearmanr, hypergeom
+from scipy.linalg import subspace_angles, qr
+from statsmodels.stats.multitest import multipletests
+
+
+def assemble_tensor(matrix, obs, gene_idx, cond_order):
+    """Stack per-(regulator, condition) rows of `matrix` into a dense-with-mask tensor.
+
+    obs columns: target_contrast_gene_name, culture_condition, n_cells_target,
+    ontarget_significant_bool, row. `matrix[row, gene_idx]` supplies each cell;
+    unobserved cells are NaN in `tensor`, False in `mask`.
+    """
+    cond_pos = {c: k for k, c in enumerate(cond_order)}
+    sig = obs[obs["ontarget_significant_bool"]]
+    regulators = sorted(sig["target_contrast_gene_name"].unique())
+    reg_pos = {g: i for i, g in enumerate(regulators)}
+    R, G, C = len(regulators), len(gene_idx), len(cond_order)
+    tensor = np.full((R, G, C), np.nan, dtype=np.float32)
+    mask = np.zeros((R, G, C), dtype=bool)
+    n_cells = np.full((R, C), np.nan, dtype=np.float32)
+    gene_idx = np.asarray(gene_idx)
+    for _, rec in sig.iterrows():
+        c = rec["culture_condition"]
+        if c not in cond_pos:
+            continue
+        i, k = reg_pos[rec["target_contrast_gene_name"]], cond_pos[c]
+        tensor[i, :, k] = matrix[int(rec["row"]), gene_idx]
+        mask[i, :, k] = True
+        n_cells[i, k] = rec["n_cells_target"]
+    return tensor, mask, np.array(regulators, dtype=object), n_cells
+
+
+def rms_normalize_conditions(tensor, mask):
+    """Scale each condition slab to unit RMS over OBSERVED entries.
+
+    RMS (not raw Frobenius) so the control is a pure per-entry scale control and
+    not also a sqrt(coverage) re-weight when conditions have different #observed.
+    """
+    out = tensor.copy()
+    C = tensor.shape[2]
+    scales = np.zeros(C, dtype=np.float64)
+    for c in range(C):
+        vals = tensor[:, :, c][mask[:, :, c]].astype(np.float64)
+        rms = float(np.sqrt(np.mean(vals ** 2))) if vals.size else 0.0
+        scales[c] = rms
+        if rms > 0:
+            out[:, :, c] = out[:, :, c] / rms
+    return out, scales
+
+
+def spearman_power(tensor, mask, n_cells):
+    norms, ncell = [], []
+    R, _, C = tensor.shape
+    for i in range(R):
+        for c in range(C):
+            if mask[i, :, c].any():
+                norms.append(float(np.linalg.norm(tensor[i, :, c][mask[i, :, c]])))
+                ncell.append(float(n_cells[i, c]))
+    if len(norms) < 3:
+        return float("nan")
+    return float(spearmanr(norms, ncell).statistic)
+
+
+def varimax(loadings, gamma=1.0, max_iter=100, tol=1e-6):
+    """Kaiser-normalized VARIMAX rotation of a (G, k) loading matrix.
+
+    gamma=1.0 is varimax (maximizes the per-column variance of squared loadings ->
+    simple structure ACROSS factors). Do NOT set gamma=0 (that is quartimax, a
+    different criterion that tends to a general factor). Convergence uses the
+    canonical Kaiser ratio criterion on the singular-value sum (the objective is
+    monotone non-decreasing under this algorithm); a rotation-change tolerance can
+    fire on the first step and exit at a non-simple-structure solution.
+    """
+    L = np.asarray(loadings, dtype=np.float64)
+    G, k = L.shape
+    if k < 2:
+        return L.copy(), np.eye(k)
+    h = np.sqrt((L ** 2).sum(axis=1, keepdims=True)); h[h == 0] = 1.0
+    Ln = L / h
+    Rm = np.eye(k)
+    d_old = 0.0
+    for _ in range(max_iter):
+        Lr = Ln @ Rm
+        u, s, vt = np.linalg.svd(
+            Ln.T @ (Lr ** 3 - (gamma / G) * Lr @ np.diag((Lr ** 2).sum(axis=0))))
+        Rm = u @ vt
+        d = s.sum()
+        if d_old != 0 and d / d_old < 1 + tol:
+            break
+        d_old = d
+    return (Ln @ Rm) * h, Rm
+
+
+def hypergeometric_enrichment(gene_list, gene_sets, background):
+    bg = set(background); drawn = set(gene_list) & bg
+    M, n_drawn = len(bg), len(drawn)
+    rows = []
+    for name, members in gene_sets.items():
+        setg = set(members) & bg; K = len(setg)
+        overlap = drawn & setg; x = len(overlap)
+        p = hypergeom.sf(x - 1, M, K, n_drawn) if K > 0 and n_drawn > 0 else 1.0
+        rows.append(dict(set_name=name, n_overlap=x, set_size=K, n_drawn=n_drawn,
+                         background_size=M, pvalue=float(p),
+                         overlap_genes=",".join(sorted(overlap))))
+    df = pd.DataFrame(rows)
+    if len(df):
+        df["fdr"] = multipletests(df["pvalue"], method="fdr_bh")[1]
+    return df.sort_values("pvalue").reset_index(drop=True)
+
+
+from scipy.optimize import linear_sum_assignment
+
+
+def _unit_cols(X):
+    n = np.linalg.norm(X, axis=0, keepdims=True); n[n == 0] = 1.0
+    return X / n, n.ravel()
+
+
+def cp_fit_masked(tensor, mask, rank, n_iter_max=400, n_init=10, random_state=0):
+    import tensorly as tl
+    from tensorly.decomposition import parafac
+    T = np.nan_to_num(np.asarray(tensor, np.float64), nan=0.0)
+    Tt, Mt = tl.tensor(T), tl.tensor(mask.astype(np.float64))
+    best = None
+    for s in range(n_init):
+        cp = parafac(Tt, rank=rank, mask=Mt, n_iter_max=n_iter_max,
+                     init="random", random_state=random_state + s,
+                     normalize_factors=False)
+        err = float(np.sum(((tl.cp_to_tensor(cp) - T) ** 2) * mask))
+        if best is None or err < best[0]:
+            best = (err, cp)
+    cp = best[1]
+    lam = np.asarray(cp[0]) if cp[0] is not None else np.ones(rank)
+    return lam, [np.asarray(f) for f in cp[1]]
+
+
+def fix_cp_gauge(weights, factors):
+    factors = [f.copy() for f in factors]
+    lam = np.ones(factors[0].shape[1])
+    for mode, f in enumerate(factors):
+        fn, norms = _unit_cols(f); factors[mode] = fn; lam = lam * norms
+    Cc = factors[2]
+    for k in range(Cc.shape[1]):
+        if Cc[np.argmax(np.abs(Cc[:, k])), k] < 0:
+            factors[2][:, k] *= -1; factors[0][:, k] *= -1
+    return lam, factors
+
+
+def gene_mode_cosine(factors):
+    Bb, _ = _unit_cols(factors[1])
+    return np.abs(Bb.T @ Bb)
+
+
+def cp_degeneracy(factors):
+    Aa, _ = _unit_cols(factors[0]); Bb, _ = _unit_cols(factors[1]); Cc, _ = _unit_cols(factors[2])
+    cong = np.abs(Aa.T @ Aa) * np.abs(Bb.T @ Bb) * np.abs(Cc.T @ Cc)
+    np.fill_diagonal(cong, 0.0)
+    return cong.max(axis=1)
+
+
+def match_factors(B1, B2):
+    B1n, _ = _unit_cols(np.asarray(B1, float)); B2n, _ = _unit_cols(np.asarray(B2, float))
+    cost = -np.abs(B1n.T @ B2n)
+    r, c = linear_sum_assignment(cost)
+    return c, -cost[r, c]
+
+
+def split_half_stability(tensor, mask, rank, n_splits=10, random_state=0, subsample=None):
+    rng = np.random.default_rng(random_state)
+    R = tensor.shape[0]; scores = []
+    for s in range(n_splits):
+        perm = rng.permutation(R)
+        if subsample:
+            perm = perm[: 2 * subsample]
+        h1, h2 = perm[: len(perm) // 2], perm[len(perm) // 2:]
+        _, f1 = cp_fit_masked(tensor[h1], mask[h1], rank, n_init=3, random_state=random_state + s)
+        _, f2 = cp_fit_masked(tensor[h2], mask[h2], rank, n_init=3, random_state=random_state + 100 + s)
+        scores.append(float(match_factors(f1[1], f2[1])[1].mean()))
+    return float(np.mean(scores))
+
+
+def bootstrap_cp_conditions(tensor, mask, rank, n_boot=100, random_state=0, subsample=None):
+    rng = np.random.default_rng(random_state)
+    R = tensor.shape[0]
+    lam0, f0 = fix_cp_gauge(*cp_fit_masked(tensor, mask, rank, n_init=5, random_state=random_state))
+    Bref = f0[1]
+    boot = np.full((n_boot, 3, rank), np.nan)
+    for b in range(n_boot):
+        idx = rng.integers(0, R, subsample or R)
+        lam, f = fix_cp_gauge(*cp_fit_masked(tensor[idx], mask[idx], rank,
+                                             n_init=1, random_state=random_state + b + 1))
+        perm, _ = match_factors(Bref, f[1])
+        Cc = f[2][:, perm].copy()
+        for k in range(rank):
+            if np.dot(f[1][:, perm[k]], Bref[:, k]) < 0:
+                Cc[:, k] *= -1
+        boot[b] = Cc
+    return f0[2], boot
+
+
+def train_test_standardize(M, train_mask):
+    M = np.asarray(M, float); mu = np.zeros(M.shape[1])
+    for j in range(M.shape[1]):
+        col = M[train_mask[:, j], j]
+        mu[j] = col.mean() if col.size else 0.0
+    return M - mu[None, :], mu
+
+
+def soft_impute(M, observed_mask, rank, n_iter=100, tol=1e-4):
+    M = np.asarray(M, float); X = np.where(observed_mask, M, 0.0); Xr = X; prev = np.inf
+    for _ in range(n_iter):
+        U, s, Vt = np.linalg.svd(X, full_matrices=False)
+        Xr = (U[:, :rank] * s[:rank]) @ Vt[:rank]
+        X = np.where(observed_mask, M, Xr)
+        change = np.linalg.norm(Xr - X) / (np.linalg.norm(X) + 1e-12)
+        if abs(prev - change) < tol:
+            break
+        prev = change
+    return Xr
+
+
+def principal_angles(Va, Vb):
+    Qa = qr(np.asarray(Va, float), mode="economic")[0]
+    Qb = qr(np.asarray(Vb, float), mode="economic")[0]
+    return np.sort(np.cos(subspace_angles(Qa, Qb)) ** 2)[::-1]
+
+
+def random_subspace_null(G, k, n=1000, random_state=0):
+    rng = np.random.default_rng(random_state)
+    means = np.array([principal_angles(rng.normal(size=(G, k)), rng.normal(size=(G, k))).mean()
+                      for _ in range(n)])
+    return float(means.mean()), float(np.percentile(means, 95))

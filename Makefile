@@ -1,6 +1,6 @@
 PY := python3
 
-.PHONY: all eda model audit report spike edges eda-edges repro-meta fingerprints spectral class-programs specificity-control disease-overlap module-gwas convergence-extras convergence-figures api clean pipeline help
+.PHONY: all eda model audit report spike edges eda-edges repro-meta fingerprints operator operator-tensor operator-svd operator-cp operator-completion operator-donors operator-deconv spectral class-programs specificity-control disease-overlap module-gwas convergence-extras convergence-figures api clean pipeline help
 
 help:
 	@echo "Targets:"
@@ -14,6 +14,9 @@ help:
 	@echo "  make eda-edges- EDA of the effect network (uses robust_edges.csv if present)"
 	@echo "  make repro-meta - extract reproducibility .obs from the h5ad (OPTIONAL, remote)"
 	@echo "  make fingerprints - transcriptional programs (PCA/similarity/clusters) [remote zscore or log_fc cache]"
+	@echo "  make operator-completion - Step 3: out-of-panel condition extrapolation (flagship) + entry-wise sanity"
+	@echo "  make operator-deconv - Step 5 STRETCH: square-block deconvolution + asymmetric subsumption (hypothesis-generating only)"
+	@echo "  make operator - empirical regulatory operator (z-score): tensor + SVD + CP + completion [+donors if fetched]; see docs/OPERATOR_ANALYSIS.md"
 	@echo "  make spectral - spectral sanity check on the program assignments (after fingerprints)"
 	@echo "  make class-programs - balanced 30-regulator panel: distinct classes → distinct programs? (after fingerprints)"
 	@echo "  make convergence-extras - specificity control + disease overlap (fully offline)"
@@ -56,6 +59,46 @@ repro-meta:
 # --matrix zscore reads a remote slice; --matrix log_fc uses the local cache if present.
 fingerprints:
 	$(PY) scripts/analyze_fingerprints.py --n 200 --matrix zscore --top-genes 2000
+
+# Step 0: regulator x gene x condition z-score tensor over the expanded ~800-reg panel.
+# Fail-closed: refuses to cache unless the confound guard passes (|spearman(||slab||,n_cells)|<0.15).
+operator-tensor:
+	$(PY) scripts/build_operator_tensor.py --n-total 800 --top-genes 2000
+
+# Step 2 CP. NB: these are the FULL defaults (sweep-to-8, 100 bootstraps) and take ~20+ min;
+# the committed operator_cp_* tables were produced by a reduced local pilot
+# (--max-rank 6 --stab-subsample 250 --boot-n 50). Use the full config on cluster compute.
+operator-cp:
+	$(PY) scripts/decompose_operator_cp.py --rank auto --scale-control rms
+
+# Step 1: gene programs = right singular vectors of the operator matrix (z-score),
+# with an ISG-anchor orientation, optional varimax rotation, offline enrichment,
+# and a power gate on the left factors (needs `make operator-tensor` first).
+operator-svd:
+	$(PY) scripts/decompose_operator_svd.py --k 10 --tail-pct 2 --rotate
+
+# Step 3: is the operator recoverably low-rank? 3b (flagship) holds out (regulator,
+# Stim48hr) fibers preferentially for out-of-panel regulators and predicts them from
+# Rest+Stim8hr via low-rank soft-impute, vs a persistence baseline (Stim48hr:=Stim8hr).
+# 3a (sanity) is random entry-wise completion (elbow only; needs `make operator-tensor` first).
+operator-completion:
+	$(PY) scripts/operator_completion.py --max-rank 12 --holdout 0.2
+
+# Step 4: are the gene programs donor-reproducible AS SUBSPACES?
+# Principal angles between top-k gene-program subspaces of DISJOINT donor pairs only.
+operator-donors:
+	$(PY) scripts/operator_donor_angles.py --k 5
+
+# Step 5 STRETCH: square-block deconvolution A = I - L^{-1} (regularized) + asymmetric
+# subsumption. HYPOTHESIS-GENERATING ONLY: valid only on the square block (regulators
+# that are also readout genes), linear approx to a nonlinear system, every edge carries
+# the block condition number (needs `make operator-tensor` first).
+operator-deconv:
+	$(PY) scripts/operator_deconvolution.py --n-robust 50 --ridge 1e-2
+
+# empirical regulatory operator umbrella: Step 0 fetch is one-time then cached; Steps 1-3 local;
+# operator-donors prints NEEDS-DATA unless per-donor matrices are fetched.
+operator: operator-tensor operator-svd operator-cp operator-completion operator-donors
 
 # spectral sanity check on the program assignments (needs `make fingerprints` first)
 spectral:

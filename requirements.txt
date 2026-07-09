@@ -17,3 +17,6 @@ matplotlib
 # install only if you will run the API:  uvicorn api.main:app --port 8000
 fastapi
 uvicorn[standard]
+
+# Optional — empirical regulatory operator analysis (`make operator`)
+#   pip install tensorly pytest h5py s3fs fsspec

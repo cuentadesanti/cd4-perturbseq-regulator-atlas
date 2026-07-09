@@ -29,6 +29,10 @@ working disk has ~10 GB free) — the entire core runs **from the supplementary 
 6. **Transcriptional programs** (`scripts/analyze_fingerprints.py`) — organizes top perturbations by
    the fingerprint they induce, reading `.h5ad` layers *by slice* from S3 **without downloading it**.
 7. **Model 1 · uncertainty-aware effect network** (optional, `scripts/model_edges.py`, bonus).
+8. **Empirical regulatory operator** (`make operator`) — treats the log-FC matrix as one operator and
+   recovers what the fingerprint PCA discarded: gene programs, condition-gating (CP with bootstrap CIs),
+   and out-of-panel prediction, all built in precision-decoupled z-score space. See
+   `docs/OPERATOR_ANALYSIS.md`.
 
 ## Dataset
 
