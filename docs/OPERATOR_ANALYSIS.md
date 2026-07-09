@@ -48,6 +48,18 @@ Principal angles between top-k gene-program subspaces across **disjoint** donor 
 
 **Two curve-driven requirements for the 6209 run** (the pilot R² had **not** plateaued at rank 11 — it was still rising at the sweep ceiling): (1) sweep rank **well past 12** to actually locate saturation, otherwise any "effective rank" number is right-censored and unsupported; (2) frame the headline as **predictivity, not compressibility** — the honest claim is "low-rank structure predicts unseen late-stim out-of-panel," not "the operator is rank-k." The curve does not yet support a low-dimensionality claim, and configuring the cluster sweep without (1) risks quietly overclaiming it.
 
+### 6209 runbook
+
+**(a) "Full axis" is a size to be found empirically, not 3106.** The floor (n_cells ≥ 567) is necessary but **not sufficient**: above it, the breadth-ranked confound still grows monotonically with axis size. On the panel's top-2000 genes (the guard's own pooled metric), raw `ρ(‖slab‖, n_cells)` is **−0.05 at N=800, −0.16 at 1600, −0.22 at 2500, and −0.24 across all 3106 above-floor** (the literal full 6209 is −0.53 on panel genes, −0.66 on all 10282). Only **N=800 is verified guard-clean** — the sole size with a *measured z-space* confound (**+0.08**); for every larger size only the raw number exists, and the raw→z map is unreliable (at 800, raw −0.05 flipped to z **+0.08**), so the raw trend marks larger axes as *riskier*, not safe. The floor keeps exactly **3106 regulators (50.0% of 6209)**, but **3106 is an upper bound on regulator count, not a verified-clean axis size.** The escalation must sweep axis size upward, re-fetch z-scores, and re-assert the confound guard (**|ρ|<0.15**) on each candidate, taking the largest that passes — or add per-cell precision weighting with real `lfcSE` (not local; needs the per-cell layers) to include the low-power tail directly. Decide sweep-to-max-clean-size vs lfcSE-weighting *before* the fetch: it sets both the fetch cost and the headline ("N-regulator operator, N found empirically" vs "6209 with precision weighting").
+
+**(b) Starting config (drivers are escalation-ready — CLI knobs only, no code change):**
+- `python scripts/build_operator_tensor.py --n-total 1200 --top-genes 2000` (rebuild the tensor at the larger panel; re-fetches z-score once to `data/cache/panel_zscore_<hash>.npy`, writes `data/cache/operator_tensor.npz` after the confound guard)
+- `python scripts/operator_completion.py --max-rank 30 --holdout 0.2` (push past 12 to find the plateau; raise further if R² still climbs at 30 → writes `docs/tables/operator_completion_condition.csv`)
+- `python scripts/decompose_operator_cp.py --rank auto --scale-control rms --max-rank 12 --stab-subsample 800 --boot-n 100` (dial the reduced-pilot knobs — pilot ran subsample 250 / 50 boots — up to full config)
+- `python scripts/decompose_operator_svd.py --k 10 --tail-pct 2 --rotate` (re-run Step 1 on the new tensor; cheap)
+
+**(c) The plateau check gates any effective-rank claim.** An effective-rank number is only reportable if the 3b R²-vs-rank curve actually saturates on the escalated (~1200–1600) axis. No plateau ⇒ report "predictive, not low-dimensional" and do **not** cite an effective rank. This is the one place the cluster run can silently overclaim, so it is the gate on the headline.
+
 ## What the nuisance controls bought us
 
 | Control | Naive version would have… |
