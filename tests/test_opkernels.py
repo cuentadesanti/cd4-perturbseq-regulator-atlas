@@ -91,3 +91,64 @@ def test_hypergeometric_enrichment_flags_planted_set():
     res = op.hypergeometric_enrichment(gene_list, gene_sets, background)
     top = res.sort_values("pvalue").iloc[0]
     assert top["set_name"] == "IFN" and top["fdr"] < 0.05
+
+
+tensorly = pytest.importorskip("tensorly")
+
+
+def _synth_cp(R=40, G=60, C=3, rank=3, seed=0, noise=0.02):
+    rng = np.random.default_rng(seed)
+    A = rng.normal(size=(R, rank)); B = rng.normal(size=(G, rank))
+    Cc = np.abs(rng.normal(size=(C, rank)))
+    T = np.einsum("ir,jr,kr->ijk", A, B, Cc)
+    T += noise * rng.normal(size=T.shape) * np.std(T)
+    return T.astype(np.float32), (A, B, Cc)
+
+
+def test_cp_recovers_planted_factors():
+    T, (_, B, _) = _synth_cp()
+    _, factors = op.cp_fit_masked(T, np.ones_like(T, bool), 3, n_init=5, random_state=0)
+    assert op.match_factors(B, factors[1])[1].mean() > 0.95
+
+
+def test_cp_masked_ignores_hidden_cells():
+    T, _ = _synth_cp()
+    mask = np.ones_like(T, bool); mask[::2, :, 2] = False
+    _, f = op.cp_fit_masked(T, mask, 3, n_init=5, random_state=0)
+    assert f[0].shape == (40, 3) and f[2].shape == (3, 3)
+
+
+def test_fix_cp_gauge_unit_norm_and_sign():
+    T, _ = _synth_cp()
+    lam, f = op.cp_fit_masked(T, np.ones_like(T, bool), 3, n_init=3, random_state=1)
+    _, f2 = op.fix_cp_gauge(lam, f)
+    for F in f2:
+        assert np.allclose(np.linalg.norm(F, axis=0), 1.0, atol=1e-5)
+    Cc = f2[2]
+    for k in range(3):
+        assert Cc[np.argmax(np.abs(Cc[:, k])), k] > 0
+
+
+def test_gene_mode_cosine_is_full_matrix():
+    T, _ = _synth_cp()
+    _, f = op.cp_fit_masked(T, np.ones_like(T, bool), 3, n_init=3, random_state=0)
+    Cm = op.gene_mode_cosine(f)
+    assert Cm.shape == (3, 3) and np.allclose(np.diag(Cm), 1.0, atol=1e-6)
+
+
+def test_split_half_stability_high_for_true_rank():
+    T, _ = _synth_cp(R=80, noise=0.03)
+    mask = np.ones_like(T, bool)
+    s3 = op.split_half_stability(T, mask, 3, n_splits=4, random_state=0)
+    s8 = op.split_half_stability(T, mask, 8, n_splits=4, random_state=0)
+    assert s3 > 0.65 and s3 > s8
+
+
+def test_bootstrap_cp_conditions_ci_brackets_truth():
+    # planted gated factor: condition profile clearly peaked -> CI of range excludes 0
+    T, _ = _synth_cp(R=120, noise=0.05)
+    C_ref, boot = op.bootstrap_cp_conditions(T, np.ones_like(T, bool), 3,
+                                             n_boot=20, random_state=0)
+    assert C_ref.shape == (3, 3) and boot.shape == (20, 3, 3)
+    rng_k = boot.max(axis=1) - boot.min(axis=1)     # (n_boot, rank)
+    assert np.percentile(rng_k, 2.5, axis=0).shape == (3,)

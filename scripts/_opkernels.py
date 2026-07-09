@@ -114,3 +114,93 @@ def hypergeometric_enrichment(gene_list, gene_sets, background):
     if len(df):
         df["fdr"] = multipletests(df["pvalue"], method="fdr_bh")[1]
     return df.sort_values("pvalue").reset_index(drop=True)
+
+
+from scipy.optimize import linear_sum_assignment
+
+
+def _unit_cols(X):
+    n = np.linalg.norm(X, axis=0, keepdims=True); n[n == 0] = 1.0
+    return X / n, n.ravel()
+
+
+def cp_fit_masked(tensor, mask, rank, n_iter_max=400, n_init=10, random_state=0):
+    import tensorly as tl
+    from tensorly.decomposition import parafac
+    T = np.nan_to_num(np.asarray(tensor, np.float64), nan=0.0)
+    Tt, Mt = tl.tensor(T), tl.tensor(mask.astype(np.float64))
+    best = None
+    for s in range(n_init):
+        cp = parafac(Tt, rank=rank, mask=Mt, n_iter_max=n_iter_max,
+                     init="random", random_state=random_state + s,
+                     normalize_factors=False)
+        err = float(np.sum(((tl.cp_to_tensor(cp) - T) ** 2) * mask))
+        if best is None or err < best[0]:
+            best = (err, cp)
+    cp = best[1]
+    lam = np.asarray(cp[0]) if cp[0] is not None else np.ones(rank)
+    return lam, [np.asarray(f) for f in cp[1]]
+
+
+def fix_cp_gauge(weights, factors):
+    factors = [f.copy() for f in factors]
+    lam = np.ones(factors[0].shape[1])
+    for mode, f in enumerate(factors):
+        fn, norms = _unit_cols(f); factors[mode] = fn; lam = lam * norms
+    Cc = factors[2]
+    for k in range(Cc.shape[1]):
+        if Cc[np.argmax(np.abs(Cc[:, k])), k] < 0:
+            factors[2][:, k] *= -1; factors[0][:, k] *= -1
+    return lam, factors
+
+
+def gene_mode_cosine(factors):
+    Bb, _ = _unit_cols(factors[1])
+    return np.abs(Bb.T @ Bb)
+
+
+def cp_degeneracy(factors):
+    Aa, _ = _unit_cols(factors[0]); Bb, _ = _unit_cols(factors[1]); Cc, _ = _unit_cols(factors[2])
+    cong = np.abs(Aa.T @ Aa) * np.abs(Bb.T @ Bb) * np.abs(Cc.T @ Cc)
+    np.fill_diagonal(cong, 0.0)
+    return cong.max(axis=1)
+
+
+def match_factors(B1, B2):
+    B1n, _ = _unit_cols(np.asarray(B1, float)); B2n, _ = _unit_cols(np.asarray(B2, float))
+    cost = -np.abs(B1n.T @ B2n)
+    r, c = linear_sum_assignment(cost)
+    return c, -cost[r, c]
+
+
+def split_half_stability(tensor, mask, rank, n_splits=10, random_state=0, subsample=None):
+    rng = np.random.default_rng(random_state)
+    R = tensor.shape[0]; scores = []
+    for s in range(n_splits):
+        perm = rng.permutation(R)
+        if subsample:
+            perm = perm[: 2 * subsample]
+        h1, h2 = perm[: len(perm) // 2], perm[len(perm) // 2:]
+        _, f1 = cp_fit_masked(tensor[h1], mask[h1], rank, n_init=3, random_state=random_state + s)
+        _, f2 = cp_fit_masked(tensor[h2], mask[h2], rank, n_init=3, random_state=random_state + 100 + s)
+        scores.append(float(match_factors(f1[1], f2[1])[1].mean()))
+    return float(np.mean(scores))
+
+
+def bootstrap_cp_conditions(tensor, mask, rank, n_boot=100, random_state=0, subsample=None):
+    rng = np.random.default_rng(random_state)
+    R = tensor.shape[0]
+    lam0, f0 = fix_cp_gauge(*cp_fit_masked(tensor, mask, rank, n_init=5, random_state=random_state))
+    Bref = f0[1]
+    boot = np.full((n_boot, 3, rank), np.nan)
+    for b in range(n_boot):
+        idx = rng.integers(0, R, subsample or R)
+        lam, f = fix_cp_gauge(*cp_fit_masked(tensor[idx], mask[idx], rank,
+                                             n_init=1, random_state=random_state + b + 1))
+        perm, _ = match_factors(Bref, f[1])
+        Cc = f[2][:, perm].copy()
+        for k in range(rank):
+            if np.dot(f[1][:, perm[k]], Bref[:, k]) < 0:
+                Cc[:, k] *= -1
+        boot[b] = Cc
+    return f0[2], boot
