@@ -65,6 +65,9 @@ fingerprints:
 operator-tensor:
 	$(PY) scripts/build_operator_tensor.py --n-total 800 --top-genes 2000
 
+# Step 2 CP. NB: these are the FULL defaults (sweep-to-8, 100 bootstraps) and take ~20+ min;
+# the committed operator_cp_* tables were produced by a reduced local pilot
+# (--max-rank 6 --stab-subsample 250 --boot-n 50). Use the full config on cluster compute.
 operator-cp:
 	$(PY) scripts/decompose_operator_cp.py --rank auto --scale-control rms
 
