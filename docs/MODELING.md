@@ -74,8 +74,10 @@ survive (`reproducibility_audit.csv`, fig 19).
 
 - **It is a sensitivity analysis, not a new posterior**: the EB model is NOT re-estimated.
 - **Partial coverage**: `guide_correlation_all` ~78% of contrasts, `donor_correlation_hits_mean`
-  only ~19% → in practice more *guide-aware* than *donor-aware*. Where the metric is missing, a
-  **neutral weight** (0.75) is used, so **a gene is not penalized just for lacking donor metadata**.
+  only ~19% (the KD-gated subset of this summary-table audit) → in practice more *guide-aware* than
+  *donor-aware*. Where the metric is missing, a **neutral weight** (0.75) is used, so **a gene is not
+  penalized just for lacking donor metadata**. The dedicated per-donor object (`by_donors.h5mu`,
+  Tier 1) later gave **100%** cross-donor coverage — see `DONOR_ROBUSTNESS.md`.
 - The **core** ranking does **not depend** on this file (`make all` runs without it).
 
 ---

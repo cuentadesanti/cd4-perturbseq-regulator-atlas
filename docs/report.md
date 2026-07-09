@@ -89,8 +89,9 @@ only, ~4 s, no `.layers`): `guide_correlation_all` (agreement between the 2 guid
 (`reweighted_score = regpower_eb_mean · repro_weight`) as a **sensitivity analysis** — which
 regulators survive. In practice it is more **guide-aware** than **donor-aware**: `guide_corr` covers
 78% of contrasts but `donor_corr` only **19%**
-(the cross-donor analysis was done on a subset); where it's missing, a **neutral weight** is used (no
-penalty for absent data). Of the top-30 EB, **5 are demoted** and **5 are promoted**:
+(the KD-gated subset of this summary-table audit; the dedicated per-donor object `by_donors.h5mu`
+later gave **100%** cross-donor coverage — see `DONOR_ROBUSTNESS.md`); where it's missing, a
+**neutral weight** is used (no penalty for absent data). Of the top-30 EB, **5 are demoted** and **5 are promoted**:
 
 | gene | old_rank | new_rank | status | guide_corr | donor_corr | reason |
 | --- | --- | --- | --- | --- | --- | --- |

@@ -231,8 +231,11 @@ Detail in [`api/README.md`](api/README.md).
   **reweights** the EB score with **real** cross-guide (`guide_correlation_all`) and cross-donor
   (`donor_correlation_hits_mean`) reproducibility — it is a **sensitivity analysis, not a new
   posterior**. Optional, and it does not replace the core; see *Sensitivity audit* in
-  `docs/report.md`. Honest coverage: cross-guide ~78% but cross-donor only ~19% of contrasts → a
-  **neutral weight** where it's missing (a gene is not penalized for lacking donor metadata).
+  `docs/report.md`. Honest coverage: cross-guide ~78% but cross-donor only ~19% of contrasts (the
+  KD-gated subset) → a **neutral weight** where it's missing (a gene is not penalized for lacking
+  donor metadata). *This is the old sensitivity audit; the dedicated per-donor object
+  (`by_donors.h5mu`, Tier 1) later gave **100%** cross-donor coverage — see
+  [`docs/DONOR_ROBUSTNESS.md`](docs/DONOR_ROBUSTNESS.md).*
 - **Model 1 is optional**: remote per-slice access is viable (~4.5 s/row, measured) but latency-bound;
   the official deliverable stands on its own with the local core.
 
