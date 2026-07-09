@@ -119,7 +119,8 @@ assays agree on the strong regulators," not as an absolute, power-free ground tr
 - **#2:** the spine is now effect-magnitude + fingerprints (the parts that touch the multivariate
   structure); the empirical-Bayes model on the count is presented as fast CSV triage, not the flagship.
 - **#5:** the "donor-aware" audit is relabeled to what the data supports — a guide-level
-  sensitivity check with **partial (19%) donor coverage** — pending the real donor axis (Tier 1).
+  sensitivity check with **partial (19%, the KD-gated subset) donor coverage** — since resolved by
+  the real donor axis (Tier 1), which gave **100%** cross-donor coverage (`by_donors.h5mu`).
   The interferon/disease bridge is reduced to a single hypothesis line; its nested requalifications
   are removed (if a claim needs three caveats to survive, we cut the claim).
 

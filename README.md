@@ -25,7 +25,8 @@ working disk has ~10 GB free) — the entire core runs **from the supplementary 
 3. **80/20 EDA** (`scripts/eda.py`) — effect-size distribution, knockdown quality, hubs, reproducibility.
 4. **Model 2 · empirical Bayes** (`scripts/model_hubs.py`) — regulator ranking with uncertainty.
 5. **Ranking audits** (`scripts/audit_ranking.py`) — baselines, bootstrap stability, global vs.
-   context-specific, and a guide-level reproducibility audit (with partial, 19%, donor coverage).
+   context-specific, and a guide-level reproducibility audit (with partial, 19%, donor coverage — the
+   KD-gated subset; the per-donor object later reaches 100%, see Tier 1 / `DONOR_ROBUSTNESS.md`).
 6. **Transcriptional programs** (`scripts/analyze_fingerprints.py`) — organizes top perturbations by
    the fingerprint they induce, reading `.h5ad` layers *by slice* from S3 **without downloading it**.
 7. **Model 1 · uncertainty-aware effect network** (optional, `scripts/model_edges.py`, bonus).
