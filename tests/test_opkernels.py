@@ -152,3 +152,20 @@ def test_bootstrap_cp_conditions_ci_brackets_truth():
     assert C_ref.shape == (3, 3) and boot.shape == (20, 3, 3)
     rng_k = boot.max(axis=1) - boot.min(axis=1)     # (n_boot, rank)
     assert np.percentile(rng_k, 2.5, axis=0).shape == (3,)
+
+
+def test_train_test_standardize_uses_train_only():
+    M = np.array([[1.0, 10.0], [3.0, 30.0], [100.0, 100.0]])
+    train = np.array([[True, True], [True, True], [False, False]])
+    Mc, mu = op.train_test_standardize(M, train)
+    assert np.allclose(mu, [2.0, 20.0]) and np.allclose(Mc[2], [98.0, 80.0])
+
+
+def test_soft_impute_recovers_low_rank():
+    rng = np.random.default_rng(0)
+    M = rng.normal(size=(30, 2)) @ rng.normal(size=(2, 20))
+    obs = rng.random(M.shape) > 0.3
+    Mhat = op.soft_impute(M, obs, 2, n_iter=200)
+    held = ~obs
+    r2 = 1 - np.sum((M[held] - Mhat[held]) ** 2) / np.sum((M[held] - M[obs].mean()) ** 2)
+    assert r2 > 0.9

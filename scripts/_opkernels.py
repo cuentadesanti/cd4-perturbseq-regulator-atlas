@@ -204,3 +204,24 @@ def bootstrap_cp_conditions(tensor, mask, rank, n_boot=100, random_state=0, subs
                 Cc[:, k] *= -1
         boot[b] = Cc
     return f0[2], boot
+
+
+def train_test_standardize(M, train_mask):
+    M = np.asarray(M, float); mu = np.zeros(M.shape[1])
+    for j in range(M.shape[1]):
+        col = M[train_mask[:, j], j]
+        mu[j] = col.mean() if col.size else 0.0
+    return M - mu[None, :], mu
+
+
+def soft_impute(M, observed_mask, rank, n_iter=100, tol=1e-4):
+    M = np.asarray(M, float); X = np.where(observed_mask, M, 0.0); Xr = X; prev = np.inf
+    for _ in range(n_iter):
+        U, s, Vt = np.linalg.svd(X, full_matrices=False)
+        Xr = (U[:, :rank] * s[:rank]) @ Vt[:rank]
+        X = np.where(observed_mask, M, Xr)
+        change = np.linalg.norm(Xr - X) / (np.linalg.norm(X) + 1e-12)
+        if abs(prev - change) < tol:
+            break
+        prev = change
+    return Xr
