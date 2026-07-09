@@ -77,3 +77,22 @@ Principal angles between top-k gene-program subspaces across **disjoint** donor 
 ## Status
 
 Pilot complete. Descriptive flagship (Step 2): pooling proven via clean gated factors; program *naming* limited by the offline enrichment panel. Predictive flagship (Step 3b): a clean out-of-panel win → escalate. Donor step: awaiting the per-donor fetch.
+
+
+## Escalation to 3106 (Option A, executed)
+
+Reproduce: rebuild `operator-tensor` at `--n-total 3106`, then the pipeline. Escalation outputs are suffixed `_3106` (the `.csv`/`.png` without a suffix remain the 800-pilot record — the escalation is additive, never destructive, so the pilot↔3106 comparison that *is* the result stays verifiable).
+
+**The axis scales 4× clean, and the predictive advantage generalizes — measured, not projected.** Sweeping `--n-total` with the confound guard as arbiter, the guard-clean ceiling turned out to be the **entire above-floor set — 3106 regulators** (confound ρ = **−0.006**; the z-space confound *improved* as the panel grew — +0.08 at 800 → +0.030 at 2000 → +0.012 at 2500 → −0.006 at 3106 — refuting the raw-space expectation that 3106 would fail). The power gate stayed clean at 4× (max |ρ| = **0.049**, no PC confounded): the larger, weaker-tail panel did not reintroduce power.
+
+**Prediction (3b), the flagship, holds against the pre-registered bar — apples-to-apples.** On 621 held-out out-of-panel regulators, the low-rank model beats persistence at all 50 ranks, **though the model's own R² peaks at rank 7 and declines thereafter** (overfitting) — a robust *advantage* over baseline, on genuinely low-rank structure. Restricted to strong regulators (matched to the pilot's type), the **margin (model − persistence) is +0.332 ≈ the pilot's +0.330** — the relative predictive advantage generalizes to 4× the axis and is not an artifact of test-set composition. (The weak stratum shows a *larger* margin, +0.470, but only because persistence collapses there — −0.427 — not because absolute prediction is better.)
+
+**But the absolute precision softens at scale, and we report it.** The model's absolute R² fell — pilot 0.154 → 0.089 **even in the strength-matched strong stratum**. Restricting to strong regulators recovers only *part* of the drop (0.074 → 0.089), so the residual is a genuine **scale effect**: a larger, more heterogeneous training population makes the shared low-rank structure a slightly worse per-regulator predictor, even at equal strength. **The relative margin generalizes; the absolute precision does not fully.** Reporting both halves is what keeps this research-worthy rather than an inflated headline.
+
+**The out-of-panel predictive structure is effectively low-rank (~7) at this scale.** The 3b curve peaks at rank 7 and declines through rank 50 — a genuine turnover, not the pilot's right-censored "still climbing" (rank-11, sweep cut at 12). This licenses a low-dimensionality claim **for the ~7 components that predict unseen regulators — not the full operator's rank** — and it is a property of this 3106/holdout configuration, **not an intrinsic constant** (a 6209 run may move it).
+
+**CP re-confirms pooling at 3106.** Even at reduced config (`--stab-subsample 250 --boot-n 50`), **2 clean factors are gated with bootstrap CIs excluding flat** (peaks Rest and Stim8hr) and **2 clean factors are constitutive** — positive proof the representation stays genuinely pooled at 4× the axis (cleaner than the pilot, which had no clean constitutive factor). The full-config bootstrap is deferred to cluster but was not needed for the re-confirmation; a reduced-config CP has less bootstrap power, so a null there would not be evidence against pooling — here it is not null, it re-confirms.
+
+**Net (the honest headline):** *the predictive advantage over baseline generalizes to 4× the regulator axis and is low-rank (~7)* — with representation clean (ρ=−0.006), power-gate holding (0.049), pooling re-confirmed, and the explicit caveat that absolute predictive precision softens at scale. **Not** "predicts the genome." Per the escalation trigger, this clean out-of-panel result is the evidence that would justify Option B (the `lfcSE` sub-floor build) — *if and only if* the low-power tail is specifically the target.
+
+*Tooling: `soft_impute` was switched to a truncated-SVD (`svds` top-k) kernel — identical to full-SVD truncation to machine precision (pinned by a 1e-13 equivalence regression test, `test_soft_impute_matches_full_svd_reference`), ~10× faster — which made the rank-50 sweep and the 6209 escalation tractable.*

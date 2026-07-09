@@ -33,13 +33,13 @@ meaningless. The guard exists to stop exactly that.
 
 1. **The power floor alone does NOT make the tensor guard-clean.** The selection rule has two parts —
    a median cell-count floor *and* ranking by `n_downstream` (breadth). The floor removes the
-   worst low-power tail, but the confound still grows as you add more regulators. At "all regulators
-   above the floor" (~3106) the *raw* confound is high and rising (≈ −0.28 on panel genes, −0.36 on
-   all genes) — so 3106 is **very likely to fail the guard**, but note we established this from the
-   raw numbers only; we never built the 3106 tensor and ran the z-guard on it. (This is consistent
-   with fact 2 below: raw predicts *roughly*, the guard decides. Don't take "3106 fails" as measured —
-   build it and let the guard rule if you want the real answer.) It is the breadth-ranking to a
-   *top-N* that keeps the confound down. So the question is never "floor or no floor," it is
+   worst low-power tail, but the *raw* confound still grows as you add more regulators (≈ −0.28 on panel genes, −0.36 on all
+   genes at ~3106), which led an earlier draft of this plan to predict the full above-floor set would
+   fail the guard. **Measured, it did NOT.** Building and running the guard at each size showed the
+   *z-space* confound stays near zero and even *improves* as the panel grows: **+0.08 at N=800 →
+   +0.030 at 2000 → +0.012 at 2500 → −0.006 at the full 3106** — the entire above-floor set is
+   guard-clean. That is fact 2 in action: raw does not predict the guard, not even the sign. It is the
+   breadth-ranking to a *top-N* that keeps the confound down. So the question is never "floor or no floor," it is
    **"what is the largest top-N that still passes the guard."**
 
 2. **You cannot predict the guard result from raw log-FC numbers. Do not try.** We have exactly one
@@ -223,9 +223,11 @@ and reporting it honestly (including "weakened") is the job.
 
 ## 9. What NOT to do
 
-- **Do not weaken or remove the confound guard to fit a bigger panel.** If a large panel trips the
-  guard (3106 very likely will, given its raw confound), that is the guard working. If you want 6209,
-  that's Option B (a new method), not a looser threshold.
+- **Do not weaken or remove the confound guard to fit a bigger panel.** If a panel trips the
+  guard, that is the guard working — not an obstacle. (The full above-floor 3106 panel did *not* trip
+  it: measured ρ = −0.006. The guard exists to catch a genuinely confounded selection, e.g. dropping
+  the floor for the sub-floor tail.) If you want 6209, that's Option B (a new method), not a looser
+  threshold.
 - **Do not pick `--n-total` from a raw→z extrapolation table.** We tried; it mis-predicts the one
   point we can check. Let the guard decide.
 - **Do not claim an effective rank without a plateau.** Predictive ≠ low-dimensional.
