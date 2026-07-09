@@ -8,6 +8,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 from scipy.stats import spearmanr, hypergeom
+from scipy.linalg import subspace_angles, qr
 from statsmodels.stats.multitest import multipletests
 
 
@@ -225,3 +226,16 @@ def soft_impute(M, observed_mask, rank, n_iter=100, tol=1e-4):
             break
         prev = change
     return Xr
+
+
+def principal_angles(Va, Vb):
+    Qa = qr(np.asarray(Va, float), mode="economic")[0]
+    Qb = qr(np.asarray(Vb, float), mode="economic")[0]
+    return np.sort(np.cos(subspace_angles(Qa, Qb)) ** 2)[::-1]
+
+
+def random_subspace_null(G, k, n=1000, random_state=0):
+    rng = np.random.default_rng(random_state)
+    means = np.array([principal_angles(rng.normal(size=(G, k)), rng.normal(size=(G, k))).mean()
+                      for _ in range(n)])
+    return float(means.mean()), float(np.percentile(means, 95))

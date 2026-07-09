@@ -169,3 +169,19 @@ def test_soft_impute_recovers_low_rank():
     held = ~obs
     r2 = 1 - np.sum((M[held] - Mhat[held]) ** 2) / np.sum((M[held] - M[obs].mean()) ** 2)
     assert r2 > 0.9
+
+
+def test_principal_angles_identical_subspace():
+    V = np.random.default_rng(0).normal(size=(50, 4))
+    assert np.allclose(op.principal_angles(V, V.copy()), 1.0, atol=1e-6)
+
+
+def test_principal_angles_orthogonal_subspace():
+    Va = np.zeros((20, 2)); Va[0, 0] = Va[1, 1] = 1.0
+    Vb = np.zeros((20, 2)); Vb[2, 0] = Vb[3, 1] = 1.0
+    assert np.allclose(op.principal_angles(Va, Vb), 0.0, atol=1e-6)
+
+
+def test_random_subspace_null_small_for_high_dim():
+    m, p95 = op.random_subspace_null(200, 4, n=200, random_state=0)
+    assert m < 0.1 and p95 >= m
