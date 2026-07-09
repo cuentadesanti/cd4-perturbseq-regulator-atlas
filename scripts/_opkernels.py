@@ -6,7 +6,9 @@ Mirrors the shared-helper convention of scripts/_figstyle.py.
 """
 from __future__ import annotations
 import numpy as np
-from scipy.stats import spearmanr
+import pandas as pd
+from scipy.stats import spearmanr, hypergeom
+from statsmodels.stats.multitest import multipletests
 
 
 def assemble_tensor(matrix, obs, gene_idx, cond_order):
@@ -65,3 +67,50 @@ def spearman_power(tensor, mask, n_cells):
     if len(norms) < 3:
         return float("nan")
     return float(spearmanr(norms, ncell).statistic)
+
+
+def varimax(loadings, gamma=1.0, max_iter=100, tol=1e-6):
+    """Kaiser-normalized VARIMAX rotation of a (G, k) loading matrix.
+
+    gamma=1.0 is varimax (maximizes the per-column variance of squared loadings ->
+    simple structure ACROSS factors). Do NOT set gamma=0 (that is quartimax, a
+    different criterion that tends to a general factor). Convergence uses the
+    canonical Kaiser ratio criterion on the singular-value sum (the objective is
+    monotone non-decreasing under this algorithm); a rotation-change tolerance can
+    fire on the first step and exit at a non-simple-structure solution.
+    """
+    L = np.asarray(loadings, dtype=np.float64)
+    G, k = L.shape
+    if k < 2:
+        return L.copy(), np.eye(k)
+    h = np.sqrt((L ** 2).sum(axis=1, keepdims=True)); h[h == 0] = 1.0
+    Ln = L / h
+    Rm = np.eye(k)
+    d_old = 0.0
+    for _ in range(max_iter):
+        Lr = Ln @ Rm
+        u, s, vt = np.linalg.svd(
+            Ln.T @ (Lr ** 3 - (gamma / G) * Lr @ np.diag((Lr ** 2).sum(axis=0))))
+        Rm = u @ vt
+        d = s.sum()
+        if d_old != 0 and d / d_old < 1 + tol:
+            break
+        d_old = d
+    return (Ln @ Rm) * h, Rm
+
+
+def hypergeometric_enrichment(gene_list, gene_sets, background):
+    bg = set(background); drawn = set(gene_list) & bg
+    M, n_drawn = len(bg), len(drawn)
+    rows = []
+    for name, members in gene_sets.items():
+        setg = set(members) & bg; K = len(setg)
+        overlap = drawn & setg; x = len(overlap)
+        p = hypergeom.sf(x - 1, M, K, n_drawn) if K > 0 and n_drawn > 0 else 1.0
+        rows.append(dict(set_name=name, n_overlap=x, set_size=K, n_drawn=n_drawn,
+                         background_size=M, pvalue=float(p),
+                         overlap_genes=",".join(sorted(overlap))))
+    df = pd.DataFrame(rows)
+    if len(df):
+        df["fdr"] = multipletests(df["pvalue"], method="fdr_bh")[1]
+    return df.sort_values("pvalue").reset_index(drop=True)

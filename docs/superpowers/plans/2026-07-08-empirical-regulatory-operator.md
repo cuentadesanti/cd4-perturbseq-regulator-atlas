@@ -426,13 +426,25 @@ git commit -m "feat(operator): Step 0 driver — z-score expanded-panel tensor w
 - [ ] **Step 1: Write the failing tests**
 
 ```python
-def test_varimax_recovers_axis_aligned_structure():
-    L = np.zeros((6, 2)); L[:3, 0] = 1.0; L[3:, 1] = 1.0
-    th = np.pi / 6
-    Rm = np.array([[np.cos(th), -np.sin(th)], [np.sin(th), np.cos(th)]])
-    rot, _ = op.varimax(L @ Rm.T)
+def _varimax_crit(X):
+    return float(((X ** 2).var(axis=0)).sum())   # varimax objective
+
+
+def test_varimax_recovers_structure_and_is_varimax():
+    # ASYMMETRIC simple structure (a symmetric/balanced toy is a saddle for varimax),
+    # mixed by a random orthogonal rotation for varimax to undo.
+    rng = np.random.default_rng(0)
+    L = np.zeros((9, 3))
+    L[0:4, 0] = [0.9, 0.8, 0.7, 0.6]; L[4:7, 1] = [0.85, 0.75, 0.65]; L[7:9, 2] = [0.9, 0.5]
+    Q, _ = np.linalg.qr(rng.normal(size=(3, 3)))
+    M = L @ Q
+    rot, R = op.varimax(M)
     dom = np.abs(rot).max(axis=1) / (np.abs(rot).sum(axis=1) + 1e-9)
-    assert (dom > 0.9).mean() >= 5 / 6
+    assert (dom > 0.85).mean() >= 8 / 9                      # recovers simple structure
+    assert _varimax_crit(rot) > _varimax_crit(M) + 1e-6     # is VARIMAX, did not early-stop
+    crits = [_varimax_crit(op.varimax(M, max_iter=t)[0]) for t in range(1, 8)]
+    assert all(crits[i + 1] >= crits[i] - 1e-9 for i in range(len(crits) - 1))  # monotone
+    assert np.allclose(R @ R.T, np.eye(3), atol=1e-6)       # orthonormal
 
 
 def test_hypergeometric_enrichment_flags_planted_set():
