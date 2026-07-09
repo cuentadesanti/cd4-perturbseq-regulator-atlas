@@ -52,7 +52,7 @@ The full regulatory operator has **6209** regulators KD-significant in all 3 con
 ## Task 1: Kernel — tensor assembly + RMS condition normalization + confound meter
 
 **Files:**
-- Create: `scripts/_operator.py`, `scripts/__init__.py` (empty), `tests/test_operator.py`
+- Create: `scripts/_operator.py`, `tests/conftest.py`, `tests/test_operator.py`
 - Modify: `requirements.txt`
 - Test: `tests/test_operator.py`
 
@@ -64,11 +64,11 @@ The full regulatory operator has **6209** regulators KD-significant in all 3 con
 - [ ] **Step 1: Write the failing tests**
 
 ```python
-# tests/test_operator.py
+# tests/test_operator.py  (tests/conftest.py puts scripts/ on sys.path)
 import numpy as np
 import pandas as pd
 import pytest
-from scripts import _operator as op
+import _operator as op
 
 
 def _toy_obs():
@@ -126,10 +126,13 @@ def test_spearman_power_detects_planted_confound():
 Run: `python -m pytest tests/test_operator.py -q`
 Expected: FAIL — `ModuleNotFoundError` / `AttributeError: ... 'assemble_tensor'`.
 
-- [ ] **Step 3: Create the package marker and kernel module**
+- [ ] **Step 3: Create the conftest shim and kernel module**
 
-Create empty `scripts/__init__.py`:
+Create `tests/conftest.py` (puts `scripts/` on `sys.path` so tests can `import _operator`; drivers run from `scripts/` and import it bare too — matching the repo's `import _figstyle` convention):
 ```python
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 ```
 
 Create `scripts/_operator.py`:
@@ -217,7 +220,7 @@ Expected: PASS (3 passed).
 - [ ] **Step 5: Commit**
 
 ```bash
-git add scripts/__init__.py scripts/_operator.py tests/test_operator.py requirements.txt
+git add tests/conftest.py scripts/_operator.py tests/test_operator.py requirements.txt
 git commit -m "feat(operator): tensor assembly, RMS condition normalization, confound meter kernels"
 ```
 
@@ -260,8 +263,8 @@ import json
 from pathlib import Path
 import numpy as np
 import pandas as pd
-from scripts import _operator as op
-from scripts.analyze_fingerprints import read_matrix, build_panel
+import _operator as op
+from analyze_fingerprints import read_matrix, build_panel
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE = ROOT / "data" / "cache"
@@ -502,25 +505,17 @@ git commit -m "feat(operator): varimax + offline hypergeometric enrichment kerne
 ## Task 4: Step 1 driver — gene programs from the SVD (with power gate)
 
 **Files:**
-- Create: `scripts/decompose_operator_svd.py`, `data/genesets/operator_genesets.gmt`
+- Create: `scripts/decompose_operator_svd.py`
 - Modify: `Makefile` (add `operator-svd`)
 - Test: run on real data; acceptance = ≥2 of top-5 programs get an FDR label AND their power gate is clean.
+
+**Note (controller fix):** gene sets are an **inline `FALLBACK_GENESETS` dict** in the driver (matching the existing `COMPLEXES` dict convention in `analyze_fingerprints.py`), NOT a committed file — `/data/` is gitignored so a `data/genesets/*.gmt` could not be committed. `load_genesets()` starts from the inline dict and merges any `.gmt` files found in an optional (gitignored) `data/genesets/` dir if present.
 
 **Interfaces:**
 - Consumes: `data/cache/operator_tensor.npz`; `_operator.varimax`, `hypergeometric_enrichment`.
 - Produces: `docs/tables/operator_svd_programs.csv` (`rotation, pc, gene, loading, tail`), `docs/tables/operator_svd_enrichment.csv` (`rotation, pc, tail, set_name, ..., fdr`), `docs/tables/operator_svd_power.csv` (`pc, power_rho, power_confounded`), `docs/figures/32_operator_svd_scree.png`. Exports `load_genesets()` (reused by Tasks 6, 12).
 
-- [ ] **Step 1: Create the offline gene-set fallback**
-
-`data/genesets/operator_genesets.gmt` (tab-separated `set_name<TAB>description<TAB>gene...`; extend by dropping any MSigDB `.gmt` here):
-```
-IFN_ISG	interferon_stimulated	ISG15	MX1	MX2	OAS1	OAS2	OAS3	IFIT1	IFIT2	IFIT3	IFI6	IRF7	STAT1	STAT2	IFI44	IFI44L	RSAD2	USP18
-TCR_PROXIMAL	tcr_signaling	ZAP70	LCK	LAT	CD3D	CD3E	CD3G	CD247	FYN	ITK	PLCG1	LCP2	VAV1	PIK3CD	PRKCQ	CARD11	BCL10	MALT1
-CHROMATIN_SAGA	saga_complex	TADA1	TADA2A	TADA2B	TADA3	SUPT20H	SUPT7L	TAF5L	TAF6L	SGF29	ATXN7	ATXN7L3	USP22	ENY2	KAT2A	KAT2B	SUPT3H
-MEDIATOR	mediator_complex	MED1	MED12	MED13	MED14	MED23	MED24	CDK8	CDK19	CCNC
-```
-
-- [ ] **Step 2: Write the driver**
+- [ ] **Step 1: Write the driver (gene sets inline; optional `.gmt` merge)**
 
 ```python
 #!/usr/bin/env python3
@@ -544,23 +539,41 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from scipy.stats import spearmanr
-from scripts import _operator as op
+import _operator as op
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE = ROOT / "data" / "cache"
 TAB = ROOT / "docs" / "tables"
 FIG = ROOT / "docs" / "figures"
-GENESETS = ROOT / "data" / "genesets"
+GENESETS = ROOT / "data" / "genesets"    # optional, gitignored; merged if present
 ANCHOR = ["ISG15", "MX1", "OAS1", "IFIT1", "STAT1", "IFI6", "IRF7"]
+
+# Inline curated gene sets (offline default; matches the COMPLEXES dict convention
+# in analyze_fingerprints.py). /data/ is gitignored so these are NOT a committed file.
+FALLBACK_GENESETS = {
+    "IFN_ISG": ["ISG15", "MX1", "MX2", "OAS1", "OAS2", "OAS3", "IFIT1", "IFIT2",
+                "IFIT3", "IFI6", "IRF7", "STAT1", "STAT2", "IFI44", "IFI44L",
+                "RSAD2", "USP18"],
+    "TCR_PROXIMAL": ["ZAP70", "LCK", "LAT", "CD3D", "CD3E", "CD3G", "CD247", "FYN",
+                     "ITK", "PLCG1", "LCP2", "VAV1", "PIK3CD", "PRKCQ", "CARD11",
+                     "BCL10", "MALT1"],
+    "CHROMATIN_SAGA": ["TADA1", "TADA2A", "TADA2B", "TADA3", "SUPT20H", "SUPT7L",
+                       "TAF5L", "TAF6L", "SGF29", "ATXN7", "ATXN7L3", "USP22",
+                       "ENY2", "KAT2A", "KAT2B", "SUPT3H"],
+    "MEDIATOR": ["MED1", "MED12", "MED13", "MED14", "MED23", "MED24", "CDK8",
+                 "CDK19", "CCNC"],
+}
 
 
 def load_genesets():
-    sets = {}
-    for gmt in sorted(GENESETS.glob("*.gmt")):
-        for line in gmt.read_text().splitlines():
-            p = line.rstrip("\n").split("\t")
-            if len(p) >= 3:
-                sets[p[0]] = p[2:]
+    """Inline curated sets, plus any optional .gmt files under data/genesets/."""
+    sets = dict(FALLBACK_GENESETS)
+    if GENESETS.exists():
+        for gmt in sorted(GENESETS.glob("*.gmt")):
+            for line in gmt.read_text().splitlines():
+                p = line.rstrip("\n").split("\t")
+                if len(p) >= 3:
+                    sets[p[0]] = p[2:]
     return sets
 
 
@@ -642,12 +655,12 @@ if __name__ == "__main__":
     main()
 ```
 
-- [ ] **Step 3: Run it**
+- [ ] **Step 2: Run it**
 
 Run: `python scripts/decompose_operator_svd.py --k 10 --tail-pct 2 --rotate`
 Expected: writes 3 tables + scree; prints the PCs that are both FDR-labeled and power-clean.
 
-- [ ] **Step 4: Verify acceptance**
+- [ ] **Step 3: Verify acceptance**
 
 Run:
 ```bash
@@ -659,7 +672,7 @@ print(p.to_string(index=False))"
 ```
 Expected (acceptance): **≥2 of the top-5 programs** carry a clean FDR<0.05 label (IFN and TCR-proximal expected) **and are not power-confounded**. In z-score space the power gate should be clean for the leading programs; if a top program is `power_confounded=True`, report it (a program that survived the representation fix but still tracks power is a real caveat).
 
-- [ ] **Step 5: Makefile + commit**
+- [ ] **Step 4: Makefile + commit**
 
 Add `operator-svd` to `.PHONY` and:
 ```makefile
@@ -668,7 +681,7 @@ operator-svd:
 ```
 
 ```bash
-git add scripts/decompose_operator_svd.py data/genesets/operator_genesets.gmt Makefile \
+git add scripts/decompose_operator_svd.py Makefile \
         docs/tables/operator_svd_*.csv docs/figures/32_operator_svd_scree.png
 git commit -m "feat(operator): Step 1 driver — SVD gene programs with power gate + offline enrichment"
 ```
@@ -913,8 +926,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from scipy.stats import spearmanr
-from scripts import _operator as op
-from scripts.decompose_operator_svd import load_genesets
+import _operator as op
+from decompose_operator_svd import load_genesets
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE = ROOT / "data" / "cache"; TAB = ROOT / "docs" / "tables"; FIG = ROOT / "docs" / "figures"
@@ -1179,7 +1192,7 @@ import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from scripts import _operator as op
+import _operator as op
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE = ROOT / "data" / "cache"; TAB = ROOT / "docs" / "tables"; FIG = ROOT / "docs" / "figures"
@@ -1418,7 +1431,7 @@ import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from scripts import _operator as op
+import _operator as op
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE = ROOT / "data" / "cache"; TAB = ROOT / "docs" / "tables"; FIG = ROOT / "docs" / "figures"
