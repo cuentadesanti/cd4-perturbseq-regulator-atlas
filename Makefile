@@ -1,6 +1,6 @@
 PY := python3
 
-.PHONY: all eda model audit report spike edges eda-edges repro-meta fingerprints spectral class-programs specificity-control disease-overlap module-gwas convergence-extras convergence-figures api clean pipeline help
+.PHONY: all eda model audit report spike edges eda-edges repro-meta fingerprints operator-tensor spectral class-programs specificity-control disease-overlap module-gwas convergence-extras convergence-figures api clean pipeline help
 
 help:
 	@echo "Targets:"
@@ -56,6 +56,11 @@ repro-meta:
 # --matrix zscore reads a remote slice; --matrix log_fc uses the local cache if present.
 fingerprints:
 	$(PY) scripts/analyze_fingerprints.py --n 200 --matrix zscore --top-genes 2000
+
+# Step 0: regulator x gene x condition z-score tensor over the expanded ~800-reg panel.
+# Fail-closed: refuses to cache unless the representation is pooled z-score (three guards).
+operator-tensor:
+	$(PY) scripts/build_operator_tensor.py --n-total 800 --top-genes 2000
 
 # spectral sanity check on the program assignments (needs `make fingerprints` first)
 spectral:
