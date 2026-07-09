@@ -1,6 +1,6 @@
 PY := python3
 
-.PHONY: all eda model audit report spike edges eda-edges repro-meta fingerprints operator-tensor operator-svd operator-cp spectral class-programs specificity-control disease-overlap module-gwas convergence-extras convergence-figures api clean pipeline help
+.PHONY: all eda model audit report spike edges eda-edges repro-meta fingerprints operator-tensor operator-svd operator-cp operator-completion spectral class-programs specificity-control disease-overlap module-gwas convergence-extras convergence-figures api clean pipeline help
 
 help:
 	@echo "Targets:"
@@ -14,6 +14,7 @@ help:
 	@echo "  make eda-edges- EDA of the effect network (uses robust_edges.csv if present)"
 	@echo "  make repro-meta - extract reproducibility .obs from the h5ad (OPTIONAL, remote)"
 	@echo "  make fingerprints - transcriptional programs (PCA/similarity/clusters) [remote zscore or log_fc cache]"
+	@echo "  make operator-completion - Step 3: out-of-panel condition extrapolation (flagship) + entry-wise sanity"
 	@echo "  make spectral - spectral sanity check on the program assignments (after fingerprints)"
 	@echo "  make class-programs - balanced 30-regulator panel: distinct classes → distinct programs? (after fingerprints)"
 	@echo "  make convergence-extras - specificity control + disease overlap (fully offline)"
@@ -70,6 +71,13 @@ operator-cp:
 # and a power gate on the left factors (needs `make operator-tensor` first).
 operator-svd:
 	$(PY) scripts/decompose_operator_svd.py --k 10 --tail-pct 2 --rotate
+
+# Step 3: is the operator recoverably low-rank? 3b (flagship) holds out (regulator,
+# Stim48hr) fibers preferentially for out-of-panel regulators and predicts them from
+# Rest+Stim8hr via low-rank soft-impute, vs a persistence baseline (Stim48hr:=Stim8hr).
+# 3a (sanity) is random entry-wise completion (elbow only; needs `make operator-tensor` first).
+operator-completion:
+	$(PY) scripts/operator_completion.py --max-rank 12 --holdout 0.2
 
 # spectral sanity check on the program assignments (needs `make fingerprints` first)
 spectral:
