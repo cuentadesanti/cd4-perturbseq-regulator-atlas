@@ -10,7 +10,7 @@
 
 ## Scope decision (this is Option 1, the pilot)
 
-The full regulatory operator has **6209** regulators KD-significant in all 3 conditions. This plan deliberately runs the **Option 1 pilot**: an expanded **~800-regulator** panel (the original 200-regulator fingerprint panel ∪ the top ~600 new regulators by effect), in z-score space. Rationale: clean representation + tractable CP runtime + one small (~0.1 GB) fetch, while still being ~4× broader than the existing fingerprint work. **Escalation trigger (Task 11):** if Step 3b beats persistence cleanly on the out-of-panel regulators, that is the evidence to escalate to Option 3 (full 6209 axis, completion as the flagship, CP sweep on cluster compute). Decide on evidence, not by relitigating scope.
+The full regulatory operator has **6209** regulators KD-significant in all 3 conditions. This plan deliberately runs the **Option 1 pilot**: an expanded **~800-regulator** panel — the regulators with the broadest downstream footprints (top 800 by `n_downstream`) among those above a **median cell-count floor** — in z-score space. (Ranking by breadth above a power floor is required: ranking by `ontarget_effect_size`, as an earlier draft did, reintroduces the power confound the guard rejects — see Task 2.) ~67 of the 800 overlap the original fingerprint panel; the other ~733 are out-of-panel, and are the held-out set for the Step-3b test. Rationale: clean representation + tractable CP runtime + one small (~0.1 GB) fetch, while still being ~4× broader than the existing fingerprint work. **Escalation trigger (Task 11):** if Step 3b beats persistence cleanly on the out-of-panel regulators, that is the evidence to escalate to Option 3 (full 6209 axis, completion as the flagship, CP sweep on cluster compute). Decide on evidence, not by relitigating scope.
 
 ## Global Constraints
 
@@ -248,8 +248,8 @@ git commit -m "feat(operator): tensor assembly, RMS condition normalization, con
 #!/usr/bin/env python3
 """Step 0 — build the regulator x gene x condition Z-SCORE tensor (expanded panel).
 
-Panel = original 200-regulator fingerprint panel UNION top ~600 NEW regulators
-(KD-significant in all 3 conditions) by ontarget_effect_size. Representation is
+Panel = the top ~800 regulators by n_downstream (breadth) among those KD-significant
+in all 3 conditions AND above the median cell-count floor. Representation is
 the pooled remote layers/zscore (precision-decoupled), fetched once and cached.
 Three fail-closed assertions guarantee the representation is pooled z-score before
 anything is cached.
@@ -283,22 +283,34 @@ def load_obs():
 
 
 def select_expanded_panel(obs, n_total):
-    """original-200 fingerprint panel UNION top-new by effect, all sig in 3 conds."""
+    """Power-floored, breadth-ranked panel (all regulators KD-significant in 3 conds).
+
+    Selection rule (this is load-bearing for the Step-0 confound guard):
+      1. n_cells FLOOR at the median of the all-3-condition population — removes the
+         low-power tail that carries the population's intrinsic norm-vs-power confound.
+      2. Rank the floored set by n_downstream (BREADTH) and take the top n_total.
+    Breadth is the right axis for an operator/program analysis AND is far less
+    power-confounded than ontarget_effect_size (which is z-like: low-cell perturbations
+    get inflated effect sizes and dominate a top-N-by-effect cut, giving raw rho ~ -0.8
+    -> z ~ -0.27, which the guard rejects). Floor alone is NOT enough (effect-ranking
+    re-imports the confound above the floor); the breadth axis is what decorrelates.
+    Verified locally: median floor + top-n by n_downstream -> raw rho ~ -0.05 -> z ~ -0.03.
+    in_original_panel is tagged post-hoc against the 200-regulator fingerprint panel
+    (the overlap, ~67; the ~733 non-overlap are the out-of-panel set for Step 3b).
+    """
     sig = obs[obs["ontarget_significant_bool"]]
     conds = sig.groupby("target_contrast_gene_name")["culture_condition"].apply(
         lambda s: set(s) & set(COND_ORDER))
     all3 = set(conds[conds.apply(lambda s: set(COND_ORDER).issubset(s))].index)
-    original = set(build_panel(obs, 200)["gene"]) & all3
-    eff = (sig[sig["target_contrast_gene_name"].isin(all3)]
-           .groupby("target_contrast_gene_name")["ontarget_effect_size"].max()
-           .sort_values(ascending=False))
-    keep = list(original)
-    for g in eff.index:
-        if len(keep) >= n_total:
-            break
-        if g not in original:
-            keep.append(g)
-    return set(keep), original
+    g3 = sig[sig["target_contrast_gene_name"].isin(all3)]
+    ncell = g3.groupby("target_contrast_gene_name")["n_cells_target"].mean()
+    ndown = g3.groupby("target_contrast_gene_name")["n_downstream"].max()
+    floor = float(np.median(ncell.values))
+    floored = ncell[ncell >= floor].index
+    ranked = ndown.reindex(floored).dropna().sort_values(ascending=False)
+    keep = set(ranked.index[:n_total])
+    original = set(build_panel(obs, 200)["gene"]) & keep
+    return keep, original
 
 
 def main():
@@ -376,7 +388,7 @@ if __name__ == "__main__":
 - [ ] **Step 2: Run it (one-time fetch, then cached)**
 
 Run: `python scripts/build_operator_tensor.py --n-total 800 --top-genes 2000`
-Expected: fetches the z-score slice (~0.1 GB, cached to `panel_zscore_<hash>.npy`), then prints a JSON summary with `n_regulators ≈ 800`, `n_new_regulators ≈ 600`, `rownorm_cv > 0.30`, `anchor_cross_cond_cv > 0.10`, and `n_cells_confound_rho` near 0. If any assertion fails it exits non-zero **without caching** — that is the blocker firing correctly, not a bug to work around.
+Expected: fetches the z-score slice (~0.1 GB, cached to `panel_zscore_<hash>.npy`), then prints a JSON summary with `n_regulators ≈ 800`, `n_new_regulators ≈ 733`, `rownorm_cv > 0.30`, `anchor_cross_cond_cv > 0.10`, and `n_cells_confound_rho` near 0 (≈ −0.03 with this selection). If any assertion fails it exits non-zero **without caching** — that is the blocker firing correctly, not a bug to work around.
 
 - [ ] **Step 3: Verify the artifact and the blocker assertions**
 
@@ -388,7 +400,7 @@ print({k: d[k].shape for k in d.files}); \
 print('confound rho', round(s['n_cells_confound_rho'],3), '| rownorm_cv', round(s['rownorm_cv'],3), \
 '| anchor_cv', round(s['anchor_cross_cond_cv'],3), '| new regs', s['n_new_regulators'])"
 ```
-Expected (acceptance): `tensor`/`mask` are `(≈800, 2000, 3)`; `in_original_panel` is `(≈800,)`; **`|confound rho| < 0.15`** (the −0.68 is gone), `rownorm_cv > 0.30`, `anchor_cv > 0.10`, ~600 new regulators. All three assertions passed (else the file would not exist).
+Expected (acceptance): `tensor`/`mask` are `(≈800, 2000, 3)`; `in_original_panel` is `(≈800,)` (~67 True); **`|confound rho| < 0.15`** (the −0.68 is gone; ≈ −0.03 here), `rownorm_cv > 0.30`, `anchor_cv > 0.10`, ~733 new (out-of-panel) regulators. All three assertions passed (else the file would not exist).
 
 - [ ] **Step 4: Add Makefile target and commit**
 
@@ -1556,7 +1568,7 @@ Required sections (each states the actual produced value; no placeholders):
 
 One matrix, four questions. The operator = effect of every regulator KD on every
 measured gene, built in precision-decoupled z-score space over an ~800-regulator
-expanded panel (original 200 fingerprint panel ∪ top ~600 new by effect).
+expanded panel (top ~800 by n_downstream above a median cell-count floor; ~733 out-of-panel).
 
 ## Representation and why z-score (Step 0)
 - Raw log-FC row-norm vs power: spearman = -0.683 (confound). z-score confound
