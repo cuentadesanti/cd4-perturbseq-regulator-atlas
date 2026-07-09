@@ -1,6 +1,6 @@
 PY := python3
 
-.PHONY: all eda model audit report spike edges eda-edges repro-meta fingerprints operator-tensor operator-svd operator-cp operator-completion operator-donors spectral class-programs specificity-control disease-overlap module-gwas convergence-extras convergence-figures api clean pipeline help
+.PHONY: all eda model audit report spike edges eda-edges repro-meta fingerprints operator operator-tensor operator-svd operator-cp operator-completion operator-donors spectral class-programs specificity-control disease-overlap module-gwas convergence-extras convergence-figures api clean pipeline help
 
 help:
 	@echo "Targets:"
@@ -15,6 +15,7 @@ help:
 	@echo "  make repro-meta - extract reproducibility .obs from the h5ad (OPTIONAL, remote)"
 	@echo "  make fingerprints - transcriptional programs (PCA/similarity/clusters) [remote zscore or log_fc cache]"
 	@echo "  make operator-completion - Step 3: out-of-panel condition extrapolation (flagship) + entry-wise sanity"
+	@echo "  make operator - empirical regulatory operator (z-score): tensor + SVD + CP + completion [+donors if fetched]; see docs/OPERATOR_ANALYSIS.md"
 	@echo "  make spectral - spectral sanity check on the program assignments (after fingerprints)"
 	@echo "  make class-programs - balanced 30-regulator panel: distinct classes → distinct programs? (after fingerprints)"
 	@echo "  make convergence-extras - specificity control + disease overlap (fully offline)"
@@ -59,7 +60,7 @@ fingerprints:
 	$(PY) scripts/analyze_fingerprints.py --n 200 --matrix zscore --top-genes 2000
 
 # Step 0: regulator x gene x condition z-score tensor over the expanded ~800-reg panel.
-# Fail-closed: refuses to cache unless the representation is pooled z-score (three guards).
+# Fail-closed: refuses to cache unless the confound guard passes (|spearman(||slab||,n_cells)|<0.15).
 operator-tensor:
 	$(PY) scripts/build_operator_tensor.py --n-total 800 --top-genes 2000
 
@@ -83,6 +84,10 @@ operator-completion:
 # Principal angles between top-k gene-program subspaces of DISJOINT donor pairs only.
 operator-donors:
 	$(PY) scripts/operator_donor_angles.py --k 5
+
+# empirical regulatory operator umbrella: Step 0 fetch is one-time then cached; Steps 1-3 local;
+# operator-donors prints NEEDS-DATA unless per-donor matrices are fetched.
+operator: operator-tensor operator-svd operator-cp operator-completion operator-donors
 
 # spectral sanity check on the program assignments (needs `make fingerprints` first)
 spectral:
