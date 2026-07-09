@@ -1,6 +1,6 @@
 PY := python3
 
-.PHONY: all eda model audit report spike edges eda-edges repro-meta fingerprints operator-tensor operator-svd spectral class-programs specificity-control disease-overlap module-gwas convergence-extras convergence-figures api clean pipeline help
+.PHONY: all eda model audit report spike edges eda-edges repro-meta fingerprints operator-tensor operator-svd operator-cp spectral class-programs specificity-control disease-overlap module-gwas convergence-extras convergence-figures api clean pipeline help
 
 help:
 	@echo "Targets:"
@@ -61,6 +61,9 @@ fingerprints:
 # Fail-closed: refuses to cache unless the representation is pooled z-score (three guards).
 operator-tensor:
 	$(PY) scripts/build_operator_tensor.py --n-total 800 --top-genes 2000
+
+operator-cp:
+	$(PY) scripts/decompose_operator_cp.py --rank auto --scale-control rms
 
 # Step 1: gene programs = right singular vectors of the operator matrix (z-score),
 # with an ISG-anchor orientation, optional varimax rotation, offline enrichment,
