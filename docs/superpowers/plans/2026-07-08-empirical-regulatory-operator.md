@@ -1686,10 +1686,19 @@ def main():
     args = ap.parse_args()
     d = np.load(CACHE / "operator_tensor.npz", allow_pickle=True)
     tensor = d["tensor"]; regs, genes = d["regulators"].astype(str), d["genes"].astype(str)
+    # dedup the donor-robust shortlist (it repeats rows per condition/contrast → would seed
+    # duplicate self-pairs), then top up from the panel's regulator-genes to n_robust.
     rp = TAB / "top_robust_regulators.csv"
-    shortlist = pd.read_csv(rp).iloc[:, 0].astype(str).tolist() if rp.exists() else list(regs)
     rset, gset = set(regs), set(genes)
-    block = [g for g in shortlist if g in rset and g in gset][: args.n_robust]
+    shortlist = (list(dict.fromkeys(pd.read_csv(rp).iloc[:, 0].astype(str).tolist()))
+                 if rp.exists() else [])
+    block = [g for g in shortlist if g in rset and g in gset]
+    for g in regs:
+        if len(block) >= args.n_robust:
+            break
+        if g in gset and g not in block:
+            block.append(g)
+    block = block[: args.n_robust]
     if len(block) < 10:
         print(f"[deconv] square block too small ({len(block)}); not supported by data.")
     ri = [list(regs).index(g) for g in block]; gi = [list(genes).index(g) for g in block]
