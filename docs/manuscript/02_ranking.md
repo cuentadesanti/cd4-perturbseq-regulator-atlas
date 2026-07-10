@@ -47,9 +47,13 @@ high-ranking regulators are robust. We carry donor-robustness as an annotation c
 ranking (`hub_ranking_bayes.csv`), not as a re-sorting criterion. This is deliberate: re-ranking on
 donor concordance would silently hide the regulators that rank high but fail reproducibility, which
 is exactly the population a reader needs to see. As a column, it lets a reader see "ranked highly,
-but fails cross-donor concordance" — for example a regulator carried by a single guide with no
-cross-guide check stays visible at its rank, flagged rather than demoted
-(Figure&nbsp;1 (`docs/figures/19_reproducibility_aware_ranking_shift.png`)).
+but fails cross-donor concordance": SMG1, for example, stays at rank 24 in the primary ranking
+flagged `donor_robust = False`, rather than being silently demoted. That this matters is shown by
+the alternative — a reproducibility-aware re-ranking would push SMG1 from rank 24 to 288
+(Figure&nbsp;S2, `docs/figures/19_reproducibility_aware_ranking_shift.png`) — so re-sorting on
+reproducibility would bury exactly the high-ranked-but-unreproducible regulators a reader most
+needs to see. We therefore keep the primary ranking (`hub_ranking_bayes.csv`) intact and carry
+reproducibility as the flag.
 
 ## The ranking is robust to cis-off-target exclusion
 

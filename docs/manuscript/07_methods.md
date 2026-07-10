@@ -15,7 +15,7 @@ laptop; no step requires the cell-level `.h5ad`/`.h5mu` files.
 Per-regulator effect profiles are the calibrated differential-expression estimates from the
 screen's harmonized pipeline; we do not re-derive them. Because raw log-fold-change magnitude is
 confounded with statistical power — regulators assayed in more cells show systematically larger
-apparent effects (Spearman ρ between per-regulator effect-vector norm and cell count ≈ −0.69 in
+apparent effects (Spearman ρ between per-regulator effect-vector norm and cell count = −0.68 in
 raw space) — all operator analyses are performed in a pooled z-score space, in which each entry is
 standardized at the layer level across the full regulator population rather than per condition.
 

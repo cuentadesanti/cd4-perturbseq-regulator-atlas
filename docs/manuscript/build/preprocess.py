@@ -47,14 +47,17 @@ def load_doi_keymap(bib: Path) -> dict:
 
 DOI_KEY = load_doi_keymap(HERE / "refs.bib")
 
-# --- figure floats (author numbering preserved) -----------------------------
+# --- figure floats (author numbering preserved; S* = supplementary) ---------
 FIGURES = {
-    "1": ("docs/figures/19_reproducibility_aware_ranking_shift.png",
-          "**Figure 1. Donor reproducibility is carried as an annotation, not used to "
-          "re-sort the ranking.** Rank change induced when cross-donor reproducibility is "
-          "folded into the breadth-based regulator ranking. Regulators that rank highly but "
-          "fail cross-donor concordance — for example one carried by a single guide with no "
-          "cross-guide check — stay visible at their rank, flagged rather than demoted."),
+    "S2": ("docs/figures/19_reproducibility_aware_ranking_shift.png",
+           "**Figure S2. Why donor-robustness is carried as a flag, not used to re-sort the "
+           "ranking.** A reproducibility-aware re-ranking (right) demotes several top-40 "
+           "regulators that fail cross-donor concordance (yellow) relative to the primary "
+           "breadth-based ranking (left). The same reweighting pushes SMG1 from rank 24 to "
+           "288 — off the top-40 window shown here — which is exactly the "
+           "high-ranked-but-unreproducible case a reader needs to see. We therefore keep the "
+           "primary ranking (`hub_ranking_bayes.csv`) intact and flag donor-robustness "
+           "(`donor_robust = False`) rather than re-sorting on it."),
     "2": ("docs/figures/35_operator_completion_curve_3106.png",
           "**Figure 2. The operator's predictive subspace is low-dimensional and beats "
           "persistence at every rank.** Out-of-panel completion R² for the low-rank fit "
@@ -149,8 +152,17 @@ def convert_citations(text: str) -> str:
 
 
 def strip_float_refs(text: str) -> str:
-    """`Figure N (`path`)` -> `Figure N`; same for Table 1."""
+    """Collapse path-carrying float refs to plain `Figure N` / `Table N`.
+
+    Two ref styles occur in the sources:
+      A. `Figure N (`docs/figures/…`)`   -> `Figure N`
+      B. `(Figure N, `docs/figures/…`)`  -> `(Figure N)`   (path only, parens kept)
+    """
+    # style A (path in its own parens after the label)
     text = re.sub(r"Figure(&nbsp;| )(S?\d+)\s*\(`docs/figures/[^`]+`\)",
+                  r"Figure\g<1>\g<2>", text)
+    # style B (label + path share one paren, comma-separated)
+    text = re.sub(r"Figure(&nbsp;| )(S?\d+),\s*`docs/figures/[^`]+`",
                   r"Figure\g<1>\g<2>", text)
     text = re.sub(r"Table(&nbsp;| )(\d+)\s*\(`docs/tables/[^`]+`\)",
                   r"Table\g<1>\g<2>", text)
@@ -164,7 +176,7 @@ def insert_floats(text: str) -> str:
     out = []
     for p in paras:
         out.append(p)
-        for num in ("1", "2", "3", "S1"):
+        for num in FIGURES:                       # insert at first mention, in ref order
             if num in fig_done:
                 continue
             if re.search(rf"Figure(&nbsp;| ){re.escape(num)}\b", p):
