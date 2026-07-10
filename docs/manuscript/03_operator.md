@@ -35,16 +35,21 @@ stimulation, it would be hard to beat; its negative R² (−0.305 on the full he
 that late stimulation genuinely diverges from early, so any method that beats it is using
 cross-regulator structure to anticipate that divergence.
 
-On 621 held-out out-of-panel regulators, the low-rank model beats persistence **at every rank**,
-with an aggregate margin of Δ R² = +0.379 at rank 7 (Figure&nbsp;2 (`docs/figures/35_operator_completion_curve_3106.png`)). Beating
-the baseline at every rank, rather than at a single tuned rank, is what makes the result a
-property of the operator rather than of a lucky hyperparameter.
+On held-out out-of-panel regulators (~621 per holdout), the low-rank model beats persistence
+**at every rank**, with an aggregate margin of Δ R² = **+0.382 ± 0.011** at rank 7 — mean ± SD
+over 20 independent random holdouts (source `operator_completion_multiseed_3106.csv`),
+confirming the margin is a stable property of the operator, not a single-seed artifact
+(Figure&nbsp;2 (`docs/figures/35_operator_completion_curve_3106.png`)). Beating the baseline at every
+rank, rather than at a single tuned rank, is what makes the result a property of the operator rather
+than of a lucky hyperparameter.
 
 The size of that margin, however, must be read carefully, and stratifying by knockdown strength
 is what keeps it honest (Table&nbsp;1 (`docs/tables/operator_completion_stratified_3106.csv`); source
 `operator_completion_stratified_3106.csv`). The margin is *largest* for weak regulators
 (+0.501, n=310) and *smallest* for strong ones (+0.277 on a median split, n=311; +0.205 on the
-subset matched to the original panel's strength, n=203). This ordering is mechanistic, not
+subset matched to the original panel's strength, n=203); each of these margins is stable across
+the 20 random holdouts (weak +0.514 ± 0.015, strong +0.277 ± 0.018, panel-matched +0.206 ± 0.021;
+source `operator_completion_multiseed_3106.csv`). This ordering is mechanistic, not
 mysterious: persistence is a fair baseline for strongly knocked-down regulators (its R² is only
 −0.146 in the panel-matched stratum) and collapses for weakly knocked-down ones (−0.421), so the
 aggregate margin is, if anything, concentrated where the baseline is weakest. The conservative
