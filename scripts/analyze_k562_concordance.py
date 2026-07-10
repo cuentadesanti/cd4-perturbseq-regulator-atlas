@@ -107,7 +107,7 @@ def main():
 
     KDc = np.array([kdc[r] for r in regs]); KDk = np.array([abs(Keff[kri[r]][gpos[r]]) if r in gpos else np.nan for r in regs])
     rk = lambda x: pd.Series(x).rank(pct=True).to_numpy()
-    mk = np.fmin(rk(KDc), rk(KDk)); okm = np.isfinite(mk)
+    mk = np.fmin(rk(KDc), rk(KDk)); okm = np.isfinite(mk)   # min of the two PER-SIDE percentile ranks
     wp = (rk(KDc) >= .5) & (rk(KDk) >= .5)
     print(f"NULL median={med:.3f} q95={q95:.3f} | SPLIT universal={int((cls=='universal').sum())} "
           f"T-specific={int((cls=='T-specific').sum())} intermediate={int((cls=='intermediate').sum())}")
@@ -119,6 +119,7 @@ def main():
     df = pd.DataFrame({"ensembl": regs, "symbol": [e2s.get(r, r) for r in regs], "pearson_z": obs_r.round(4),
                        "empirical_p": emp_p.round(4), "n_co_measured": n_co, "class": cls,
                        "kd_cd4_abs": np.round(KDc, 3), "kd_k562_ontarget_abs": np.round(KDk, 3),
+                       "min_kd_rank": np.round(mk, 4),   # exact quantity for the power diagnostic (spearman vs pearson_z)
                        "well_powered": wp, "k562_cells": [int(kcells.get(r, 0)) for r in regs]})
     hb = pd.read_csv(TAB / "hub_ranking_bayes.csv")
     df["donor_robust"] = df.symbol.isin(set(hb.loc[hb.get("donor_robust", False) == True, "target_contrast_gene_name"].astype(str)))
