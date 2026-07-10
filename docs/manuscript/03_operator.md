@@ -36,12 +36,12 @@ that late stimulation genuinely diverges from early, so any method that beats it
 cross-regulator structure to anticipate that divergence.
 
 On 621 held-out out-of-panel regulators, the low-rank model beats persistence **at every rank**,
-with an aggregate margin of Δ R² = +0.379 at rank 7 (Figure&nbsp;{{fig:completion_curve}}). Beating
+with an aggregate margin of Δ R² = +0.379 at rank 7 (Figure&nbsp;2 (`docs/figures/35_operator_completion_curve_3106.png`)). Beating
 the baseline at every rank, rather than at a single tuned rank, is what makes the result a
 property of the operator rather than of a lucky hyperparameter.
 
 The size of that margin, however, must be read carefully, and stratifying by knockdown strength
-is what keeps it honest (Table&nbsp;{{tab:stratified}}; source
+is what keeps it honest (Table&nbsp;1 (`docs/tables/operator_completion_stratified_3106.csv`); source
 `operator_completion_stratified_3106.csv`). The margin is *largest* for weak regulators
 (+0.501, n=310) and *smallest* for strong ones (+0.277 on a median split, n=311; +0.205 on the
 subset matched to the original panel's strength, n=203). This ordering is mechanistic, not
@@ -70,12 +70,12 @@ inflated headline.
 ## The predictive subspace is low-dimensional
 
 The rank at which prediction is best is itself informative. The out-of-panel completion R² peaks
-at rank 7 and declines thereafter through rank 50 (Figure&nbsp;{{fig:completion_curve}}) — a genuine
+at rank 7 and declines thereafter through rank 50 (Figure&nbsp;2 (`docs/figures/35_operator_completion_curve_3106.png`)) — a genuine
 turnover, not a curve still climbing at the edge of the swept range. This licenses a
 low-dimensionality statement, but a carefully scoped one: it is the **predictive subspace** that
 is low-dimensional (~7 components), not the operator as a whole. The operator's own effective rank,
 measured on its singular spectrum, is roughly an order of magnitude higher
-(Figure&nbsp;{{fig:svd_scree}}); the ~7-dimensional structure is the part of it that generalizes to
+(Figure&nbsp;S1 (`docs/figures/32_operator_svd_scree_3106.png`)); the ~7-dimensional structure is the part of it that generalizes to
 unseen regulators. The distinction matters — a reader who took "low-rank operator" at face value
 would expect a spectrum that collapses after seven components, and the spectrum does not. What is
 low-rank is the shared, transferable structure, and it is a property of this 3,106-regulator
