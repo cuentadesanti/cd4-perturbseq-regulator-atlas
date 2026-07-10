@@ -1,0 +1,33 @@
+---
+title: "The empirical regulatory operator of CD4⁺ T cells"
+subtitle: "A low-dimensional, condition-gated, partly cell-type-specific reading of a genome-scale Perturb-seq screen"
+author:
+  - Santiago Silva Avalos
+date: "2026-07-10"
+lang: en
+documentclass: article
+fontsize: 11pt
+geometry: "margin=1in"
+linestretch: 1.05
+colorlinks: true
+linkcolor: black
+urlcolor: RoyalBlue
+citecolor: black
+header-includes: |
+  \usepackage{newunicodechar}
+  \newunicodechar{×}{\ensuremath{\times}}
+  \newunicodechar{→}{\ensuremath{\rightarrow}}
+  \newunicodechar{↔}{\ensuremath{\leftrightarrow}}
+  \newunicodechar{−}{\ensuremath{-}}
+  \newunicodechar{ρ}{\ensuremath{\rho}}
+  \newunicodechar{Δ}{\ensuremath{\Delta}}
+  \newunicodechar{≈}{\ensuremath{\approx}}
+  \newunicodechar{≥}{\ensuremath{\geq}}
+  \newunicodechar{⁺}{\textsuperscript{+}}
+  \newunicodechar{²}{\textsuperscript{2}}
+  \usepackage{caption}
+  \captionsetup{labelformat=empty,font=small,justification=justified}
+  \captionsetup[figure]{skip=6pt}
+  \usepackage{float}
+  \usepackage{booktabs}
+---
