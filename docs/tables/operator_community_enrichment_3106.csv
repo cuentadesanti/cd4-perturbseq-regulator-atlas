@@ -1,0 +1,13 @@
+community,stable,set_name,n_overlap,set_size,pvalue,fdr,overlap_genes,source
+2,False,SAGA,7,8,2.638100632525011e-05,7.914301897575034e-05,"ATXN7L3,SGF29,SUPT20H,SUPT7L,TADA2B,TAF6L,USP22",curated(SAGA/Mediator/TCR)
+2,False,Mediator,7,10,0.0002886042806218304,0.0004329064209327456,"CCNC,CDK19,MED13,MED15,MED19,MED23,MED24",curated(SAGA/Mediator/TCR)
+2,False,TCR,0,1,1.0,1.0,,curated(SAGA/Mediator/TCR)
+5,True,SAGA,0,8,1.0,1.0,,curated(SAGA/Mediator/TCR)
+5,True,Mediator,0,10,1.0,1.0,,curated(SAGA/Mediator/TCR)
+5,True,TCR,0,1,1.0,1.0,,curated(SAGA/Mediator/TCR)
+6,True,SAGA,0,8,1.0,1.0,,curated(SAGA/Mediator/TCR)
+6,True,Mediator,0,10,1.0,1.0,,curated(SAGA/Mediator/TCR)
+6,True,TCR,0,1,1.0,1.0,,curated(SAGA/Mediator/TCR)
+7,True,SAGA,0,8,1.0,1.0,,curated(SAGA/Mediator/TCR)
+7,True,Mediator,0,10,1.0,1.0,,curated(SAGA/Mediator/TCR)
+7,True,TCR,0,1,1.0,1.0,,curated(SAGA/Mediator/TCR)
