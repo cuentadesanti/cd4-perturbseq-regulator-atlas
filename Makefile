@@ -1,6 +1,6 @@
 PY := python3
 
-.PHONY: all eda model audit report spike edges eda-edges repro-meta fingerprints operator operator-tensor operator-svd operator-cp operator-completion operator-donors operator-deconv spectral class-programs specificity-control disease-overlap module-gwas convergence-extras convergence-figures api clean pipeline help
+.PHONY: all eda model audit report spike edges eda-edges repro-meta fingerprints operator operator-tensor operator-svd operator-cp operator-completion operator-communities operator-donors operator-deconv spectral class-programs specificity-control disease-overlap module-gwas convergence-extras convergence-figures api clean pipeline help
 
 help:
 	@echo "Targets:"
@@ -83,6 +83,12 @@ operator-svd:
 # 3a (sanity) is random entry-wise completion (elbow only; needs `make operator-tensor` first).
 operator-completion:
 	$(PY) scripts/operator_completion.py --max-rank 12 --holdout 0.2
+
+# Step 6 (core): RMT-clean regulator communities — global-mode + Marchenko-Pastur denoised
+# reg-reg correlation, Leiden resolution sweep + multi-seed consensus, stability-gated.
+# Needs `pip install leidenalg python-igraph` and `make operator-tensor` first.
+operator-communities:
+	$(PY) scripts/operator_communities.py --k 15 --res 0.2:2.0:0.2 --seeds 50 --stab-threshold 0.8
 
 # Step 4: are the gene programs donor-reproducible AS SUBSPACES?
 # Principal angles between top-k gene-program subspaces of DISJOINT donor pairs only.

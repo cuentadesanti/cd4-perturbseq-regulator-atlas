@@ -20,3 +20,6 @@ uvicorn[standard]
 
 # Optional — empirical regulatory operator analysis (`make operator`)
 #   pip install tensorly pytest h5py s3fs fsspec
+
+# Optional — RMT-clean regulator communities (`make operator-communities`)
+#   pip install leidenalg python-igraph
