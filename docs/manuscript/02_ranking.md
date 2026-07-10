@@ -15,7 +15,7 @@ a differential-expression threshold — rather than an effect size, so the ranki
 artifact of the counting. We tested this directly by building a continuous effect magnitude (the
 summed absolute log-fold-change over the FDR-significant genes for each regulator) and comparing it
 to the count-based rank. The two agree closely: Spearman ρ = 0.90 between the proper
-FDR-restricted magnitude and `n_downstream` (source `REVIEW_RESPONSE.md`; per-gene 0.93). A naive
+FDR-restricted magnitude and `n_downstream` (per-gene ρ = 0.93). A naive
 all-gene magnitude — summing over every gene rather than the significant ones — is *worse*, not
 better, because it sums noise. The ranking is therefore robust to the metric: doing the effect-size
 calculation properly reproduces the count-based order, and the order does not depend on which of

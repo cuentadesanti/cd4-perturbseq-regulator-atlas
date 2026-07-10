@@ -3,7 +3,7 @@
 Genome-scale Perturb-seq — pooled CRISPR perturbation with single-cell transcriptomic readout —
 has made it possible to measure the transcriptional consequence of knocking down essentially every
 expressed gene in a cell [Dixit 2016 `10.1016/j.cell.2016.11.038`; Replogle 2022
-`10.1016/j.cell.2022.05.013`]. In primary human CD4⁺ T cells, a recent screen extends this to a
+`10.1016/j.cell.2022.05.013`]. In primary human CD4⁺ T cells, a recent screen [Zhu 2025 `10.64898/2025.12.23.696273`] extends this to a
 setting that matters for immunology and for therapy: four donors, three activation states
 (resting, early- and late-stimulated), and genome-scale coverage of candidate regulators. The
 standard way such a screen is read is as a ranked list — which perturbations move the most genes,
