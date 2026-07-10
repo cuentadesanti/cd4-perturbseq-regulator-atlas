@@ -1,0 +1,7 @@
+factor,gating,n_top_in_operator,dominant_community,dom_is_stable,concentration,community_spread,top_regs
+1,gated(peak=Rest),8,5,True,0.25,5,UBXN1;NCKAP1L;AHR;ZMYM2;ARHGAP30;ARNT;WASF2;DOCK2
+2,gated(peak=Stim48hr),8,2,False,1.0,1,TADA2B;TAF6L;SUPT20H;SGF29;SUPT7L;SENP5;CHD7;CCNC
+3,constitutive(flat),8,2,False,1.0,1,TADA2B;ATAD5;TAF6L;SUPT20H;SGF29;CCNC;MED19;DENR
+4,constitutive(flat),8,0,False,0.5,4,BCL10;CD28;NUDCD1;TAF6L;TFAM;UBE2V2;SUPT20H;CLCC1
+5,constitutive(flat),8,2,False,1.0,1,TADA2B;TAF6L;SUPT20H;SUPT7L;SGF29;SENP5;CHD7;MED19
+6,gated(peak=Stim8hr),8,0,False,0.5,2,SLC3A2;TADA2B;SENP5;TAF6L;SUPT20H;DOLPP1;APPL2;CD28

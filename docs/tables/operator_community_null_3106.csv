@@ -1,0 +1,6 @@
+metric,value,n_signal
+noise_edge_theoretical_MP,1.4909,336.0
+noise_edge_empirical_p95,2.9484,92.0
+modularity_real,0.5059,
+modularity_null_mean,-0.0006,
+modularity_null_z,258.75,

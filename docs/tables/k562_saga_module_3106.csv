@@ -1,0 +1,8 @@
+subunit,en_k562_shared,pearson_z,klass,well_powered,donor_robust,k562_module_intra_corr,k562_module_null_mean,k562_module_z,k562_module_p
+SUPT20H,True,0.1863,universal,True,True,0.2441,0.0102,16.14,0.0
+TAF6L,True,0.1509,universal,False,True,0.2441,0.0102,16.14,0.0
+TADA2B,True,0.1573,universal,False,True,0.2441,0.0102,16.14,0.0
+SUPT7L,True,0.0866,universal,False,True,0.2441,0.0102,16.14,0.0
+USP22,True,0.0876,universal,True,True,0.2441,0.0102,16.14,0.0
+SGF29,False,,not_in_shared,False,False,0.2441,0.0102,16.14,0.0
+KAT2B,True,0.001,intermediate,False,True,0.2441,0.0102,16.14,0.0
