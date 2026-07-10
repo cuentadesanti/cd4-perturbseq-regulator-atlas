@@ -135,6 +135,61 @@ next steps (folding real cross-guide/cross-donor reproducibility into the rankin
 spike-and-slab prior for the edge network; full-Bayes via a PPL) are precisely the moves that
 would close the gap to the specialized methods.
 
+## Methodology positioning (single-cell-CRISPR statistics)
+
+The sections above position the work against the *biology* it recovers. This section positions it
+against the *methodological* literature — the single-cell-CRISPR statistics and
+effect-quantification work that the rigor pass either re-derived or leans on implicitly. Three
+references are close to mandatory:
+
+- **Pseudoreplication / donors as the replication unit.** The most consequential methodological
+  anchor is the pseudoreplication critique ([Squair et al. 2021](https://doi.org/10.1038/s41467-021-25960-2)):
+  single-cell DE methods that treat individual cells as independent replicates produce large numbers
+  of false discoveries, and aggregating to pseudobulk per biological replicate is what restores
+  calibration. This is the principle behind the donor design — the four-donor cross-donor
+  reproducibility filter (Tier-1 fold-in) is Squair's thesis applied at the regulator level. The
+  companion cell-state-prioritization work ([Skinnider et al. 2020](https://doi.org/10.1038/s41587-020-0605-1);
+  [Squair et al. 2021 protocol](https://doi.org/10.1038/s41596-021-00561-x)) is adjacent to the
+  global-vs-context-specific split.
+- **Perturbation-strength metric.** The Tier-0 metric work independently rediscovered a solved
+  problem: a naive Σ|log-FC| is dominated by measurement imprecision. The canonical treatment is the
+  **E-distance** (energy distance between a perturbation's cell distribution and controls) formalized
+  in the scPerturb harmonization effort ([Peidli et al. 2024](https://doi.org/10.1038/s41592-023-02144-y)).
+  This lets the ranking be stated as "we validated `n_downstream` against a magnitude restricted to the
+  FDR-significant set (0.90 concordance); the cell-level E-distance is the gold-standard multivariate
+  statistic, deferred for compute reasons" — and citing the metric you chose not to run is stronger than
+  silence. A modelling review ([Gavriilidis et al. 2024](https://doi.org/10.1016/j.csbj.2024.04.058))
+  anchors the broader effect-quantification framing.
+- **Calibrated testing.** The knockdown gate and reproducibility audit are within-modality substitutes
+  for formal calibration, and should be positioned against SCEPTRE, which uses conditional resampling to
+  produce calibrated p-values for single-cell CRISPR and showed naive tests are badly miscalibrated
+  ([Barry et al. 2021](https://doi.org/10.1186/s13059-021-02545-2);
+  [Barry et al. 2024](https://doi.org/10.1186/s13059-024-03254-2)). The pipeline consumes a pre-computed
+  DE table, so SCEPTRE is the road not taken — naming it converts "we trust the supplied DE calls" into
+  "we inherit calibrated DE calls and add a regulator-level robustness layer on top." Mixscape
+  ([Papalexi et al. 2021](https://doi.org/10.1038/s41588-021-00778-2)) is the cell-level analogue of the
+  `ontarget_significant` gate.
+
+**Quick-win comparators.** The fingerprint/program layer has a named comparator in guided sparse factor
+analysis ([Zhou et al. 2023](https://doi.org/10.1038/s41592-023-02017-4)), which recovers gene programs
+and their driving perturbations from the count model directly — the object the CP/SVD operator
+decomposition approximates. The chromatin-machinery result has modern corroboration in bidirectional
+epigenetic editing recovering coactivator/chromatin machinery upstream of broad programs
+([Pacalin et al. 2024](https://doi.org/10.1038/s41587-024-02213-3)). The operator's network-deconvolution
+direction is benchmarked against the network-inference-from-perturbation literature
+([Chevalley et al. 2025](https://doi.org/10.1038/s42003-025-07764-y), *Communications Biology*). And on
+predictive modelling, two 2025 Nature Methods results — that deep perturbation-effect predictors do not
+yet reliably beat simple baselines ([Ahlmann-Eltze et al. 2025](https://doi.org/10.1038/s41592-025-02772-6))
+and that generalizable single-cell perturbation-response prediction is an open benchmark
+([Wei et al. 2025](https://doi.org/10.1038/s41592-025-02980-0)) — frame the interpretable, out-of-panel
+predictive operator as a deliberate choice against an unsettled frontier, not a failure to use the
+fashionable tool.
+
+**The one genuine conceptual gap** (not merely a citation gap) is that the pipeline never estimates
+effects from the count model with explicit guide-assignment uncertainty — what SCEPTRE and GSFA do and
+what E-distance operationalizes at the cell level. The arXiv-friendly move is to *name* that gap and state
+the compute trade that motivates deferring it, not to close it.
+
 ## Bottom line
 
 The submission is well-grounded. Its effect-size structure, its knockdown-gating principle, and
