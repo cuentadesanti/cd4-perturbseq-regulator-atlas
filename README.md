@@ -2,6 +2,13 @@
 
 > Hackathon submission · genome-scale CRISPRi Perturb-seq in primary human CD4+ T cells (Marson Lab, 2025)
 
+## Hackathon submission — Built with Claude: Life Sciences
+
+- 🎬 **[Watch the 3-minute demo](https://youtu.be/3tu_3JmHh14)**
+- 📄 [Read the manuscript (PDF)](docs/CD4_operator_manuscript.pdf)
+- 🖼️ [View the flagship figure — Figure 3, operator modules](docs/figures/38_operator_insignia_3106.png)
+- 🔁 [Reproduce the analysis](#how-to-reproduce)
+
 ![pipeline](docs/figures/00_pipeline_overview.png)
 
 ## The question
