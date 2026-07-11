@@ -1,0 +1,6 @@
+# Manim render output and caches
+media/
+__pycache__/
+*.srt
+# never commit the raw API key
+eleven_labs_raw_key.txt
