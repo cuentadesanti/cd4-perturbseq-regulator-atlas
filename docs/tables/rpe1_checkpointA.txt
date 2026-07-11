@@ -1,0 +1,16 @@
+RPE1 Checkpoint A — regulator overlap gate (pre-registered)
+RPE1 targeting genes (controls dropped 135): 2390
+CD4 significant regulators (unique): 7912
+SHARED (RPE1 perturbed ∩ CD4 significant, by Ensembl): 962
+shared genes (Ensembl intersect): 7036
+
+Anchor presence (the specificity-test anchors):
+  SAGA subunits perturbed in RPE1: ['SUPT20H', 'TAF6L', 'TADA2B'] (3/6)
+  SAGA subunits in shared set:     ['SUPT20H', 'TAF6L', 'TADA2B'] (3/6)
+  DOCK2 (T-specific anchor) in RPE1: NO — not in essential-scale set
+
+DECISION: PROCEED (>=100)
+CAVEAT: DOCK2 is not targeted in RPE1's essential-scale screen (it is a hematopoietic-
+specific GEF, not core-essential), so its T-specific arm cannot be measured directly here.
+Compensated below by a CLASS-level test: are K562-classified T-specific regulators that ARE
+shared with RPE1 also non-universal in RPE1?
