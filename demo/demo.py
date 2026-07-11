@@ -29,6 +29,7 @@ from manim import (
     Line,
     DashedLine,
     Arrow,
+    DoubleArrow,
     ArcBetweenPoints,
     Dot,
     FadeIn,
@@ -193,10 +194,12 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
         self.play(FadeIn(promoter), FadeIn(prom_lab), Create(tss),
                   FadeIn(gene), FadeIn(gene_lab), run_time=0.7)
 
-        # (1) one successful pass — three related nascent RNAs behind Pol
-        pol_active = make_polymerase().move_to([-4.5, pol_y, 0])
+        # (1) one successful pass — a convoy of polymerases making several RNAs
+        pol_a = make_polymerase().move_to([-4.7, pol_y, 0])
+        pol_b = make_polymerase().move_to([-6.0, pol_y, 0])
         transcripts = VGroup()
-        for frac, L in zip((0.30, 0.55, 0.80), (1.0, 0.85, 0.70)):
+        for frac, L in zip((0.20, 0.36, 0.52, 0.68, 0.84),
+                           (1.0, 0.9, 0.8, 0.72, 0.64)):
             x = gene_left + frac * gene_w
             stem = Line([x, gene_bot, 0], [x, gene_bot - 0.16, 0],
                         stroke_width=3, color=S)
@@ -204,14 +207,17 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
                                    [x + 0.42 * L, gene_bot - 0.16 - 0.40 * L, 0],
                                    angle=-0.6, stroke_width=3, color=S)
             transcripts.add(VGroup(stem, arc))
-        self.play(FadeIn(pol_active, shift=RIGHT * 0.2), run_time=0.35)
-        self.play(pol_active.animate.move_to([1.6, pol_y, 0]),
-                  LaggedStart(*[Create(t) for t in transcripts], lag_ratio=0.45),
-                  run_time=1.85, rate_func=T.EASE_MOVE)
-        self.play(pol_active.animate.shift(RIGHT * 1.1).set_opacity(0.0),
-                  run_time=0.45)
-        self.wait(0.35)  # hold after successful transcription
-        self.remove(pol_active)
+        self.play(FadeIn(pol_a, shift=RIGHT * 0.2), run_time=0.35)
+        self.play(pol_a.animate.move_to([1.6, pol_y, 0]),
+                  FadeIn(pol_b, shift=RIGHT * 0.2),
+                  LaggedStart(*[Create(t) for t in transcripts], lag_ratio=0.35),
+                  run_time=2.3, rate_func=rate_functions.linear)
+        self.play(pol_a.animate.shift(RIGHT * 1.1).set_opacity(0.0),
+                  pol_b.animate.move_to([1.6, pol_y, 0]),
+                  run_time=0.9, rate_func=rate_functions.linear)
+        self.play(pol_b.animate.shift(RIGHT * 1.1).set_opacity(0.0), run_time=0.5)
+        self.wait(0.4)  # hold after successful transcription
+        self.remove(pol_a, pol_b)
 
         # (2) recruit dCas9–KRAB to the promoter (Claude orange; no DNA cut)
         guide = ArcBetweenPoints([-2.6, 1.8, 0], promoter.get_center() + UP * 0.04,
@@ -307,41 +313,55 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
             reg_node, down_nodes, down_marks, arrows = self.crispri_intro(rng)
 
         # --- one downstream gene's cell observations → a standardized effect ---
+        # the z-score is shown as the horizontal shift between the two means.
         def cloud(cx, cy, color, n=16):
             return VGroup(*[
                 Dot(radius=0.05, color=color).move_to(
-                    [cx + rng.normal(0, 0.35), cy + rng.uniform(-0.3, 0.3), 0])
+                    [cx + rng.normal(0, 0.32), cy + rng.uniform(-0.28, 0.28), 0])
                 for _ in range(n)])
         gb = down_nodes[0]  # the up-regulated downstream gene
-        axis = Line([-1.4, -1.7, 0], [4.4, -1.7, 0], color=T.MUTED, stroke_width=2)
+        axis_y = -1.7
+        ctrl_cx, shift = 0.1, 2.2
+        pert_cx = ctrl_cx + shift
+        axis = Line([-1.6, axis_y, 0], [4.2, axis_y, 0], color=T.MUTED, stroke_width=2)
         axlab = txt("expression of one downstream gene", size=T.SMALL_SIZE,
                     color=T.MUTED).next_to(axis, DOWN, buff=0.15)
-        ctrl = cloud(0.6, 0.3, T.MUTED)
-        pert = cloud(0.6, -0.7, T.SIGNAL)
+        ctrl = cloud(ctrl_cx, 0.45, T.MUTED)
+        pert = cloud(ctrl_cx, -0.5, T.SIGNAL)  # starts aligned with control
         ctrl_lab = txt("control", size=T.SMALL_SIZE, color=T.MUTED).next_to(
             ctrl, LEFT, buff=0.4)
         pert_lab = txt("perturbed", size=T.SMALL_SIZE, color=T.SIGNAL).next_to(
             pert, LEFT, buff=0.4)
-        zval = txt("z = +2.4", size=T.SUB_SIZE, color=T.POSITIVE,
-                   weight="BOLD").move_to([1.5, -0.2, 0])
-        znote = txt("signed, standardized effect", size=T.SMALL_SIZE,
-                    color=T.MUTED).next_to(zval, DOWN, buff=0.25)
+        mean_ctrl = DashedLine([ctrl_cx, 0.78, 0], [ctrl_cx, axis_y, 0],
+                               color=T.MUTED, stroke_width=2)
+        mean_pert = DashedLine([pert_cx, -0.2, 0], [pert_cx, axis_y, 0],
+                               color=T.SIGNAL, stroke_width=2)
+        delta = DoubleArrow([ctrl_cx, axis_y + 0.32, 0], [pert_cx, axis_y + 0.32, 0],
+                            color=T.POSITIVE, stroke_width=3, buff=0, tip_length=0.16)
+        dlab = txt("horizontal shift  (Δ)", size=T.SMALL_SIZE,
+                   color=T.POSITIVE).next_to(delta, UP, buff=0.08)
+        zval = txt("z = +2.4", size=T.SUB_SIZE, color=T.POSITIVE, weight="BOLD")
         with self.beat("Those single-cell observations become one signed, "
-                       "standardized effect."):
+                       "standardized effect — the horizontal shift between the "
+                       "means, measured in standard deviations."):
             self.play(FadeOut(reg_node), FadeOut(down_nodes[1]),
                       FadeOut(down_nodes[2]), FadeOut(down_marks),
                       FadeOut(arrows), run_time=0.4)
             self.play(FadeTransform(gb, pert), FadeIn(ctrl), Create(axis),
                       FadeIn(axlab), FadeIn(ctrl_lab), FadeIn(pert_lab),
                       run_time=T.T_NORMAL)
-            self.wait(0.30)
-            self.play(pert.animate.shift(RIGHT * 1.4), run_time=0.75,
+            self.wait(0.3)
+            # the perturbed distribution shifts clearly to the right
+            self.play(pert.animate.shift(RIGHT * shift), run_time=0.9,
                       rate_func=T.EASE_MOVE)
-            self.play(FadeOut(axis), FadeOut(axlab), FadeOut(ctrl_lab),
-                      FadeOut(pert_lab),
-                      FadeTransform(VGroup(ctrl, pert), zval), run_time=T.T_NORMAL)
-            self.play(FadeIn(znote), run_time=T.T_MICRO)
+            # mark each mean and the horizontal difference on the axis
+            self.play(Create(mean_ctrl), Create(mean_pert), run_time=0.55)
+            self.play(GrowFromCenter(delta), FadeIn(dlab), run_time=0.55)
             self.wait(0.35)
+            # that horizontal shift IS the standardized effect
+            zval.next_to(delta, UP, buff=0.12)
+            self.play(ReplacementTransform(dlab, zval), run_time=0.7)
+            self.wait(0.45)
 
         # fingerprint
         vals = rng.normal(0, 1, 16)
@@ -357,7 +377,8 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
                      color=T.MUTED).next_to(vec, RIGHT, buff=0.3)
         with self.beat("Every gene gives one; together they form a "
                        "transcriptional fingerprint."):
-            self.play(FadeOut(znote), run_time=0.4)
+            self.play(*[FadeOut(m) for m in self.mobjects if m is not zval],
+                      run_time=0.4)
             self.play(ReplacementTransform(zval, vec[0]), run_time=0.6)
             self.play(LaggedStart(*[GrowFromCenter(s) for s in vec[1:]],
                                   lag_ratio=0.05), FadeIn(veclab), run_time=1.2)
