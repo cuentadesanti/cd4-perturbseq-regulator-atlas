@@ -44,6 +44,7 @@ from manim import (
     FadeTransform,
     LaggedStart,
     Indicate,
+    rate_functions,
     UP,
     DOWN,
     LEFT,
@@ -158,98 +159,110 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
         return grid
 
     def crispri_intro(self, rng):
-        """~7 s abstract CRISPRi diagram: active transcription → a dCas9–KRAB
-        block reduces transcription → knockdown → the regulator hands off to
-        downstream genes (up / down / unchanged). Returns the end-state nodes
-        so the caller can transform one gene into cell-level observations."""
+        """~8 s schematic CRISPRi diagram with two distinct transcription
+        cycles: (1) one successful pass, then (2) a second polymerase that is
+        blocked by a dCas9–KRAB complex parked on the promoter. Transcription
+        drops qualitatively (not a literal %), then the regulator hands off to
+        three downstream genes (↑ / ↓ / ≈). Returns the end-state nodes."""
         S, C, M = T.SIGNAL, T.CLAUDE, T.MUTED
-        dna_top = Line(LEFT * 4.8, RIGHT * 1.8, stroke_width=3, color=M)
+        dna_y, pol_y = 0.0, 0.22
+
+        def make_polymerase():
+            body = RoundedRectangle(width=0.66, height=0.48, corner_radius=0.22,
+                                    fill_opacity=0.92, stroke_width=0, fill_color=S)
+            return VGroup(body, txt("Pol", size=11, color=T.BG).move_to(body))
+
+        # genomic layout: DNA · promoter · start marker · gene · downstream
+        dna_top = Line([-5.0, dna_y, 0], [2.6, dna_y, 0], stroke_width=3, color=M)
         dna_bot = dna_top.copy().shift(DOWN * 0.18)
-        promoter = RoundedRectangle(width=0.7, height=0.38, corner_radius=0.08,
-                                    stroke_width=2, stroke_color=S,
-                                    fill_color=S, fill_opacity=0.15).move_to(
-            LEFT * 2.5 + DOWN * 0.09)
-        gene = RoundedRectangle(width=2.6, height=0.55, corner_radius=0.12,
+        promoter = Line([-2.95, dna_y, 0], [-2.25, dna_y, 0], stroke_width=9, color=S)
+        prom_lab = txt("promoter", size=12, color=M).next_to(promoter, DOWN, buff=0.3)
+        tss = Arrow([-2.0, dna_y + 0.06, 0], [-1.55, dna_y + 0.06, 0], buff=0,
+                    stroke_width=2.5, color=M, max_tip_length_to_length_ratio=0.4)
+        gene = RoundedRectangle(width=3.0, height=0.5, corner_radius=0.12,
                                 stroke_width=2, stroke_color=S, fill_color=S,
-                                fill_opacity=0.18).move_to(LEFT * 0.7 + DOWN * 0.09)
-        gene_label = txt("regulator", size=T.SMALL_SIZE, color=T.FG).move_to(gene)
-        dna = VGroup(dna_top, dna_bot, promoter, gene, gene_label)
-        pol = VGroup(RoundedRectangle(width=0.72, height=0.55, corner_radius=0.18,
-                                      fill_opacity=0.9, stroke_width=0, fill_color=S),
-                     txt("Pol", size=13, color=T.BG))
-        pol[1].move_to(pol[0])
-        pol.move_to(LEFT * 3.6 + UP * 0.16)
+                                fill_opacity=0.12).move_to([0.0, dna_y - 0.09, 0])
+        gene_lab = txt("target regulator", size=T.SMALL_SIZE, color=M).next_to(
+            gene, UP, buff=0.22)
+
+        self.play(Create(dna_top), Create(dna_bot), run_time=0.5)
+        self.play(FadeIn(promoter), FadeIn(prom_lab), Create(tss),
+                  FadeIn(gene), FadeIn(gene_lab), run_time=0.7)
+
+        # (1) one successful transcription pass — transcripts emerge behind Pol
+        pol_active = make_polymerase().move_to([-5.0, pol_y, 0])
         transcripts = VGroup(*[
-            ArcBetweenPoints(gene.get_bottom() + RIGHT * (0.1 + 0.6 * i),
-                             gene.get_bottom() + DOWN * (0.6 + 0.1 * i)
-                             + RIGHT * (0.4 + 0.6 * i),
-                             angle=-0.6, stroke_width=3, color=S)
-            for i in range(3)])
-        exp_anchor = np.array([4.5, 1.5, 0])
-        exp_lab = txt("expression", size=T.SMALL_SIZE, color=M).move_to(exp_anchor)
-        exp_num = txt("100%", size=T.SUB_SIZE, color=S, weight="BOLD").move_to(
-            exp_anchor + DOWN * 0.55)
-        exp_low = txt("25%", size=T.SUB_SIZE, color=M, weight="BOLD").move_to(
-            exp_anchor + DOWN * 0.55)
+            ArcBetweenPoints([x, dna_y - 0.34, 0], [x + 0.5, dna_y - 0.92, 0],
+                             angle=-0.7, stroke_width=3, color=S)
+            for x in (-0.9, 0.1, 1.1)])
+        self.play(FadeIn(pol_active, shift=RIGHT * 0.2), run_time=0.3)
+        self.play(pol_active.animate.move_to([1.6, pol_y, 0]),
+                  LaggedStart(*[Create(t) for t in transcripts], lag_ratio=0.55),
+                  run_time=1.5, rate_func=T.EASE_MOVE)
+        self.play(pol_active.animate.shift(RIGHT * 1.1).set_opacity(0.0),
+                  run_time=0.35)
+        self.remove(pol_active)
 
-        self.play(Create(dna_top), Create(dna_bot), FadeIn(promoter),
-                  FadeIn(gene), FadeIn(gene_label), run_time=0.8)
-        self.play(FadeIn(pol, shift=RIGHT * 0.2), FadeIn(exp_lab),
-                  FadeIn(exp_num), run_time=0.4)
-        self.play(pol.animate.move_to(gene.get_right() + LEFT * 0.35 + UP * 0.16),
-                  LaggedStart(*[Create(t) for t in transcripts], lag_ratio=0.18),
-                  run_time=1.2)
+        # (2) recruit dCas9–KRAB to the promoter (Claude orange; no DNA cut)
+        guide = ArcBetweenPoints([-2.6, 1.8, 0], promoter.get_center() + UP * 0.04,
+                                 angle=-0.9, stroke_width=2.5, color=C)
+        dcas9 = RoundedRectangle(width=0.86, height=0.58, corner_radius=0.24,
+                                 fill_opacity=0.95, stroke_width=0, fill_color=C)
+        krab = RoundedRectangle(width=0.4, height=0.32, corner_radius=0.13,
+                                fill_opacity=0.95, stroke_width=0, fill_color=C)
+        krab.next_to(dcas9, UP + RIGHT, buff=-0.14)
+        crispri = VGroup(dcas9, krab,
+                         txt("CRISPRi", size=10, color=T.BG).move_to(dcas9))
+        crispri.move_to([-2.6, 1.6, 0])
+        self.play(Create(guide), FadeIn(crispri, shift=DOWN * 0.2), run_time=0.6)
+        self.play(crispri.animate.move_to([-2.6, dna_y + 0.4, 0]),
+                  promoter.animate.set_color(C), run_time=0.7,
+                  rate_func=T.EASE_MOVE)
+        self.play(FadeOut(guide), run_time=0.3)
 
-        # dCas9–KRAB recruited to the promoter (Claude orange; no DNA cut)
-        guide = ArcBetweenPoints(UP * 2.3 + LEFT * 2.0, promoter.get_top(),
-                                 angle=-0.8, stroke_width=3, color=C)
-        dcas9 = VGroup(RoundedRectangle(width=1.0, height=0.68, corner_radius=0.18,
-                                        fill_opacity=0.95, stroke_width=0, fill_color=C),
-                       txt("dCas9", size=13, color=T.BG))
-        dcas9[1].move_to(dcas9[0])
-        krab = VGroup(RoundedRectangle(width=0.52, height=0.32, corner_radius=0.08,
-                                       fill_opacity=0.95, stroke_width=0, fill_color=C),
-                      txt("KRAB", size=10, color=T.BG))
-        krab[1].move_to(krab[0])
-        krab.next_to(dcas9[0], UP, buff=-0.04)
-        crispri = VGroup(dcas9, krab).move_to(UP * 1.9 + LEFT * 2.2)
-        self.play(Create(guide), FadeIn(crispri, shift=DOWN * 0.3), run_time=0.6)
-        self.play(crispri.animate.move_to(promoter.get_center() + UP * 0.3),
-                  FadeOut(guide), run_time=0.7, rate_func=T.EASE_MOVE)
+        # (2b) a second polymerase enters and stalls just before the complex
+        pol_blocked = make_polymerase().move_to([-5.0, pol_y, 0])
+        self.play(FadeIn(pol_blocked, shift=RIGHT * 0.2), run_time=0.3)
+        self.play(pol_blocked.animate.move_to([-3.55, pol_y, 0]), run_time=0.7,
+                  rate_func=T.EASE_MOVE)
+        self.play(pol_blocked.animate.shift(RIGHT * 0.15), run_time=0.25,
+                  rate_func=rate_functions.there_and_back)
+        self.play(pol_blocked.animate.set_opacity(0.0), run_time=0.35)
+        self.remove(pol_blocked)
 
-        # polymerase blocked → transcripts fade, expression drops
-        self.play(pol.animate.move_to(promoter.get_left() + LEFT * 0.4 + UP * 0.16),
-                  run_time=0.4)
-        self.play(Wiggle(pol, scale_value=1.06),
-                  transcripts.animate.set_opacity(0.12),
-                  Transform(exp_num, exp_low),
-                  gene.animate.set_fill(M, opacity=0.12), run_time=1.0)
+        # (2c) reduced transcription, shown qualitatively
+        red_lab = txt("transcription reduced", size=T.SMALL_SIZE,
+                      color=C).to_edge(UP, buff=0.9)
+        self.play(LaggedStart(*[t.animate.set_opacity(0.1) for t in transcripts],
+                              lag_ratio=0.3), FadeIn(red_lab),
+                  gene.animate.set_fill(M, opacity=0.1), run_time=0.9)
 
-        # hand off: regulator node → downstream genes (up / down / unchanged)
+        # hand off: regulator node → downstream genes (↑ / ↓ / ≈)
         reg_node = VGroup(Circle(radius=0.33, fill_opacity=0.9, stroke_width=0,
                                  fill_color=M), txt("R", size=T.SMALL_SIZE, color=T.BG))
         reg_node[1].move_to(reg_node[0])
-        reg_node.move_to(LEFT * 4.2 + DOWN * 0.1)
-        molecular = VGroup(dna, pol, transcripts, crispri, exp_lab, exp_num)
+        reg_node.move_to([-4.2, -0.1, 0])
+        molecular = VGroup(dna_top, dna_bot, promoter, prom_lab, tss, gene,
+                           gene_lab, crispri, transcripts, red_lab)
         self.play(FadeOut(molecular), FadeIn(reg_node), run_time=0.6)
 
-        down_nodes = VGroup(*[
-            Circle(radius=0.28, fill_opacity=0.9, stroke_width=0,
-                   fill_color=M).move_to(RIGHT * 2.9 + UP * y)
-            for y in (1.3, 0.0, -1.3)])
-        down_labels = VGroup(*[
-            txt(g, size=15, color=T.BG).move_to(down_nodes[i])
-            for i, g in enumerate(["G1", "G2", "G3"])])
+        down_nodes = VGroup()
+        down_marks = VGroup()
+        for y, col, mk in zip((1.3, 0.0, -1.3),
+                              (T.POSITIVE, T.NEGATIVE, M), ("↑", "↓", "≈")):
+            node = Circle(radius=0.26, fill_opacity=0.9, stroke_width=0,
+                          fill_color=col).move_to([2.6, y, 0])
+            down_nodes.add(node)
+            down_marks.add(txt(mk, size=T.SUB_SIZE, color=col,
+                               weight="BOLD").next_to(node, RIGHT, buff=0.25))
         arrows = VGroup(*[
             Arrow(reg_node.get_right(), n.get_left(), buff=0.12, stroke_width=2,
                   color=M) for n in down_nodes])
         self.play(LaggedStart(*[GrowArrow(a) for a in arrows], lag_ratio=0.15),
-                  FadeIn(down_nodes), FadeIn(down_labels), run_time=0.8)
-        self.play(down_nodes[0].animate.scale(1.25).set_fill(T.POSITIVE),
-                  down_nodes[1].animate.scale(0.72).set_fill(T.NEGATIVE),
-                  down_nodes[2].animate.set_fill(M).set_opacity(0.4),
-                  run_time=0.7)
-        return reg_node, down_nodes, down_labels, arrows
+                  FadeIn(down_nodes), run_time=0.7)
+        self.play(LaggedStart(*[FadeIn(m, shift=RIGHT * 0.1) for m in down_marks],
+                              lag_ratio=0.2), run_time=0.55)
+        return reg_node, down_nodes, down_marks, arrows
 
     # ================================================================== #
     # 1 — BIOLOGICAL QUESTION + OPERATOR CONSTRUCTION
@@ -279,7 +292,7 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
         with self.beat("CRISPR interference reduces the expression of one "
                        "regulator without cutting the DNA. The screen then "
                        "measures how the rest of the transcriptome responds."):
-            reg_node, down_nodes, down_labels, arrows = self.crispri_intro(rng)
+            reg_node, down_nodes, down_marks, arrows = self.crispri_intro(rng)
 
         # --- one downstream gene's cell observations → a standardized effect ---
         def cloud(cx, cy, color, n=16):
@@ -304,7 +317,7 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
         with self.beat("Those single-cell observations become one signed, "
                        "standardized effect."):
             self.play(FadeOut(reg_node), FadeOut(down_nodes[1]),
-                      FadeOut(down_nodes[2]), FadeOut(down_labels),
+                      FadeOut(down_nodes[2]), FadeOut(down_marks),
                       FadeOut(arrows), run_time=0.4)
             self.play(FadeTransform(gb, pert), FadeIn(ctrl), Create(axis),
                       FadeIn(axlab), FadeIn(ctrl_lab), FadeIn(pert_lab),
