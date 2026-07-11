@@ -3,10 +3,12 @@
 Beat-level: each line is one `with self.beat(...)` block wrapping the animation it describes. Edit in `demo.py`; this mirrors it. Numbers from `docs/OPERATOR_ANALYSIS.md`.
 
 - Meet the regulatory operator — a map of how one human immune cell is wired.
-- Take a single gene, and switch it off with CRISPR interference.
-- Then read out how every other gene responds — one number each. That vector is the perturbation's fingerprint.
-- Do this thousands of times, and the fingerprints stack into one regulator-by-gene map.
-- Correlate every pair, and the map folds into one square object — the operator. Everything ahead is a question we put to this matrix.
+- Where does each number come from? Inhibit one regulator, and follow one downstream gene.
+- Across many cells, the screen compares control to perturbed — the whole distribution shifts.
+- That shift collapses into one standardized effect — direction and evidence in a single number.
+- Do that for every gene — thousands of standardized effects stack into one transcriptional fingerprint.
+- One fingerprint per regulator — stack thousands into the regulator-by-gene map.
+- Correlate every pair, and the map folds into one square object — the operator.
 - A word on method. Every claim ran the same loop —
 - question, hypothesis, executable test, artifact — each one audited adversarially.
 - Concretely: is SAGA a stable community? The gate weakened it. Predict an unseen regulator? The control failed it.
@@ -29,7 +31,7 @@ Beat-level: each line is one `with self.beat(...)` block wrapping the animation 
 - Claude helped us find the structure — and, just as importantly, where the claim stops.
 - The empirical regulatory operator of CD4 T-cells — built with Claude.
 
-_26 beats · 407 words._
+_28 beats · 424 words._
 
 
 ## Voice

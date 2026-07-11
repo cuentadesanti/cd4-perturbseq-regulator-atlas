@@ -175,38 +175,80 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
         self.play(FadeOut(sub), head.animate.scale(0.5).to_edge(UP),
                   run_time=0.6)
 
-        # a row of genes; knock one down
-        genes = VGroup(*[Dot(radius=0.13, color=T.SIGNAL, fill_opacity=0.45)
-                         for _ in range(13)]).arrange(RIGHT, buff=0.4)
-        genes.move_to(UP * 1.7)
-        k = 6
-        cross = txt("✕", size=30, color=T.NEGATIVE, weight="BOLD").move_to(genes[k])
-        klab = txt("CRISPRi", size=T.SMALL_SIZE, color=T.NEGATIVE).next_to(
-            genes[k], UP, buff=0.25)
-        with self.beat("Take a single gene, and switch it off with CRISPR "
-                       "interference."):
-            self.play(LaggedStart(*[FadeIn(g) for g in genes], lag_ratio=0.05),
-                      run_time=1.0)
-            self.play(genes[k].animate.set_color(T.NEGATIVE).set_opacity(1.0),
-                      FadeIn(cross), FadeIn(klab), run_time=0.8)
+        # --- where does one number come from? one regulator, one gene ---
+        regA = VGroup(Dot(radius=0.16, color=T.NEGATIVE),
+                      txt("Regulator A", size=T.SMALL_SIZE, color=T.FG))
+        regA[1].next_to(regA[0], DOWN, buff=0.15)
+        regA.move_to([-5.1, 1.5, 0])
+        cross = txt("✕", size=24, color=T.NEGATIVE, weight="BOLD").move_to(regA[0])
+        crispr = txt("CRISPRi", size=T.SMALL_SIZE, color=T.NEGATIVE).next_to(
+            regA[0], UP, buff=0.15)
+        geneB = VGroup(Dot(radius=0.13, color=T.SIGNAL),
+                       txt("Gene B", size=T.SMALL_SIZE, color=T.FG))
+        geneB[1].next_to(geneB[0], DOWN, buff=0.15)
+        geneB.move_to([-5.1, -1.4, 0])
+        arr0 = Arrow(regA[0].get_bottom(), geneB[0].get_top(), buff=0.25,
+                     color=T.MUTED, stroke_width=T.STROKE_MUTED)
+        with self.beat("Where does each number come from? Inhibit one "
+                       "regulator, and follow one downstream gene."):
+            self.play(FadeIn(regA), FadeIn(crispr), FadeIn(cross),
+                      run_time=T.T_NORMAL)
+            self.play(Create(arr0), FadeIn(geneB), run_time=T.T_NORMAL)
 
-        # measure every other gene -> one response vector (the fingerprint)
+        # --- many cells: control vs perturbed distributions ---
+        axis = Line([-1.4, -1.7, 0], [4.4, -1.7, 0], color=T.MUTED, stroke_width=2)
+        axlab = txt("expression of Gene B", size=T.SMALL_SIZE,
+                    color=T.MUTED).next_to(axis, DOWN, buff=0.15)
+
+        def cloud(cx, cy, color, n=16):
+            return VGroup(*[
+                Dot(radius=0.05, color=color).move_to(
+                    [cx + rng.normal(0, 0.35), cy + rng.uniform(-0.3, 0.3), 0])
+                for _ in range(n)])
+        ctrl = cloud(0.6, 0.3, T.MUTED)
+        pert = cloud(0.6, -0.7, T.SIGNAL)
+        ctrl_lab = txt("control", size=T.SMALL_SIZE, color=T.MUTED).next_to(
+            ctrl, LEFT, buff=0.4)
+        pert_lab = txt("perturbed", size=T.SMALL_SIZE, color=T.SIGNAL).next_to(
+            pert, LEFT, buff=0.4)
+        with self.beat("Across many cells, the screen compares control to "
+                       "perturbed — the whole distribution shifts."):
+            self.play(Create(axis), FadeIn(axlab), run_time=T.T_MICRO)
+            self.play(FadeIn(ctrl), FadeIn(ctrl_lab),
+                      FadeIn(pert), FadeIn(pert_lab), run_time=T.T_NORMAL)
+            self.play(pert.animate.shift(RIGHT * 1.4), run_time=T.T_NORMAL,
+                      rate_func=T.EASE_MOVE)
+
+        # --- collapse to one standardized effect ---
+        zval = txt("z = +2.4", size=T.SUB_SIZE, color=T.POSITIVE,
+                   weight="BOLD").move_to([1.5, -0.2, 0])
+        znote = txt("standardized effect · depth-independent", size=T.SMALL_SIZE,
+                    color=T.MUTED).next_to(zval, DOWN, buff=0.25)
+        with self.beat("That shift collapses into one standardized effect — "
+                       "direction and evidence in a single number."):
+            self.play(FadeOut(axis), FadeOut(axlab), FadeOut(ctrl_lab),
+                      FadeOut(pert_lab),
+                      FadeTransform(VGroup(ctrl, pert), zval), run_time=T.T_REVEAL)
+            self.play(FadeIn(znote), run_time=T.T_MICRO)
+
+        # --- every gene's effect stacks into the fingerprint ---
         vals = rng.normal(0, 1, 16)
+        vals[0] = 2.4  # the z we just built = the top cell
         vec = VGroup(*[
             Rectangle(width=cell, height=cell, stroke_width=0,
-                      fill_color=(T.SIGNAL if v > 0 else T.NEGATIVE),
+                      fill_color=(T.POSITIVE if i == 0 else
+                                  (T.SIGNAL if v > 0 else T.NEGATIVE)),
                       fill_opacity=float(min(abs(v), 1)) * 0.9)
-            for v in vals
-        ]).arrange(DOWN, buff=0.02).move_to(RIGHT * 3.6 + DOWN * 0.3)
-        veclab = txt("response fingerprint\n(2,000 genes)", size=T.SMALL_SIZE,
+            for i, v in enumerate(vals)
+        ]).arrange(DOWN, buff=0.02).move_to(RIGHT * 3.7 + DOWN * 0.3)
+        veclab = txt("fingerprint\n2,000 genes", size=T.SMALL_SIZE,
                      color=T.MUTED).next_to(vec, RIGHT, buff=0.3)
-        arr = Arrow(genes[k].get_bottom(), vec.get_top(), color=T.MUTED,
-                    stroke_width=2, buff=0.2)
-        with self.beat("Then read out how every other gene responds — one "
-                       "number each. That vector is the perturbation's "
-                       "fingerprint."):
-            self.play(Create(arr), run_time=0.6)
-            self.play(LaggedStart(*[GrowFromCenter(s) for s in vec],
+        with self.beat("Do that for every gene — thousands of standardized "
+                       "effects stack into one transcriptional fingerprint."):
+            self.play(FadeOut(regA), FadeOut(cross), FadeOut(crispr),
+                      FadeOut(arr0), FadeOut(geneB), FadeOut(znote), run_time=0.4)
+            self.play(ReplacementTransform(zval, vec[0]), run_time=0.7)
+            self.play(LaggedStart(*[GrowFromCenter(s) for s in vec[1:]],
                                   lag_ratio=0.05), FadeIn(veclab), run_time=1.4)
 
         # stack thousands of fingerprints into the regulator x gene map
@@ -226,10 +268,9 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
         mat = VGroup(*colgroups).move_to(DOWN * 0.3)
         mlab = txt("3,106 regulators × 2,000 genes", size=T.LABEL_SIZE,
                    color=T.MUTED).next_to(mat, DOWN, buff=0.4)
-        with self.beat("Do this thousands of times, and the fingerprints "
-                       "stack into one regulator-by-gene map."):
-            self.play(FadeOut(genes), FadeOut(cross), FadeOut(klab),
-                      FadeOut(arr), FadeOut(veclab), run_time=0.4)
+        with self.beat("One fingerprint per regulator — stack thousands into "
+                       "the regulator-by-gene map."):
+            self.play(FadeOut(veclab), run_time=0.3)
             self.play(ReplacementTransform(vec, colgroups[0]), run_time=0.8)
             self.play(LaggedStart(*[FadeIn(cg) for cg in colgroups[1:]],
                                   lag_ratio=0.05), run_time=1.6)
@@ -237,8 +278,7 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
 
         # fold into the square operator
         with self.beat("Correlate every pair, and the map folds into one "
-                       "square object — the operator. Everything ahead is a "
-                       "question we put to this matrix."):
+                       "square object — the operator."):
             op = self.make_operator_matrix(n=20, size=5.0).move_to(DOWN * 0.3)
             self.play(FadeTransform(mat, op), FadeOut(mlab), run_time=1.4)
             cap = txt("the operator — regulator × regulator", size=T.LABEL_SIZE,
