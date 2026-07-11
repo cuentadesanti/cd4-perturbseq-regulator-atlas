@@ -34,6 +34,12 @@ if [[ "$NARRATE" == "eleven" ]]; then
   fi
   export ELEVEN_API_KEY ELEVENLABS_API_KEY="${ELEVEN_API_KEY:-}"
 fi
+if [[ "$NARRATE" == "deepgram" ]]; then
+  if [[ -z "${DEEPGRAM_API_KEY:-}" && -f deepgram_api_key.txt ]]; then
+    DEEPGRAM_API_KEY="$(tr -d '[:space:]' < deepgram_api_key.txt)"
+  fi
+  export DEEPGRAM_API_KEY
+fi
 export NARRATE="$NARRATE"
 
 case "$MODE" in

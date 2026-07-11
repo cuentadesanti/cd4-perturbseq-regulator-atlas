@@ -82,6 +82,10 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
                 SayService(voice=os.environ.get("SAY_VOICE", "Samantha"),
                            rate=int(os.environ.get("SAY_RATE", "138")),
                            ffmpeg=os.environ.get("FFMPEG", "ffmpeg")))
+        elif self.narrate == "deepgram":
+            from voice import DeepgramService
+            self.set_speech_service(DeepgramService(
+                voice=os.environ.get("DG_VOICE", "aura-asteria-en")))
         elif self.narrate == "eleven":
             from voice import ElevenLabsByID
             self.set_speech_service(
@@ -106,7 +110,7 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
     # ---- helpers ----------------------------------------------------- #
     @contextmanager
     def beat(self, text):
-        if self.narrate in ("say", "eleven"):
+        if self.narrate in ("say", "eleven", "deepgram"):
             with self.voiceover(text=text) as tr:
                 yield tr
         else:
