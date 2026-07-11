@@ -70,7 +70,7 @@ methods often fail to beat simple baselines. And the low-power regulator tail, e
 cell-count floor, could be recovered with a precision-weighted (lfcSE) sub-floor build if those
 specific regulators — rather than the well-powered structure — became the target of a follow-up.
 
-The contribution of this work is not a new estimator or a new master regulator, but a way of
-looking: the perturbation screen as a single operator whose geometry is predictive, condition-
-resolved, and cell-type-discriminating — recovered with explicit statistical rigor from a 1.8 TB
-atlas, on a laptop.
+The contribution is a way of reading genome-scale perturbation data as an auditable operator whose
+geometry contains recoverable modular and context-dependent biological organization, while placing a
+measured boundary on what that organization can predict — recovered with explicit statistical rigor
+from a 1.8 TB atlas, on a laptop.

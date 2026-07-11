@@ -21,18 +21,20 @@ primary-cell Perturb-seq screen: existing analyses either rank regulators by eff
 factor the expression matrix into programs, but none builds the regulator × gene operator and
 interrogates it as an operator — its predictive structure, its low-dimensional subspace, its
 decomposition by condition. That is the gap this work addresses, and the results that follow are
-properties of the operator: it predicts within its panel, it is gated by condition, its denoised
-structure resolves into reproducible modules — one of them a known molecular complex recovered blind
-to annotation — and it separates universal from cell-type-specific regulation, while failing to
-predict the effects of regulators it never saw.
+properties of the operator: it completes held-out conditions of observed regulators, it is gated by
+condition, its denoised structure resolves into reproducible modules — one of them a known molecular
+complex recovered blind to annotation — and it separates universal from cell-type-specific
+regulation, while failing to predict the trans-effects of regulators it never saw.
 
 Positioning this against the single-cell-CRISPR methodology literature clarifies what is inherited
 and what is contributed. The front end — turning raw counts into calibrated, harmonized
 per-regulator effect estimates — is a solved problem we build on rather than redo: calibrated
 single-cell-CRISPR testing [Barry 2024 `10.1186/s13059-024-03254-2`] and the scPerturb
 effect-quantification framework [Peidli 2024 `10.1038/s41592-023-02144-y`] define that layer. Our
-contribution sits above it: the operator, its condition factors, and its out-of-panel
-predictivity. The closest methodological neighbor is guided sparse factor analysis
+contribution sits above this calibrated front end: a spectrally denoised perturbational operator, its
+modular and condition-resolved organization, and an explicit separation between within-operator
+completion and prediction of unseen regulators. The closest methodological neighbor is guided sparse
+factor analysis
 [Zhou 2023 `10.1038/s41592-023-02017-4`], which recovers gene programs and their driving
 perturbations probabilistically; our CP/SVD operator decomposition is a deterministic analogue of
 that object, and we treat it as a comparison rather than a claim of priority. The predictive

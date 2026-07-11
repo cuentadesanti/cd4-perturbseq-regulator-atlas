@@ -6,7 +6,8 @@ what those trustworthy effects build when taken together. The operator induces a
 regulator–regulator similarity, and that similarity is not structureless — it carries discrete,
 co-regulated modules. This is where the analysis changes scale, from individual regulators to the
 organization of the system, and it is the strongest use of the shared structure in this work: we
-recover the modules blind to any annotation, and only then ask what they are.
+recover the modules blind to any annotation, and only then ask what they are
+(Figure&nbsp;3 (`docs/figures/38_operator_insignia_3106.png`)).
 
 ## 4.1 Spectral denoising isolates low-dimensional regulatory structure
 

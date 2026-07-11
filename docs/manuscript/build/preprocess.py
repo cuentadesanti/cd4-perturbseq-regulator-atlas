@@ -67,8 +67,25 @@ FIGURES = {
           "every rank; the aggregate margin peaks at rank 7 (Δ R² = +0.379) and "
           "declines thereafter — a genuine turnover that scopes the predictive subspace to "
           "~7 dimensions."),
-    "3": ("docs/figures/34_operator_cp_condition_factors_3106.png",
-          "**Figure 3. The operator decomposes into gene programs gated by activation state.** "
+    "3": ("docs/figures/38_operator_insignia_3106.png",
+          "**Figure 3. Denoised operator structure reveals regulatory modules — and the boundary "
+          "on prediction.** (A) The denoised regulator–regulator operator, block-ordered by "
+          "community, with the SAGA and Complex-I communities outlined (consensus modularity "
+          "z = 259 against a label-permutation null). (B) Eigenspectrum: after deflating the "
+          "global co-variation mode (λ₀ = 167) and discarding the Marchenko–Pastur bulk "
+          "(λ₊ = 1.49), an empirical column-permutation edge (2.95) leaves 92 signal directions "
+          "rather than the 336 the closed form admits. (C) The stability-gated community matching "
+          "mitochondrial Complex I, recovered blind to annotation (CORUM NADH-dehydrogenase, "
+          "BH-FDR 1.4 × 10⁻⁷; 10 NDUF* subunits present). (D) The SAGA subunits' operator "
+          "correlations — a convergent module whose subunits also re-form a cluster in K562 "
+          "(z = 16.1). (E) Partition stability against the 0.8 gate distinguishes a recovered "
+          "community (Complex I) from the convergent SAGA module (0.56, below the gate). (F) "
+          "Leave-regulator-out prediction of unseen regulators: real and shuffled features "
+          "perform identically at R² ≈ 0 (ridge and CatBoost), and a capacity probe confirms the "
+          "learners fit the training response while failing to generalize — the predictive "
+          "boundary."),
+    "4": ("docs/figures/34_operator_cp_condition_factors_3106.png",
+          "**Figure 4. The operator decomposes into gene programs gated by activation state.** "
           "CANDECOMP/PARAFAC condition-factor weights across Rest / Stim8hr / Stim48hr. Two "
           "factors are gated with bootstrap confidence intervals excluding a flat profile — "
           "one peaking in resting cells (factor 1) and one in early stimulation (factor 6) — "

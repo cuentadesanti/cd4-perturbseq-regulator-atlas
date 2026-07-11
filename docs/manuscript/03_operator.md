@@ -25,15 +25,15 @@ pilot.
 
 ## The operator predicts the unobserved response of out-of-panel regulators
 
-The central claim is predictive. We hold out an entire condition fiber — the late-stimulation
-(Stim48hr) response — for regulators that lie outside the original variance-selected panel, and
-ask whether a low-rank fit trained on the other regulators, reading only the resting and
-early-stimulation entries of the held-out regulators, recovers their held-out late-stimulation
-response. The baseline is persistence: predicting that the late-stimulation response equals the
-early-stimulation one. Persistence is not a straw man — if late stimulation simply extended early
-stimulation, it would be hard to beat; its negative R² (−0.305 on the full held-out set) shows
-that late stimulation genuinely diverges from early, so any method that beats it is using
-cross-regulator structure to anticipate that divergence.
+A first test of shared structure is whether observations in two conditions improve completion of a
+third. We hold out an entire condition fiber — the late-stimulation (Stim48hr) response — for
+regulators outside the original variance-selected panel, and ask whether a low-rank fit trained on
+the other regulators, reading only the resting and early-stimulation entries of the held-out
+regulators, recovers their held-out late-stimulation response. The baseline is persistence
+(late = early); its negative R² (−0.305 on the full held-out set) shows late stimulation genuinely
+diverges from early, so beating it means the fit is using cross-regulator structure to anticipate
+that divergence. This is evidence that the operator's structure is shared and usable — not the
+paper's central result, which is the modular organization recovered in Section 4.
 
 On held-out out-of-panel regulators (~621 per holdout), the low-rank model beats persistence
 **at every rank**, with an aggregate margin of Δ R² = **+0.382 ± 0.011** at rank 7 — mean ± SD
@@ -43,20 +43,15 @@ confirming the margin is a stable property of the operator, not a single-seed ar
 rank, rather than at a single tuned rank, is what makes the result a property of the operator rather
 than of a lucky hyperparameter.
 
-The size of that margin, however, must be read carefully, and stratifying by knockdown strength
-is what keeps it honest (Table&nbsp;1 (`docs/tables/operator_completion_stratified_3106.csv`); source
-`operator_completion_stratified_3106.csv`). The margin is *largest* for weak regulators
-(+0.501, n=310) and *smallest* for strong ones (+0.277 on a median split, n=311; +0.205 on the
-subset matched to the original panel's strength, n=203); each of these margins is stable across
-the 20 random holdouts (weak +0.514 ± 0.015, strong +0.277 ± 0.018, panel-matched +0.206 ± 0.021;
-source `operator_completion_multiseed_3106.csv`). This ordering is mechanistic, not
-mysterious: persistence is a fair baseline for strongly knocked-down regulators (its R² is only
-−0.146 in the panel-matched stratum) and collapses for weakly knocked-down ones (−0.421), so the
-aggregate margin is, if anything, concentrated where the baseline is weakest. The conservative
-reading is therefore the one we adopt: even for the strongest, panel-matched regulators — where
-persistence is a genuinely fair baseline — the model still beats it, by +0.205 at rank 7 and by
-at least +0.151 at every rank. The out-of-panel predictive advantage is not an artifact of
-weak-regulator baseline collapse; it holds where the baseline is hardest to beat.
+The margin must be read carefully, and stratifying by knockdown strength keeps it honest
+(Table&nbsp;1 (`docs/tables/operator_completion_stratified_3106.csv`)). It is *largest* for weak
+regulators (+0.501) and *smallest* for strong ones (+0.205 on the subset matched to the original
+panel's strength), each stable across the 20 holdouts — an ordering that is mechanistic, not
+mysterious: persistence is a fair baseline for strongly knocked-down regulators and collapses for
+weakly knocked-down ones, so the aggregate margin concentrates where the baseline is weakest. The
+conservative reading is the one we adopt: even for the strongest, panel-matched regulators the model
+still beats persistence (+0.205 at rank 7, ≥ +0.151 at every rank), so the advantage is not an
+artifact of weak-regulator baseline collapse.
 
 Two boundaries on this claim are worth stating explicitly, because both are places a reader could
 otherwise over-read the result. First, the held-out unit is a condition *fiber*, not a whole
