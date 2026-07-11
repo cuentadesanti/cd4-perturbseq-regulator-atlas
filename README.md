@@ -1,261 +1,327 @@
-# Robust regulators of CD4+ T cell programs — Perturb-seq
+# Robust regulators of CD4+ T-cell programs from genome-scale Perturb-seq
 
-> Hackathon submission · genome-scale CRISPRi Perturb-seq in primary human CD4+ T cells (Marson Lab, 2025)
+*A quality-aware, donor-audited framework for identifying robust regulators and transcriptional response programs in primary human CD4+ T cells*
 
-![pipeline](docs/figures/00_pipeline_overview.png)
+## Overview
 
-## The question
+Genome-scale Perturb-seq screens contain thousands of statistically significant effects, but significance alone does not identify reliable regulators.
 
-Which genes are **robust regulators** of CD4+ T cell programs? The challenge: the signal from a
-genome-scale screen is dominated by noise and by a handful of hubs. We want to **separate signal
-from noise with uncertainty** and prioritize regulators by a **large and reproducible** effect —
-not by raw counts or `adj_p_value < 0.1`.
+Raw differential-expression counts are strongly influenced by:
 
-## What this repo does
+* perturbation quality
+* statistical power
+* a small number of extreme hubs
+* condition-specific responses
+* instability across guides and donors
 
-This project turns a massive CD4+ T cell Perturb-seq screen into **three explorable objects: robust
-regulators, reproducibility audits, and transcriptional programs.** The CSV-only core identifies
-quality-aware regulators; optional h5ad slicing maps selected perturbations into transcriptomic
-fingerprint neighborhoods. It is **memory- and compute-aware** (the full dataset is 1.8 TB; the
-working disk has ~10 GB free) — the entire core runs **from the supplementary CSV tables alone
-(~15 MB)**:
+This project develops a reproducible framework for distinguishing large, stable and replicable regulatory effects from these sources of variation.
 
-1. **Selective download pipeline** from the public S3 bucket (`scripts/download.sh`).
-2. **Data model** of the dataset (`docs/DATA_MODEL.md` + [interactive artifact](docs/data-model.html)).
-3. **80/20 EDA** (`scripts/eda.py`) — effect-size distribution, knockdown quality, hubs, reproducibility.
-4. **Model 2 · empirical Bayes** (`scripts/model_hubs.py`) — regulator ranking with uncertainty.
-5. **Ranking audits** (`scripts/audit_ranking.py`) — baselines, bootstrap stability, global vs.
-   context-specific, and a guide-level reproducibility audit (with partial, 19%, donor coverage — the
-   KD-gated subset; the per-donor object later reaches 100%, see Tier 1 / `DONOR_ROBUSTNESS.md`).
-6. **Transcriptional programs** (`scripts/analyze_fingerprints.py`) — organizes top perturbations by
-   the fingerprint they induce, reading `.h5ad` layers *by slice* from S3 **without downloading it**.
-7. **Model 1 · uncertainty-aware effect network** (optional, `scripts/model_edges.py`, bonus).
-8. **Empirical regulatory operator** (`make operator`) — treats the log-FC matrix as one operator and
-   recovers what the fingerprint PCA discarded: gene programs, condition-gating (CP with bootstrap CIs),
-   and out-of-panel prediction, all built in precision-decoupled z-score space. See
-   `docs/OPERATOR_ANALYSIS.md`.
+The analysis produces three primary outputs:
+
+1. A quality-aware ranking of robust regulators
+2. Audits of guide-, condition- and donor-level reproducibility
+3. Transcriptional response programs induced by selected perturbations
+
+The core analysis runs from approximately 15 MB of supplementary tables, despite the complete dataset occupying roughly 1.8 TB.
+
+## Main contribution
+
+The central contribution is not a new differential-expression test.
+
+It is a framework for deciding which perturbation effects remain credible after accounting for knockdown quality, effect uncertainty, context specificity and biological replication.
+
+The resulting regulator atlas separates:
+
+* robust global regulators from condition-specific hubs
+* reproducible effects from guide- or donor-fragile signals
+* perturbation magnitude from response-program identity
+* exploratory biological hypotheses from evidence supported by the screen
 
 ## Dataset
 
-**Primary Human CD4+ T Cell Perturb-seq** · [CZI Virtual Cells Platform](https://virtualcellmodels.cziscience.com/dataset/genome-scale-tcell-perturb-seq)
-· public bucket `s3://genome-scale-tcell-perturb-seq/marson2025_data/` · 4 donors × 3 conditions
-(Rest / Stim8hr / Stim48hr). The core uses 3 CSVs (33,983 DE contrasts, 26,504 guides, 12 samples).
+**Primary Human CD4+ T Cell Perturb-seq**
 
-## Key findings
+* Genome-scale CRISPR interference screen
+* Primary human CD4+ T cells
+* 4 donors
+* 3 conditions: Rest, Stim8hr and Stim48hr
+* 33,983 differential-expression contrasts
+* 26,504 guides
+* 12 donor-condition samples
 
-- **Heavy-tailed effects**: the median perturbation yields 2 DEGs, 15% have no effect, but 1.5% are
-  hubs (>1000 DEGs). → summarize with percentiles and rankings, not the mean.
-- **Knockdown gates the signal**: contrasts with a significant on-target knockdown (62%) concentrate
-  **85%** of all trans-effects. Filtering by `ontarget_significant` is the mandatory first step.
-- **Robust ranking ≠ raw hubs**: the EB model surfaces **chromatin/transcription machinery**
-  (SAGA complex: TADA1/TADA2B/SGF29/SUPT20H · Mediator: MED12/CCNC · KDM1A, SETD2) — regulators with a
-  large **and** stable effect across conditions, ranked above the Stim8hr-specific TCR-signaling hubs.
-- **Fingerprint similarity organizes perturbations into recognizable programs**: matching each
-  regulator's downstream fingerprint to the curated complexes recovers **TCR signaling, SAGA/chromatin,
-  and Mediator/transcription** (permutation-validated at z=11, z=9, z=3) and surfaces candidate
-  neighbors — e.g. the chromatin remodeler **CHD7 is assigned to the SAGA/chromatin program** by
-  fingerprint similarity (cosine 0.84; a related perturbation response, not a complex-membership claim).
-  The latent axis is program *identity*, not effect magnitude (|PC1| vs. n_downstream = 0.25).
-- **Uncertainty-aware effect network (bonus)**: ~2,470 robust edges (`P(|effect|>1.5×)>0.8`, i.e. the
-  probability that the effect *magnitude* exceeds 1.5×, not that a causal edge exists) for the top
-  regulators, extracted from the remote h5ad without downloading it.
+Data source: CZI Virtual Cells Platform, Marson Lab, 2025
 
-Detail: [`docs/report.md`](docs/report.md) · [`docs/EDA.md`](docs/EDA.md) · [`docs/MODELING.md`](docs/MODELING.md).
-Rigor audit / response to reviewer: [`docs/REVIEW_RESPONSE.md`](docs/REVIEW_RESPONSE.md)
-(effect-size metric audit, within-condition null, external concordance).
+The local core uses three supplementary CSV files. Larger `.h5ad` and `.h5mu` objects are accessed selectively for analyses that require gene-level perturbation profiles or donor-specific effects.
 
-## Validating the ranking
+## Analysis workflow
 
-Before trusting the ranking, we audit it (`scripts/audit_ranking.py`, no new dependencies). It is
-further pressure-tested against a senior-researcher critique in [`docs/REVIEW_RESPONSE.md`](docs/REVIEW_RESPONSE.md)
-(effect-size metric vs. DE-count, within-condition null, external concordance) and against the true
-replication unit in [`docs/DONOR_ROBUSTNESS.md`](docs/DONOR_ROBUSTNESS.md).
+### 1. Perturbation quality control
 
-**Donor robustness (the replication unit that matters).** From the dedicated per-donor DE object
-(`by_donors.h5mu`, 100% cross-donor coverage on KD-gated contrasts) we add a `donor_robust` flag
-(worst of 6 pairwise donor correlations ≥ 0.5) as a **column, not a re-sort** — a large-effect hub
-that fails replication stays visible at its rank (e.g. **SMG1, rank 24, 2,683 DEGs, fails donor
-concordance**). The top regulators are donor-robust as a class (29/30). The same check over the
-fingerprint programs flags **4 assigned-neighbor false positives** (TCR: ATF7IP2/NCAPG2/EIF1AX;
-Mediator: GLIPR2) while the SAGA/chromatin neighbor **CHD7 survives** — so the programs are now
-internally consistent with the donor-audited ranking.
+A significant on-target knockdown is required before interpreting downstream effects.
 
-**Naive hubs vs. quality-aware regulators.** Ranking by raw `n_downstream` rewards hubs that don't
-survive the controls: of the top 30 raw hubs, **2 fall out at the knockdown gate** (no validated
-knockdown) and **~15 are demoted** by EB shrinkage for being condition-specific. The EB ranking
-surfaces regulators with a large **and** stable effect. Stability was measured by bootstrap (B=200):
-it is *moderate* — read it as a set of robust regulators, not an exact ordering (`stability_frequency`
-per gene).
+Only 62% of contrasts pass this gate, but they account for approximately 85% of all detected trans-effects. This makes perturbation quality control a necessary first step rather than an optional sensitivity analysis.
 
-**Global vs. context-specific regulators.** Splitting by
-`condition_specificity = max/sum of n_downstream`: the **global** ones (SGF29, TADA2B, SUPT20H…) are
-chromatin/transcription machinery active in all conditions; the **context-specific** ones (ZAP70,
-LCK…) are TCR signaling, active only under stimulation. Both classes are real biology; the
-distinction avoids confusing a universal regulator with a context-dependent one. See
-`docs/tables/top_global_regulators.csv` and `top_condition_specific_regulators.csv`.
+### 2. Quality-aware regulator ranking
 
-## Transcriptional programs
+An empirical-Bayes model combines effect magnitude with uncertainty and cross-condition behavior.
 
-A rank is one number; a **fingerprint** is what the perturbation actually does to the cell. On a
-balanced panel of 200 top perturbations (global · context-specific · reproducibility-promoted ·
-demoted), each regulator's downstream fingerprint (zscore vector) is compared to the curated **SAGA /
-Mediator / TCR** complexes. These are **candidate program assignments by fingerprint similarity — not
-claims of physical complex membership.** `scripts/analyze_fingerprints.py` · `make fingerprints`.
+This prevents the ranking from being dominated by:
 
-- **Fingerprint similarity recovers the known complexes.** By permutation test the three complexes are
-  each significantly cohesive: **TCR z=11, SAGA z=9, Mediator z=3** (N=5000). The latent PC1 is program
-  *identity*, not effect magnitude (|PC1| vs. n_downstream Spearman = 0.25).
-- **The classifier is conservative — only 25 of 200 are assigned; the rest stay *mixed*, by design.**
-  The assigned set: **TCR signaling (13), SAGA/chromatin (9), Mediator/transcription (3)** — of which
-  **4 are flagged donor-fragile** by the per-donor check (TCR 3: ATF7IP2/NCAPG2/EIF1AX; Mediator 1:
-  GLIPR2; SAGA 0), so SAGA/chromatin is the most donor-robust program. Each program
-  recovers its curated core and adds **newly assigned neighbors** (non-curated genes placed in the same
-  fingerprint neighborhood) — e.g. the chromatin remodeler **CHD7 is assigned to the SAGA/chromatin
-  program** (cosine 0.84; a related response, not complex membership), and Mediator's **MED12** lands in
-  the chromatin neighborhood (Mediator–SAGA-like response). Every assignment is auditable in
-  `docs/tables/program_label_evidence.csv`.
-- **The reproducibility-promoted hits are coherent but distinct.** Promoted/demoted regulators have
-  transcriptomic neighborhoods as tight as the top global regulators (kNN cosine ~0.47 vs. 0.40), so
-  they are not statistical noise — yet **none map onto the canonical complexes**: the audit surfaces a
-  *distinct high-confidence set* rather than simply rediscovering known complexes.
+* noisy large estimates
+* raw DEG counts
+* weakly validated knockdowns
+* effects observed in only one favorable condition
 
-Tables: `fingerprint_findings.csv` (per-regulator program, neighbors, markers) ·
-`fingerprint_program_markers.csv` · `program_label_evidence.csv` · `fingerprint_audit_coherence.csv`.
-Figures 20–24. Detail in [`docs/FINGERPRINT_ANALYSIS.md`](docs/FINGERPRINT_ANALYSIS.md).
+The output is best interpreted as a set of high-confidence regulators, not as an exact ordering of genes.
 
-> *Honest scope:* fingerprint-based, program-level re-analysis anchored to known complexes — candidate
-> assignments and hypotheses, **not** de-novo pathway discovery or novel complex membership. The
-> convergent "response genes" are genes consistently moved by a program's regulators (relative to the
-> panel), not baseline cell-type markers; PCA is a view, not the proof.
+### 3. Reproducibility audits
 
-## Convergent programs by regulator class
+The ranking is pressure-tested using:
 
-A rank tells you *who* is strong; the fingerprint tells you *what a perturbation does*. But is
-"chromatin machinery recovers as top hubs" just the expected result of perturbing coactivators? To
-test that, a **balanced 30-regulator panel** — chosen by *class* (SAGA/chromatin, Mediator, TCR,
-other-robust, reproducibility-promoted, demoted control), not by rank — asks whether different classes
-converge on *different* downstream programs. Fully offline (`make class-programs`, uses the cached
-fingerprint panel; `scripts/analyze_class_programs.py`).
+* bootstrap rank stability
+* alternative baseline rankings
+* guide-level agreement
+* cross-condition consistency
+* donor-level replication
+* within-condition null comparisons
 
-- **Classes converge on distinct programs.** The pairwise Jaccard of per-class convergent-target sets
-  has a **median off-diagonal of ~0.05** — the classes barely share targets, so the "programs" are
-  real, not an artifact of every strong perturbation moving the same genes.
-- **A convergent interferon module** (SAGA-family knockdown *de-represses* interferon). Genes hit by
-  ≥4 of the 6 robust SAGA-family regulators form a **163-gene module** enriched for interferon-
-  stimulated genes, **all de-repressive** (knockdown *raises* ISGs).
-  > **Specificity control (important requalification).** A dedicated control
-  > (`make specificity-control`, fig 29) shows the ISG-enrichment *magnitude* is **largely a general
-  > strong-perturbation-under-stimulation effect**: effect-size-matched random regulators already reach
-  > **~3×** and SAGA is only marginally above (**5.4×**, p=0.04 on the uniform-threshold method). SAGA's
-  > real distinction is the **consistency of the de-repressive direction (95% ISG-up on KD vs 76%
-  > random)**, not a unique fold. So the earlier "19–24×" headline is *not* strong SAGA-specific
-  > evidence — read it as a prominent but largely general program that SAGA consistently restrains.
-- **Programs are condition-dependent.** Across 3 conditions (phase-2 comparison), TCR programs are
-  **stimulation-gated** (~4× Rest→Stim) while chromatin programs are **constitutive**; the interferon
-  program is stimulation-gated in every class.
-- **Disease link (one hypothesis, not a headline).** The module overlaps the clinically-tracked
-  lupus / interferonopathy IFN signature and 31/163 of its genes are autoimmune GWAS risk genes — but
-  an IFN module overlapping a clinical IFN signature is confirmatory by construction, so we state it as
-  a single untested hypothesis: *coactivator knockdown de-represses ISGs; whether this is a control
-  point in disease is not tested here.* Details in `docs/disease_and_specificity.md`.
+Donor robustness is reported as an audit column rather than being used to silently reorder the ranking. Large but donor-fragile effects therefore remain visible.
 
-These are **candidate convergent-target programs** (ISG-flagged), not causal pathways. UI: the
-**Programs by class** tab (per-class cards, Jaccard heatmap, ISG-flagged target lists). Tables:
-`class_isg_enrichment.csv`, `class_convergent_targets.csv`, `chromatin_stress_control.csv`,
-`module_disease_overlap.csv`, `module_gwas_hits.csv`, `convergent_module_*`, `phase2_*`. Figures 26–31.
-Detail: [`docs/disease_and_specificity.md`](docs/disease_and_specificity.md) ·
-[`docs/literature_positioning.md`](docs/literature_positioning.md).
+### 4. Transcriptional response programs
 
-## How to reproduce
+For selected regulators, the full downstream expression fingerprint is used to characterize what each perturbation does to the cell.
+
+Fingerprint similarity recovers coherent response neighborhoods associated with:
+
+* TCR signaling
+* SAGA and chromatin regulation
+* Mediator and transcriptional control
+
+Program labels indicate similarity of perturbation response. They do not imply physical protein-complex membership.
+
+### 5. Empirical regulatory operator
+
+The complete regulator-by-response-gene log-fold-change matrix is also analyzed as an empirical operator.
+
+This extension investigates:
+
+* low-dimensional gene-response programs
+* condition gating
+* regulator communities
+* out-of-panel reconstruction
+* inductive prediction for unseen regulators
+
+The leave-regulator-out experiments provide an important negative result: response structure is strongly compressible within the observed matrix, but current regulator-side features do not reliably predict the effects of entirely unseen perturbations.
+
+This distinguishes transductive structure recovery from genuine inductive generalization.
+
+## Principal findings
+
+### Robust regulators differ from raw hubs
+
+Ranking genes by the number of downstream DEGs overemphasizes perturbations that are condition-specific, noisy or insufficiently validated.
+
+The quality-aware ranking instead prioritizes stable chromatin and transcriptional regulators, including members of:
+
+* the SAGA complex
+* the Mediator complex
+* chromatin-modifying machinery
+
+TCR-signaling genes remain biologically meaningful, but many are correctly classified as stimulation-dependent rather than universal regulators.
+
+### Donor replication changes interpretation
+
+The strongest regulators are donor-robust as a class, with 29 of the top 30 passing the donor-concordance criterion.
+
+The audit also identifies prominent exceptions. For example, a regulator may have thousands of downstream effects yet fail cross-donor replication. Such genes are retained in the tables but explicitly flagged.
+
+### Perturbation fingerprints recover recognizable programs
+
+Response similarity recovers coherent SAGA/chromatin, Mediator and TCR neighborhoods.
+
+The classifier is deliberately conservative. Most regulators remain unassigned rather than being forced into a known program.
+
+Candidate neighbors are treated as hypotheses based on response similarity. For example, CHD7 is placed near the SAGA/chromatin response program, but this is not presented as evidence of physical complex membership.
+
+### Strong perturbations share a stimulation-linked interferon response
+
+SAGA-family knockdown produces a consistent de-repressive interferon response.
+
+However, effect-size-matched controls show that much of the enrichment magnitude is shared by strong perturbations under stimulation. The more specific SAGA-associated observation is the consistency of the response direction, not uniquely high enrichment.
+
+### Inductive prediction remains unresolved
+
+Low-rank and nonlinear models can reconstruct held-out entries or regulators when information from the same observed response system remains available.
+
+They do not yet generalize convincingly to entirely unseen regulators using the available regulator annotations.
+
+This negative result is retained because it defines the current boundary of what can be inferred from the dataset.
+
+## Repository structure
+
+```
+.
+├── api/                    # Read-only FastAPI service and atlas UI
+├── docs/
+│   ├── figures/            # Generated figures
+│   ├── tables/             # Generated analysis tables
+│   ├── report.md           # Consolidated analysis report
+│   ├── MODELING.md         # Ranking methodology
+│   ├── DONOR_ROBUSTNESS.md # Donor-level audit
+│   ├── FINGERPRINT_ANALYSIS.md
+│   └── OPERATOR_ANALYSIS.md
+├── scripts/                # Reproducible analysis pipeline
+├── Makefile                # Main workflow entry points
+└── requirements.txt
+```
+
+## Reproducing the core analysis
 
 ```bash
-# 1. environment
-python3 -m venv .venv && source .venv/bin/activate
+# Create an environment
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 
-# 2. data (tables only, ~15 MB)
+# Download the supplementary tables
 scripts/download.sh tables
 
-# 3. full pipeline (EDA + model + report), verified
+# Run the verified core pipeline
 make all
 ```
 
-Targets: `make eda` · `make model` · `make audit` · `make report` · `make all` · `make clean`.
-Optional (remote, requires `pip install h5py s3fs fsspec` + `scikit-learn`): `make fingerprints` ·
-`make spike` · `make edges`.
-
-## Outputs
-
-| File | What it is |
-|---|---|
-| `docs/report.md` | consolidated judge-facing report |
-| `docs/tables/top_regulators_for_review.csv` | top 30 regulators (judge-facing) |
-| `docs/tables/hub_ranking_bayes.csv` | full EB ranking (all genes) |
-| `docs/tables/fingerprint_findings.csv` | per-regulator transcriptional program + neighbors + markers |
-| `docs/tables/program_label_evidence.csv` | auditable basis for each program label |
-| `docs/tables/class_isg_enrichment.csv` · `class_convergent_targets.csv` | per-class convergent programs + interferon test |
-| `docs/tables/convergent_module_*` · `phase2_*` | interferon module + condition-dependence analyses |
-| `docs/tables/robust_edges.csv` | uncertainty-aware effect network (bonus, Model 1) |
-| `docs/figures/*.png` | EDA · ranking · programs (20–25) · class programs (26–28) · overview |
-| `docs/data-model.html` | interactive explorer (data model + EDA + study) |
-
-## Product: Regulator Atlas (API + UI)
-
-*The pipeline produces the artifacts; a read-only API makes them explorable.* The API does **not**
-run models, does **not** download the h5ad, and does **not** touch S3 — it only serves the versioned
-CSVs from `make all`.
+The core pipeline includes:
 
 ```bash
-pip install -r requirements.txt      # includes fastapi + uvicorn
-make all                             # generates the tables the API serves
-make api                             # uvicorn :8000 (serves API + UI on the same origin)
-open http://localhost:8000/          # the UI · Swagger at http://localhost:8000/docs
+make eda
+make model
+make audit
+make report
 ```
 
-The UI is served by the API itself (same origin), so there's **no file to open** and no CORS to deal
-with. If port 8000 is taken, use another (`--port 8010`) and open `http://localhost:8010/`.
+Optional analyses that access larger remote objects require additional dependencies:
 
-Key endpoints: `/summary`, `/regulators?q=&regulator_class=&sort_by=`, **`/regulators/{gene}`**
-(full profile: class, per-condition profile, audits, **transcriptional program + neighbors + markers**,
-top edges, interpretation), `/audit/reproducibility`, **`/programs/summary`**, `/programs/findings`,
-**`/programs/classes`**, `/programs/class-targets?class=`, `/edges/downstream`. The UI has **6 screens**:
-Overview, Explore, Audit, Effect network, Programs, and **Programs by class**.
-Detail in [`api/README.md`](api/README.md).
+```bash
+pip install h5py s3fs fsspec scikit-learn
+```
+
+Selected optional targets include:
+
+```bash
+make fingerprints
+make edges
+make operator
+```
+
+See the `Makefile` and the corresponding documents under `docs/` for the complete workflow.
+
+## Regulator Atlas
+
+The repository includes a read-only API and browser interface for exploring the generated artifacts.
+
+The application does not train models or download the full dataset. It serves versioned outputs created by the analysis pipeline.
+
+```bash
+make all
+make api
+```
+
+Then open:
+
+```
+http://localhost:8000/
+```
+
+Swagger documentation is available at:
+
+```
+http://localhost:8000/docs
+```
+
+The atlas supports:
+
+* regulator search and ranking
+* per-condition effect profiles
+* knockdown and reproducibility audits
+* donor-robustness flags
+* transcriptional-program assignments
+* fingerprint neighbors and response markers
+* downstream effect-network exploration
+* regulator-class comparisons
+
+See `api/README.md` for details.
+
+## Key outputs
+
+| Output | Description |
+|---|---|
+| `docs/report.md` | Consolidated analysis report |
+| `docs/tables/top_regulators_for_review.csv` | Review-facing table of top regulators |
+| `docs/tables/hub_ranking_bayes.csv` | Full empirical-Bayes regulator ranking |
+| `docs/tables/fingerprint_findings.csv` | Program assignments, neighbors and markers |
+| `docs/tables/program_label_evidence.csv` | Evidence supporting each program label |
+| `docs/tables/class_convergent_targets.csv` | Convergent response genes by regulator class |
+| `docs/tables/class_isg_enrichment.csv` | Interferon enrichment and specificity controls |
+| `docs/tables/robust_edges.csv` | Uncertainty-aware effect-network edges |
+| `docs/figures/` | Generated figures and diagnostic plots |
+| `docs/data-model.html` | Interactive data-model explorer |
+
+## Interpretation guide
+
+Several distinctions are important when reading the results.
+
+**Robust does not mean universally causal**
+
+The ranking quantifies evidence for a large and stable perturbation response within this experiment. It is not a posterior probability that a gene is a causal regulator in every biological context.
+
+**Program similarity is not complex membership**
+
+A gene assigned to a response program produces a transcriptomic fingerprint similar to that program's reference regulators. This does not establish a physical interaction or direct pathway membership.
+
+**Donor robustness is an audit, not a hidden filter**
+
+Genes that fail donor replication are retained and flagged. This avoids presenting a cleaner ranking by silently removing inconvenient observations.
+
+**Negative results are part of the deliverable**
+
+Failed specificity tests and unsuccessful inductive-prediction experiments are reported alongside positive findings. They constrain the biological and predictive claims that the dataset can support.
 
 ## Limitations
 
-- **Honest naming**: the models are **empirical-Bayes / pseudo-Bayesian**, not a full hierarchical NB
-  or MCMC (no PPL, no formal random effects).
-- `xcond_reproducibility` is an **exploratory feature** (cross-condition stability). It is **audited**
-  with a **guide-level sensitivity analysis (partial donor coverage)** (`make repro-meta` →
-  `scripts/extract_de_obs_metadata.py`, which extracts only the `.obs`, no `.layers`) that
-  **reweights** the EB score with **real** cross-guide (`guide_correlation_all`) and cross-donor
-  (`donor_correlation_hits_mean`) reproducibility — it is a **sensitivity analysis, not a new
-  posterior**. Optional, and it does not replace the core; see *Sensitivity audit* in
-  `docs/report.md`. Honest coverage: cross-guide ~78% but cross-donor only ~19% of contrasts (the
-  KD-gated subset) → a **neutral weight** where it's missing (a gene is not penalized for lacking
-  donor metadata). *This is the old sensitivity audit; the dedicated per-donor object
-  (`by_donors.h5mu`, Tier 1) later gave **100%** cross-donor coverage — see
-  [`docs/DONOR_ROBUSTNESS.md`](docs/DONOR_ROBUSTNESS.md).*
-- **Model 1 is optional**: remote per-slice access is viable (~4.5 s/row, measured) but latency-bound;
-  the official deliverable stands on its own with the local core.
+* The ranking model is empirical Bayes or pseudo-Bayesian, not a full hierarchical count model
+* Differential-expression summaries discard some cell-level information
+* Guide-level reproducibility is unavailable for part of the original table-only core
+* Program assignments depend on the selected perturbation panel and reference complexes
+* Response similarity cannot establish direct molecular interactions
+* Remote slicing of large expression objects is latency-bound
+* Inductive prediction for unseen regulators remains weak with the currently available regulator-side features
+* Disease and GWAS overlaps are hypothesis-generating and are not tested mechanistically here
 
-## Submission summary
+## Documentation
 
-A reproducible product that turns a 1.8 TB CD4 Perturb-seq screen into **three explorable objects —
-robust regulators, reproducibility audits, and transcriptional programs** — runnable on a laptop with
-~10 GB of disk using only 15 MB of data for the core. The **CSV-only** core ranks regulators with
-uncertainty (empirical Bayes) and audits them (bootstrap stability + a guide-level reproducibility
-audit with partial donor coverage). On top of that, **fingerprint similarity organizes the top perturbations into
-recognizable programs** — recovering the SAGA, Mediator and TCR complexes (permutation z=9/3/11,
-robust to a within-condition null) and
-surfacing candidate neighbors (e.g. CHD7 assigned to the chromatin program by fingerprint) — plus a
-bonus **uncertainty-aware effect network**, both
-streamed from the 17 GB h5ad without downloading it. An explorable **Regulator Atlas** (read-only
-FastAPI + UI) ties it together: search a gene and see its rank, audit survival, transcriptional
-program, transcriptomic neighbors, and defining response genes in one view. `make all` reproduces the
-core; `make fingerprints` builds the programs; `make api` launches the atlas. See `docs/report.md`.
+Start with:
+
+* `docs/report.md` for the complete analysis
+* `docs/MODELING.md` for regulator ranking
+* `docs/DONOR_ROBUSTNESS.md` for donor replication
+* `docs/FINGERPRINT_ANALYSIS.md` for response programs
+* `docs/OPERATOR_ANALYSIS.md` for the empirical operator
+* `docs/REVIEW_RESPONSE.md` for robustness checks and reviewer-style critiques
+
+## Scope
+
+This repository provides a reproducible, audit-first reanalysis of a genome-scale primary-cell Perturb-seq screen.
+
+Its strongest claims concern:
+
+1. the identification of quality-aware and donor-audited regulators
+2. the separation of global from context-specific effects
+3. the organization of perturbations into reproducible response programs
+
+The operator, network, disease-overlap and inductive-prediction analyses extend this core result, but are not required to support it.
 
 ---
-Data: CZI Virtual Cells Platform · Marson Lab 2025 · biorxiv preprint `10.64898/2025.12.23.696273`.
-Original analysis code: [emdann/GWT_perturbseq_analysis_2025](https://github.com/emdann/GWT_perturbseq_analysis_2025).
+
+Data: CZI Virtual Cells Platform · Marson Lab 2025
+Preprint: 10.64898/2025.12.23.696273
+Original analysis code: emdann/GWT_perturbseq_analysis_2025
