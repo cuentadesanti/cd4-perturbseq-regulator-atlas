@@ -1,57 +1,37 @@
 # Narration script
 
-Narration is now **beat-level**: each sentence lives in a `with self.beat("…")`
-block in `demo.py`, wrapping only the animation it describes, so the voiceover
-syncs to that specific moment (the "336" is spoken as the counter appears, "watch
-this one" as the camera zooms). Each beat holds its last frame until its audio
-ends, so nothing plays over black. Edit the text in `demo.py`; this file mirrors
-it. Every number is from `docs/OPERATOR_ANALYSIS.md`.
+Beat-level: each line is one `with self.beat(...)` block wrapping the animation it describes. Edit in `demo.py`; this mirrors it. Numbers from `docs/OPERATOR_ANALYSIS.md`.
 
-**1 · Intro — one gene → fingerprint → matrix → operator**
 - Meet the regulatory operator — a map of how one human immune cell is wired.
 - Take a single gene, and switch it off with CRISPR interference.
-- Then measure how every other gene in the cell responds. That readout — one number per gene — is the perturbation's fingerprint.
-- Repeat for the next gene, and the next — thousands of perturbations — and the fingerprints stack into one regulator-by-gene map.
-- Compare every pair of fingerprints, and the map folds into one square object — the operator. Everything that follows is asking this matrix questions.
-
-**2 · Workflow**
-- Before the findings, a word on method. Every claim in this project ran the same loop.
-- A question becomes a hypothesis; the hypothesis becomes an executable test; and whatever it produces gets audited — adversarially.
-- Only then does a claim get to survive, weaken, or fail.
-
-**3 · Spectral denoising (336 → 92)**
-- Inside the operator, which directions are real signal — and which are just noise?
-- Random-matrix theory draws a clean line. The closed-form Marchenko-Pastur edge counts three hundred and thirty-six directions above the noise.
-- But that edge is optimistic. A permutation null — shuffling the data to see what noise alone produces — pushes the threshold outward, and the honest count drops to ninety-two.
-- Real, reproducible structure. And of those ninety-two, only about seven generalise to unseen conditions.
-
-**4 · Complex I reveal**
-- Cleaned and clustered, the operator falls into communities — eight of them; three are stable enough to trust.
+- Then read out how every other gene responds — one number each. That vector is the perturbation's fingerprint.
+- Do this thousands of times, and the fingerprints stack into one regulator-by-gene map.
+- Correlate every pair, and the map folds into one square object — the operator. Everything ahead is a question we put to this matrix.
+- A word on method. Every claim ran the same loop —
+- question, hypothesis, executable test, artifact — each one audited adversarially.
+- Concretely: is SAGA a stable community? The gate weakened it. Predict an unseen regulator? The control failed it.
+- Now the questions. Inside the operator, which directions are real — and which are noise?
+- Random-matrix theory draws a line. The closed-form Marchenko-Pastur edge admits three hundred and thirty-six directions.
+- But that edge is optimistic. A permutation null — the same data with the signal shuffled out — pushes it outward, and the honest count drops to ninety-two.
+- Real, reproducible structure — of which only about seven carry across held-out conditions.
+- Cleaned and clustered, the operator falls into communities — eight; three stable enough to trust.
 - Watch this one.
-- Its members name themselves — the NDUF genes, subunits of Mitochondrial Respiratory Chain Complex One.
-- An external database, CORUM, confirms the identity at a false-discovery rate near one in ten million. The clustering was blind — the model was never told what these genes were.
-
-**5 · Skepticism**
-- Good science also reports what didn't hold. Claude was asked to argue against its own results.
-- Take the SAGA chromatin module. Its subunits do cluster together — but the group's stability, 0.56, sits below our 0.80 bar. So we flag it, rather than claim it.
-- And the hardest test: can a regulator's own features predict the response of a regulator we have never perturbed?
-- The answer is no. Real features and randomly shuffled features both score essentially zero. A clean null — reported, not buried.
-
-**6 · Reproducibility**
+- Its members name themselves — the N-D-U-F genes, subunits of Mitochondrial Respiratory Chain Complex One.
+- CORUM, an external database, confirms it — a false- discovery rate near one in ten million. The clustering used no annotations; we asked what it contained only afterward.
+- Good science also reports what fails — so Claude argued against its own results.
+- Take the SAGA module. Its subunits co-cluster — but as a stable community it misses the gate. It stands only as a convergent module, supported independently.
+- The hardest test: can a regulator's own features predict a regulator we have never perturbed?
+- No. Real features and shuffled features both land on zero. A clean null — reported, not buried.
 - None of this asks you to take our word for it.
-- Every claim ships as an artifact — a manuscript, versioned tables, matched nulls, seventeen automated tests, an open repository — the whole core rebuilding in about eight seconds on a laptop.
-
-**7 · Closing**
+- The same code that runs the analysis writes the tables, the figures, and the manuscript itself.
+- Seventeen tests, open source, and the whole core rebuilding in about eight seconds on a laptop.
 - Which leaves one honest lesson. Recoverable structure is not the same as inductive predictability.
 - Claude helped us find the structure — and, just as importantly, where the claim stops.
+- The empirical regulatory operator of CD4 T-cells — built with Claude.
 
----
+_26 beats · 407 words._
+
 
 ## Voice
-
-- Preview/default: macOS `say` (voice **Samantha**) — offline, zero cost.
-- Final target: ElevenLabs **Elise** (`voice_id EST9Ui6982FZPSi7gCHi`), wired as
-  the default `eleven` voice. **Blocked on a free plan**: the API returns
-  HTTP 402 ("free users cannot use library voices") for every library voice,
-  Elise included. After upgrading the ElevenLabs plan to any paid tier:
-  `./render.sh final eleven` renders the final with Elise, no other change.
+- Default preview: macOS `say` (Samantha), offline.
+- Target: ElevenLabs **Elise** (`EST9Ui6982FZPSi7gCHi`), wired as default `eleven` voice — blocked on the free plan (HTTP 402 on library voices); `./render.sh final eleven` after upgrading.

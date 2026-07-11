@@ -104,11 +104,20 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
             self.run_chapter(name, fn)
 
     def run_chapter(self, name, fn):
-        # Reset between chapters; each chapter narrates itself in beats.
-        if self.mobjects:
-            self.play(*[FadeOut(m) for m in self.mobjects], run_time=0.4)
+        # No blanket clear — chapters cross-fade (see crossfade_in) so a
+        # protagonist (the operator) can persist and there is never a
+        # fade-to-empty between chapters.
         self.camera.frame.move_to(self.base_center).set_width(self.base_width)
         fn()
+
+    def crossfade_in(self, *news, run_time=0.7, keep=()):
+        """Fade the current frame out while the next content fades in — no
+        empty gap between chapters. Pass keep=[mob] so a protagonist stays."""
+        keep = list(keep)
+        outs = [FadeOut(m) for m in self.mobjects if m not in keep]
+        ins = [FadeIn(n) for n in news]
+        if outs or ins:
+            self.play(*outs, *ins, run_time=run_time)
 
     @contextmanager
     def beat(self, text):
@@ -193,9 +202,9 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
                      color=T.MUTED).next_to(vec, RIGHT, buff=0.3)
         arr = Arrow(genes[k].get_bottom(), vec.get_top(), color=T.MUTED,
                     stroke_width=2, buff=0.2)
-        with self.beat("Then measure how every other gene in the cell "
-                       "responds. That readout — one number per gene — is the "
-                       "perturbation's fingerprint."):
+        with self.beat("Then read out how every other gene responds — one "
+                       "number each. That vector is the perturbation's "
+                       "fingerprint."):
             self.play(Create(arr), run_time=0.6)
             self.play(LaggedStart(*[GrowFromCenter(s) for s in vec],
                                   lag_ratio=0.05), FadeIn(veclab), run_time=1.4)
@@ -217,9 +226,8 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
         mat = VGroup(*colgroups).move_to(DOWN * 0.3)
         mlab = txt("3,106 regulators × 2,000 genes", size=T.LABEL_SIZE,
                    color=T.MUTED).next_to(mat, DOWN, buff=0.4)
-        with self.beat("Repeat for the next gene, and the next — thousands of "
-                       "perturbations — and the fingerprints stack into one "
-                       "regulator-by-gene map."):
+        with self.beat("Do this thousands of times, and the fingerprints "
+                       "stack into one regulator-by-gene map."):
             self.play(FadeOut(genes), FadeOut(cross), FadeOut(klab),
                       FadeOut(arr), FadeOut(veclab), run_time=0.4)
             self.play(ReplacementTransform(vec, colgroups[0]), run_time=0.8)
@@ -228,14 +236,16 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
             self.play(FadeIn(mlab), run_time=0.4)
 
         # fold into the square operator
-        with self.beat("Compare every pair of fingerprints, and the map folds "
-                       "into one square object — the operator. Everything that "
-                       "follows is asking this matrix questions."):
+        with self.beat("Correlate every pair, and the map folds into one "
+                       "square object — the operator. Everything ahead is a "
+                       "question we put to this matrix."):
             op = self.make_operator_matrix(n=20, size=5.0).move_to(DOWN * 0.3)
             self.play(FadeTransform(mat, op), FadeOut(mlab), run_time=1.4)
             cap = txt("the operator — regulator × regulator", size=T.LABEL_SIZE,
                       color=T.SIGNAL).next_to(op, DOWN, buff=0.4)
             self.play(FadeIn(cap), run_time=0.5)
+        self.operator = op          # protagonist: persists into denoising
+        self.op_cap = cap
 
     def make_operator_matrix(self, n=22, size=4.2):
         """A synthetic block-correlation grid — the abstract operator."""
@@ -269,12 +279,12 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
     # ================================================================== #
     def claude_workflow(self):
         head = txt("Every claim ran the same loop", size=T.SUB_SIZE,
-                   color=T.CLAUDE, weight="BOLD").to_edge(UP, buff=0.8)
+                   color=T.CLAUDE, weight="BOLD").to_edge(UP, buff=0.7)
         steps = ["Question", "Hypothesis", "Executable test",
                  "Artifact", "Adversarial audit"]
         rows = VGroup(*[
             VGroup(
-                RoundedRectangle(corner_radius=0.12, width=4.6, height=0.8,
+                RoundedRectangle(corner_radius=0.12, width=4.4, height=0.72,
                                  stroke_width=T.STROKE_MUTED,
                                  stroke_color=T.CLAUDE,
                                  fill_color=T.CLAUDE, fill_opacity=0.06),
@@ -284,37 +294,41 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
         ])
         for r in rows:
             r[1].move_to(r[0])
-        rows.arrange(DOWN, buff=0.45).next_to(head, DOWN, buff=0.6)
+        rows.arrange(DOWN, buff=0.35).next_to(head, DOWN, buff=0.5)
         arrows = VGroup(*[
-            Arrow(rows[i].get_bottom(), rows[i + 1].get_top(), buff=0.08,
+            Arrow(rows[i].get_bottom(), rows[i + 1].get_top(), buff=0.06,
                   color=T.CLAUDE, stroke_width=T.STROKE_MUTED,
                   max_tip_length_to_length_ratio=0.2)
             for i in range(len(rows) - 1)
         ])
-        with self.beat("Before the findings, a word on method. Every claim in "
-                       "this project ran the same loop."):
-            self.play(FadeIn(head, shift=DOWN * 0.2), run_time=T.T_MICRO)
-        with self.beat("A question becomes a hypothesis; the hypothesis "
-                       "becomes an executable test; and whatever it produces "
-                       "gets audited — adversarially."):
+        with self.beat("A word on method. Every claim ran the same loop —"):
+            # park the operator on the side; it returns in denoising
+            self.crossfade_in(head, keep=[self.operator])
+            self.play(self.operator.animate.scale(0.5).to_edge(LEFT, buff=0.4),
+                      FadeOut(self.op_cap), run_time=0.8)
+        with self.beat("question, hypothesis, executable test, artifact — each "
+                       "one audited adversarially."):
             self.play(
                 LaggedStart(
                     *[FadeIn(m) for pair in zip(rows, list(arrows) + [None])
                       for m in ([pair[0], pair[1]] if pair[1] else [pair[0]])],
                     lag_ratio=0.4,
                 ),
-                run_time=2.6,
+                run_time=2.2,
             )
 
-        verdict = VGroup(
-            txt("survives", size=T.LABEL_SIZE, color=T.POSITIVE, weight="BOLD"),
-            txt("/", size=T.LABEL_SIZE, color=T.MUTED),
-            txt("weakens", size=T.LABEL_SIZE, color=T.WARNING, weight="BOLD"),
-            txt("/", size=T.LABEL_SIZE, color=T.MUTED),
-            txt("fails", size=T.LABEL_SIZE, color=T.NEGATIVE, weight="BOLD"),
-        ).arrange(RIGHT, buff=0.25).next_to(rows, DOWN, buff=0.5)
-        with self.beat("Only then does a claim get to survive, weaken, or fail."):
-            self.play(FadeIn(verdict, shift=UP * 0.2), run_time=T.T_NORMAL)
+        # concrete cases — this is where Claude actually bit
+        ex = VGroup(
+            txt("“Is SAGA a stable community?”   →   0.56 < 0.80   →   weakened",
+                size=T.SMALL_SIZE, color=T.WARNING),
+            txt("“Predict an unseen regulator?”   →   real ≈ shuffled   →   failed",
+                size=T.SMALL_SIZE, color=T.NEGATIVE),
+        ).arrange(DOWN, buff=0.3).next_to(rows, DOWN, buff=0.5)
+        with self.beat("Concretely: is SAGA a stable community? The gate "
+                       "weakened it. Predict an unseen regulator? The control "
+                       "failed it."):
+            self.play(LaggedStart(*[FadeIn(e, shift=UP * 0.15) for e in ex],
+                                  lag_ratio=0.4), run_time=T.T_REVEAL)
 
     # ================================================================== #
     # 3 — DENOISING: 336 signal directions become 92
@@ -364,12 +378,15 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
             bars.add(bar)
             bar_meta.append((bar, x))
 
-        with self.beat("Inside the operator, which directions are real signal "
-                       "— and which are just noise?"):
-            self.play(FadeIn(head, shift=DOWN * 0.2), run_time=T.T_MICRO)
-            self.play(Create(ax), FadeIn(xlab), run_time=T.T_NORMAL)
-            self.play(LaggedStart(*[GrowFromCenter(b) for b in bars],
-                                  lag_ratio=0.01), run_time=1.6)
+        with self.beat("Now the questions. Inside the operator, which "
+                       "directions are real — and which are noise?"):
+            # the parked operator becomes its own eigenvalue spectrum
+            self.play(*[FadeOut(m) for m in self.mobjects
+                        if m is not self.operator],
+                      Create(ax), FadeIn(head, shift=DOWN * 0.2),
+                      run_time=T.T_NORMAL)
+            self.play(FadeTransform(self.operator, bars), FadeIn(xlab),
+                      run_time=1.4)
 
         # global mode annotation (off-scale)
         gmode = txt("global mode  λ₀ = 167  (off-scale)", size=T.SMALL_SIZE,
@@ -384,15 +401,16 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
         c_anchor = np.array([3.4, 2.35, 0])
         counter = always_redraw(
             lambda: txt(f"{int(round(count_val.get_value()))}",
-                        size=T.TITLE_SIZE, color=T.SIGNAL, weight="BOLD"
-                        ).move_to(c_anchor))
-        counter_static = txt("336", size=T.TITLE_SIZE, color=T.SIGNAL,
+                        size=T.TITLE_SIZE, weight="BOLD",
+                        color=(T.SIGNAL if count_val.get_value() <= 100
+                               else T.WARNING)).move_to(c_anchor))
+        counter_static = txt("336", size=T.TITLE_SIZE, color=T.WARNING,
                              weight="BOLD").move_to(c_anchor)
-        counter_lab = txt("signal eigenvalues", size=T.LABEL_SIZE,
-                          color=T.SIGNAL).move_to(c_anchor + DOWN * 0.75)
-        with self.beat("Random-matrix theory draws a clean line. The "
-                       "closed-form Marchenko-Pastur edge counts three hundred "
-                       "and thirty-six directions above the noise."):
+        counter_lab = txt("admitted · closed-form edge", size=T.SMALL_SIZE,
+                          color=T.WARNING).move_to(c_anchor + DOWN * 0.7)
+        with self.beat("Random-matrix theory draws a line. The closed-form "
+                       "Marchenko-Pastur edge admits three hundred and "
+                       "thirty-six directions."):
             self.play(FadeIn(gmode), Create(edge_t), FadeIn(edge_t_lab),
                       run_time=T.T_NORMAL)
             self.play(FadeIn(counter_static, shift=UP * 0.2),
@@ -404,12 +422,13 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
         edge_e_lab = txt("empirical null  λ₊ = 2.95", size=T.SMALL_SIZE,
                          color=T.NEGATIVE).next_to(edge_e, UP, buff=0.1)
         demoted = [b for b, x in bar_meta if lam_plus <= x < 2.95]
+        counter_lab2 = txt("supported · empirical null", size=T.SMALL_SIZE,
+                           color=T.SIGNAL).move_to(counter_lab)
         self.remove(counter_static)
         self.add(counter)
-        with self.beat("But that edge is optimistic. A permutation null — "
-                       "shuffling the data to see what noise alone produces — "
-                       "pushes the threshold outward, and the honest count "
-                       "drops to ninety-two."):
+        with self.beat("But that edge is optimistic. A permutation null — the "
+                       "same data with the signal shuffled out — pushes it "
+                       "outward, and the honest count drops to ninety-two."):
             self.play(
                 LaggedStart(*[b.animate.set_fill(T.MUTED) for b in demoted],
                             lag_ratio=0.02),
@@ -417,14 +436,19 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
                 Create(edge_e), FadeIn(edge_e_lab),
                 run_time=T.T_REVEAL,
             )
-            self.play(Indicate(counter_lab, color=T.SIGNAL, scale_factor=1.15),
-                      run_time=T.T_NORMAL)
+            self.play(Transform(counter_lab, counter_lab2), run_time=T.T_NORMAL)
 
-        note = txt("real structure — but only ~7 of these generalise across "
-                   "conditions", size=T.SMALL_SIZE, color=T.MUTED)
+        # freeze the live counter so the chapter can cross-fade cleanly
+        counter92 = txt("92", size=T.TITLE_SIZE, color=T.SIGNAL,
+                        weight="BOLD").move_to(c_anchor)
+        self.remove(counter)
+        self.add(counter92)
+
+        note = txt("real structure — of which only ~7 transfer across "
+                   "held-out conditions", size=T.SMALL_SIZE, color=T.MUTED)
         note.next_to(ax, UP, buff=0.2).to_edge(LEFT, buff=1.2)
-        with self.beat("Real, reproducible structure. And of those ninety-two, "
-                       "only about seven generalise to unseen conditions."):
+        with self.beat("Real, reproducible structure — of which only about "
+                       "seven carry across held-out conditions."):
             self.play(FadeIn(note), run_time=T.T_MICRO)
 
     # ================================================================== #
@@ -437,9 +461,8 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
         head = txt("8 regulator communities · 3 clear the ≥ 0.80 stability gate",
                    size=T.LABEL_SIZE, color=T.MUTED).to_edge(UP, buff=0.5)
         with self.beat("Cleaned and clustered, the operator falls into "
-                       "communities — eight of them; three are stable enough "
-                       "to trust."):
-            self.play(FadeIn(heat), FadeIn(head), run_time=T.T_NORMAL)
+                       "communities — eight; three stable enough to trust."):
+            self.crossfade_in(heat, head, run_time=0.9)
 
         # target: the compact strong module in the lower-right corner
         w_img = heat.width
@@ -483,18 +506,21 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
             stroke_width=T.STROKE_MUTED, stroke_color=T.POSITIVE,
             fill_color=T.FAINT, fill_opacity=0.5,
         ).move_to(ident)
-        stamp = txt("annotations added after clustering — the model was never told",
+        stamp = txt("community fixed first · CORUM queried after",
                     size=T.SMALL_SIZE, color=T.MUTED)
         group = VGroup(panel, ident).move_to(UP * 0.3)
         stamp.next_to(group, DOWN, buff=0.6)
-        with self.beat("An external database, CORUM, confirms the identity at "
-                       "a false-discovery rate near one in ten million. The "
-                       "clustering was blind — the model was never told what "
-                       "these genes were."):
+        with self.beat("CORUM, an external database, confirms it — a false-"
+                       "discovery rate near one in ten million. The clustering "
+                       "used no annotations; we asked what it contained only "
+                       "afterward."):
             self.play(FadeOut(gene_col), run_time=0.3)
             self.reset_camera(run_time=1.2)
             self.play(FadeOut(mask), FadeOut(heat), FadeOut(box), run_time=0.5)
-            self.play(FadeIn(panel), Write(ident), run_time=T.T_REVEAL)
+            self.play(FadeIn(panel), run_time=0.5)
+            self.play(LaggedStart(*[FadeIn(line, shift=UP * 0.1)
+                                    for line in ident], lag_ratio=0.3),
+                      run_time=T.T_REVEAL)
             self.play(FadeIn(stamp), run_time=T.T_NORMAL)
 
     # ================================================================== #
@@ -503,26 +529,25 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
     def scientific_skepticism(self):
         head = txt("Claude argued against the result too", size=T.SUB_SIZE,
                    color=T.CLAUDE, weight="BOLD").to_edge(UP, buff=0.7)
-        with self.beat("Good science also reports what didn't hold. Claude was "
-                       "asked to argue against its own results."):
-            self.play(FadeIn(head, shift=DOWN * 0.2), run_time=T.T_MICRO)
+        with self.beat("Good science also reports what fails — so Claude "
+                       "argued against its own results."):
+            self.crossfade_in(head)
 
         gate = MetricGate("SAGA core module stability", value=0.56, gate=0.80,
                           lo=0.0, hi=1.0, width=7.0, accent=T.SIGNAL)
-        gate.move_to(UP * 0.7)
-        # build with marker at 0, then walk it to 0.56 (stops short of the gate)
+        gate.move_to(UP * 0.9)
         start_pos = gate.marker_position(0.0)
         gate.marker.move_to(start_pos)
         gate.val_lab.next_to(gate.marker, DOWN, buff=0.2)
         end_pos = gate.marker_position(0.56)
         verdicts = VGroup(
-            ClaimVerdict("SAGA subunits co-cluster into one group", "recovered", ok=True),
-            ClaimVerdict("a tight, gate-passing stable module", "below 0.80 gate", ok=False),
-        ).arrange(DOWN, buff=0.35, aligned_edge=LEFT).next_to(gate, DOWN, buff=1.0)
-        with self.beat("Take the SAGA chromatin module. Its subunits do cluster "
-                       "together — but the group's stability, zero point five "
-                       "six, sits below our zero point eight bar. So we flag "
-                       "it, rather than claim it."):
+            ClaimVerdict("SAGA subunits co-cluster", "observed", ok=True),
+            ClaimVerdict("a stable Leiden community", "below 0.80 gate", ok=False),
+            ClaimVerdict("a convergent module", "supported independently", ok=True),
+        ).arrange(DOWN, buff=0.28, aligned_edge=LEFT).next_to(gate, DOWN, buff=0.8)
+        with self.beat("Take the SAGA module. Its subunits co-cluster — but as "
+                       "a stable community it misses the gate. It stands only "
+                       "as a convergent module, supported independently."):
             self.play(FadeIn(gate), run_time=T.T_NORMAL)
             self.play(
                 gate.marker.animate.move_to(end_pos).set_color(T.WARNING),
@@ -532,74 +557,86 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
             self.play(LaggedStart(*[FadeIn(v, shift=UP * 0.15) for v in verdicts],
                                   lag_ratio=0.4), run_time=T.T_REVEAL)
 
-        # the inductive null: real ≈ shuffled ≈ 0
-        q = txt("Can regulator features predict an unseen regulator's response?",
-                size=T.LABEL_SIZE, color=T.FG).next_to(head, DOWN, buff=0.7)
-        zero_axis = Line(LEFT * 4.5, RIGHT * 4.5, color=T.MUTED,
-                         stroke_width=T.STROKE_MUTED).move_to(DOWN * 0.6)
-        zero_tick = txt("held-out R² = 0", size=T.SMALL_SIZE,
-                        color=T.MUTED).next_to(zero_axis.get_center(), UP, buff=0.15)
-        real = VGroup(Dot(radius=0.12, color=T.SIGNAL),
-                      txt("real features   R² ≈ −0.0005", size=T.SMALL_SIZE,
-                          color=T.SIGNAL))
-        real[0].move_to(zero_axis.get_center() + LEFT * 3.2)
-        real[1].next_to(real[0], DOWN, buff=0.3)
-        shuf = VGroup(Dot(radius=0.12, color=T.MUTED),
-                      txt("shuffled features   R² ≈ −0.00003", size=T.SMALL_SIZE,
-                          color=T.MUTED))
-        shuf[0].move_to(zero_axis.get_center() + RIGHT * 3.2)
-        shuf[1].next_to(shuf[0], UP, buff=0.3)
-        with self.beat("And the hardest test: can a regulator's own features "
-                       "predict the response of a regulator we have never "
-                       "perturbed?"):
+        # inductive null: two rows land on one shared zero line (x ≈ R²)
+        q = txt("Can a regulator's features predict an unseen regulator?",
+                size=T.LABEL_SIZE, color=T.FG).next_to(head, DOWN, buff=0.55)
+        zero = DashedLine(UP * 1.0, DOWN * 1.0, color=T.MUTED,
+                          stroke_width=2).move_to(DOWN * 0.4)
+        x0 = zero.get_center()[0]
+        zlab = txt("held-out R² = 0", size=T.SMALL_SIZE, color=T.MUTED).next_to(
+            zero, UP, buff=0.15)
+        ay = zero.get_center()[1] + 0.4
+        by = zero.get_center()[1] - 0.4
+        real_lab = txt("real features", size=T.SMALL_SIZE,
+                       color=T.SIGNAL).move_to([-4.3, ay, 0])
+        shuf_lab = txt("shuffled features", size=T.SMALL_SIZE,
+                       color=T.MUTED).move_to([-4.3, by, 0])
+        real_dot = Dot(radius=0.11, color=T.SIGNAL).next_to(real_lab, RIGHT, buff=0.3)
+        shuf_dot = Dot(radius=0.11, color=T.MUTED).next_to(shuf_lab, RIGHT, buff=0.3)
+        with self.beat("The hardest test: can a regulator's own features "
+                       "predict a regulator we have never perturbed?"):
             self.play(FadeOut(gate), FadeOut(verdicts), run_time=0.5)
-            self.play(FadeIn(q), run_time=T.T_MICRO)
-            self.play(Create(zero_axis), FadeIn(zero_tick), run_time=T.T_NORMAL)
-            self.play(FadeIn(real), FadeIn(shuf), run_time=T.T_NORMAL)
+            self.play(FadeIn(q), Create(zero), FadeIn(zlab), run_time=T.T_NORMAL)
+            self.play(FadeIn(real_lab), FadeIn(shuf_lab),
+                      FadeIn(real_dot), FadeIn(shuf_dot), run_time=T.T_MICRO)
 
-        concl = txt("real ≈ shuffled ≈ 0   —   a clean, reported null "
-                    "(linear and non-linear)", size=T.LABEL_SIZE,
-                    color=T.NEGATIVE, weight="BOLD").next_to(zero_axis, DOWN, buff=1.2)
-        with self.beat("The answer is no. Real features and randomly shuffled "
-                       "features both score essentially zero. A clean null — "
-                       "reported, not buried."):
-            self.play(
-                real[0].animate.move_to(zero_axis.get_center() + LEFT * 0.15),
-                shuf[0].animate.move_to(zero_axis.get_center() + RIGHT * 0.15),
-                run_time=T.T_REVEAL, rate_func=T.EASE_MOVE,
-            )
-            self.play(FadeIn(concl, shift=UP * 0.2), run_time=T.T_NORMAL)
+        real_val = txt("−0.0005", size=T.SMALL_SIZE, color=T.SIGNAL)
+        shuf_val = txt("−0.00003", size=T.SMALL_SIZE, color=T.MUTED)
+        concl = txt("real ≈ shuffled ≈ 0   —   a clean, reported null",
+                    size=T.LABEL_SIZE, color=T.NEGATIVE,
+                    weight="BOLD").next_to(zero, DOWN, buff=1.0)
+        with self.beat("No. Real features and shuffled features both land on "
+                       "zero. A clean null — reported, not buried."):
+            self.play(real_dot.animate.move_to([x0 - 0.08, ay, 0]),
+                      shuf_dot.animate.move_to([x0 - 0.02, by, 0]),
+                      run_time=T.T_REVEAL, rate_func=T.EASE_MOVE)
+            real_val.next_to(real_dot, RIGHT, buff=0.25)
+            shuf_val.next_to(shuf_dot, RIGHT, buff=0.25)
+            self.play(FadeIn(real_val), FadeIn(shuf_val),
+                      FadeIn(concl, shift=UP * 0.2), run_time=T.T_NORMAL)
 
     # ================================================================== #
     # 6 — REPRODUCIBILITY: the artifacts
     # ================================================================== #
     def reproducibility(self):
-        head = txt("Every claim ships as an artifact", size=T.SUB_SIZE,
+        head = txt("The code writes the paper", size=T.SUB_SIZE,
                    color=T.SIGNAL, weight="BOLD").to_edge(UP, buff=0.8)
-        cards = [
-            ("manuscript", "peer-review draft", T.SIGNAL),
-            ("tables", "versioned CSVs", T.SIGNAL),
-            ("nulls", "matched permutation", T.WARNING),
-            ("tests", "17 automated", T.POSITIVE),
-            ("repo", "open source", T.SIGNAL),
-            ("make all", "≈ 8 s · laptop", T.CLAUDE),
-        ]
-        cgroup = VGroup(*[
-            EvidenceCard(cap, val, accent=acc, width=3.4, height=1.5)
-            for cap, val, acc in cards
-        ]).arrange_in_grid(rows=2, cols=3, buff=0.5).next_to(head, DOWN, buff=0.7)
-        dirs = [LEFT, UP, RIGHT, LEFT, DOWN, RIGHT]
+        # one pipeline: code -> tables -> figures -> manuscript
+        files = [("analysis.py", T.CLAUDE), ("results.csv", T.SIGNAL),
+                 ("Figure 3", T.SIGNAL), ("manuscript.pdf", T.POSITIVE)]
+        chain = VGroup(*[
+            VGroup(RoundedRectangle(corner_radius=0.1, width=3.4, height=0.7,
+                                    stroke_width=T.STROKE_MUTED, stroke_color=c,
+                                    fill_color=c, fill_opacity=0.06),
+                   txt(f, size=T.LABEL_SIZE, color=T.FG))
+            for f, c in files
+        ])
+        for r in chain:
+            r[1].move_to(r[0])
+        chain.arrange(DOWN, buff=0.45).next_to(head, DOWN, buff=0.55).shift(LEFT * 2.6)
+        arrows = VGroup(*[
+            Arrow(chain[i].get_bottom(), chain[i + 1].get_top(), buff=0.06,
+                  color=T.MUTED, stroke_width=T.STROKE_MUTED,
+                  max_tip_length_to_length_ratio=0.28)
+            for i in range(len(chain) - 1)
+        ])
+        chips = VGroup(
+            EvidenceCard("tests", "17 automated", accent=T.POSITIVE, width=3.2, height=1.2),
+            EvidenceCard("source", "open", accent=T.SIGNAL, width=3.2, height=1.2),
+            EvidenceCard("make all", "≈ 8 s · laptop", accent=T.CLAUDE, width=3.2, height=1.2),
+        ).arrange(DOWN, buff=0.4).to_edge(RIGHT, buff=1.1)
         with self.beat("None of this asks you to take our word for it."):
-            self.play(FadeIn(head, shift=DOWN * 0.2), run_time=T.T_MICRO)
-        with self.beat("Every claim ships as an artifact — a manuscript, "
-                       "versioned tables, matched nulls, seventeen automated "
-                       "tests, an open repository — the whole core rebuilding "
-                       "in about eight seconds on a laptop."):
-            self.play(
-                LaggedStart(*[FadeIn(c, shift=-d * 0.4)
-                              for c, d in zip(cgroup, dirs)], lag_ratio=0.15),
-                run_time=2.4,
-            )
+            self.crossfade_in(head)
+        with self.beat("The same code that runs the analysis writes the "
+                       "tables, the figures, and the manuscript itself."):
+            self.play(LaggedStart(
+                *[FadeIn(m) for pair in zip(chain, list(arrows) + [None])
+                  for m in ([pair[0], pair[1]] if pair[1] else [pair[0]])],
+                lag_ratio=0.35), run_time=2.2)
+        with self.beat("Seventeen tests, open source, and the whole core "
+                       "rebuilding in about eight seconds on a laptop."):
+            self.play(LaggedStart(*[FadeIn(c, shift=LEFT * 0.3) for c in chips],
+                                  lag_ratio=0.2), run_time=T.T_REVEAL)
 
     # ================================================================== #
     # 7 — CLOSING: the boundary of the claim
@@ -619,7 +656,7 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
         ).arrange(DOWN, buff=0.25).next_to(row, DOWN, buff=1.2)
         with self.beat("Which leaves one honest lesson. Recoverable structure "
                        "is not the same as inductive predictability."):
-            self.play(FadeIn(left, shift=RIGHT * 0.2), run_time=T.T_NORMAL)
+            self.crossfade_in(left)
             self.play(Write(neq), run_time=T.T_MICRO)
             self.play(FadeIn(right, shift=LEFT * 0.2), run_time=T.T_NORMAL)
             self.play(Indicate(neq, color=T.NEGATIVE, scale_factor=1.3),
@@ -627,4 +664,17 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
         with self.beat("Claude helped us find the structure — and, just as "
                        "importantly, where the claim stops."):
             self.play(FadeIn(thesis, shift=UP * 0.2), run_time=T.T_REVEAL)
-        self.play(FadeOut(row), FadeOut(thesis), run_time=1.0)
+
+        # end card
+        endcard = VGroup(
+            txt("The Empirical Regulatory Operator of CD4⁺ T Cells",
+                size=T.BODY_SIZE, color=T.FG, weight="BOLD"),
+            txt("Built with Claude · Life Sciences", size=T.LABEL_SIZE,
+                color=T.CLAUDE),
+            txt("github.com/cuentadesanti/cd4-perturbseq-regulator-atlas",
+                size=T.SMALL_SIZE, color=T.MUTED),
+        ).arrange(DOWN, buff=0.4)
+        with self.beat("The empirical regulatory operator of CD4 T-cells — "
+                       "built with Claude."):
+            self.crossfade_in(endcard, run_time=1.0)
+        self.wait(1.5)

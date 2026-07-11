@@ -43,4 +43,14 @@ case "$MODE" in
 esac
 
 "$PY" -m manim $FLAGS demo.py FullDemo
+
+# Optional: burn the manim-voiceover subtitles into a *_subbed.mp4 for silent
+# async viewing.  BURN_SUBS=1 ./render.sh final say
+MP4="$(ls -t media/videos/demo/*/FullDemo.mp4 2>/dev/null | head -1)"
+SRT="${MP4%.mp4}.srt"
+if [[ "${BURN_SUBS:-}" == "1" && -n "$MP4" && -f "$SRT" ]]; then
+  SUBBED="${MP4%.mp4}_subbed.mp4"
+  ffmpeg -y -i "$MP4" -vf "subtitles=${SRT}:force_style='FontName=Helvetica Neue,FontSize=16,Outline=1,Shadow=0,MarginV=36'" -c:a copy "$SUBBED"
+  echo "Burned subtitles → $SUBBED"
+fi
 echo "Output under media/videos/demo/"
