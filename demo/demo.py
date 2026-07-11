@@ -502,10 +502,10 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
     # ================================================================== #
     def complex_i_reveal(self):
         heat = ImageMobject(str(ASSETS / "heatmap_panel.png"))
-        heat.height = 6.6
-        heat.move_to(ORIGIN)
+        heat.height = 6.2
+        heat.move_to(DOWN * 0.2)
         head = txt("8 regulator communities · 3 clear the ≥ 0.80 stability gate",
-                   size=T.LABEL_SIZE, color=T.MUTED).to_edge(UP, buff=0.5)
+                   size=22, color=T.MUTED).to_edge(UP, buff=0.7)
         with self.beat("Cleaned and clustered, the operator falls into "
                        "communities — eight; three stable enough to trust."):
             self.crossfade_in(heat, head, run_time=0.9)
@@ -529,11 +529,11 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
         gene_col.next_to(box, LEFT, buff=0.4)
         focus_grp = Group(box, gene_col)
 
-        mask = spotlight(box, opacity=0.78)
+        # lighter dim so the rest of the panel stays legible while we focus
+        mask = spotlight(box, opacity=0.6)
         with self.beat("Watch this one."):
-            self.play(FadeIn(mask), Create(box), FadeOut(head),
-                      run_time=T.T_NORMAL)
-            self.focus_on(focus_grp, width=focus_grp.width * 1.4, run_time=1.6)
+            self.play(FadeIn(mask), Create(box), FadeOut(head), run_time=0.7)
+            self.focus_on(focus_grp, width=focus_grp.width * 1.4, run_time=1.5)
 
         with self.beat("Its members name themselves — the N-D-U-F genes, "
                        "subunits of Mitochondrial Respiratory Chain Complex One."):
@@ -562,9 +562,13 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
                        "discovery rate near one in ten million. The clustering "
                        "used no annotations; we asked what it contained only "
                        "afterward."):
-            self.play(FadeOut(gene_col), run_time=0.3)
-            self.reset_camera(run_time=1.2)
-            self.play(FadeOut(mask), FadeOut(heat), FadeOut(box), run_time=0.5)
+            # zoom back out WHILE the heatmap fades, so we never dwell on the
+            # dimmed full panel on the way out
+            self.play(
+                FadeOut(gene_col), FadeOut(mask), FadeOut(heat), FadeOut(box),
+                self.camera.frame.animate.move_to(self.base_center).set_width(
+                    self.base_width),
+                run_time=1.1, rate_func=T.EASE_MOVE)
             self.play(FadeIn(panel), run_time=0.5)
             self.play(LaggedStart(*[FadeIn(line, shift=UP * 0.1)
                                     for line in ident], lag_ratio=0.3),
