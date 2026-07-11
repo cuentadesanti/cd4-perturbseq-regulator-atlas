@@ -23,3 +23,6 @@ uvicorn[standard]
 
 # Optional — RMT-clean regulator communities (`make operator-communities`)
 #   pip install leidenalg python-igraph
+
+# Optional — inductive matrix completion, non-linear robustness (`scripts/imc_nonlinear.py`)
+#   pip install catboost
