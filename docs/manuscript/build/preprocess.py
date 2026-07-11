@@ -96,8 +96,8 @@ FIGURES = {
            "**Figure S1. The operator's own effective rank is far higher than its predictive "
            "subspace.** Singular-value scree of the 3,106-regulator operator. The spectrum does "
            "not collapse after seven components (effective rank ≈ 86); the ~7-dimensional "
-           "structure identified in Figure 2 is the transferable part that generalizes to unseen "
-           "regulators, not the operator's full rank."),
+           "structure identified in Figure 2 is the transferable part that generalizes to "
+           "out-of-panel regulators, not the operator's full rank."),
 }
 
 # --- Table 1: rank-7 (peak) slice read straight from the stratified CSV ------

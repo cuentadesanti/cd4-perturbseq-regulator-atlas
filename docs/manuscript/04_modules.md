@@ -34,7 +34,8 @@ Consensus community detection (Leiden with an RBConfiguration objective, swept o
 50 random seeds, 500 partitions consensus-aggregated) yields eight communities, three of which pass
 a partition-stability gate of s_c ≥ 0.8. The structure is overwhelmingly non-random: the consensus
 modularity Q = 0.506 sits **z = 259** above a label-permutation null. This is a property of the
-denoised operator, established before any community is named — the partition is real, and the
+denoised operator, established before any community is named — the community structure is strongly
+supported relative to the matched null, and the
 question of what the modules correspond to is therefore worth asking.
 
 ## 4.3 Blind community detection recovers mitochondrial Complex I
@@ -42,8 +43,8 @@ question of what the modules correspond to is therefore worth asking.
 The cleanest result in this work is what the clustering produces with no annotation in the loop.
 Of the three stability-gated communities, one (n = 87, 45% donor-reproducible) matches
 **Mitochondrial Respiratory Chain Complex I** (NADH dehydrogenase) under CORUM enrichment at
-BH-FDR 1.4 × 10⁻⁷ — 8 of 13 holoenzyme subunits, corroborated across seven Complex-I assembly and
-intermediate entries. **An annotation-blind partition recovered a known molecular complex.** The
+BH-FDR 1.4 × 10⁻⁷ — 8 of the 13 CORUM holoenzyme members, with 10 NDUF-family genes present in the
+community overall, corroborated across seven Complex-I assembly and intermediate entries. **An annotation-blind partition recovered a known molecular complex.** The
 community was defined purely by co-movement of perturbation signatures across the transcriptome and
 only afterward matched to a database; nothing about its construction knew the subunits belonged
 together. This single result validates the denoising, the fingerprint representation, and the

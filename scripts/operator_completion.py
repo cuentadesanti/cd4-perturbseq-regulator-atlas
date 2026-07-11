@@ -113,7 +113,7 @@ def main():
     ax.plot(ce["rank"], ce["r2_persistence_novel"], "--", c="crimson", label="3b persistence (out-of-panel)")
     ax.plot(ew["rank"], ew["r2_vs_rank1"], "o-", alpha=0.5, label="3a R² vs rank-1 (sanity)")
     ax.axhline(0, ls=":", c="grey"); ax.set_xlabel("rank"); ax.set_ylabel("held-out R²")
-    ax.legend(fontsize=8); ax.set_title("Operator low-rank recoverability (flagship = 3b out-of-panel)")
+    ax.legend(fontsize=8); ax.set_title("Low-rank completion across held-out conditions")
     fig.tight_layout(); fig.savefig(FIG / "35_operator_completion_curve.png", dpi=150)
 
     print(f"[3b FLAGSHIP] out-of-panel n={int(ce.n_test_novel.iloc[0])}; "
