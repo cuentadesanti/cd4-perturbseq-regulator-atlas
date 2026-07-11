@@ -1,21 +1,38 @@
-# 6. Discussion
+# 7. Discussion
 
 ## What the operator view buys
 
-The three results share a common source: treating the screen as one object rather than a list.
-Each is something the ranking or program-extraction views cannot produce on their own. The
-predictive result (Section 3) is the clearest case — a ranked list says nothing about a regulator
-outside the panel, whereas the operator's shared structure predicts the unobserved
-late-stimulation response of out-of-panel regulators, beating an honest persistence baseline at
-every rank. The condition-gated programs (Section 4) exist in program-extraction analyses too, but
-here they emerge as factors of a single object whose condition-modulation profile is read off
-directly and tested with bootstrap confidence intervals, rather than as separate per-condition
-decompositions that must then be aligned. And the universal-versus-specific contrast (Section 5) is
-not a property of the CD4⁺ screen at all until it is set against a second cell type; the operator
-makes each regulator's effect profile the unit of comparison, so the contrast becomes a
-data-built distinction rather than an annotation. The through-line is that shared structure, once
-made explicit, is usable — for prediction, for condition resolution, and for cross-cell-type
-comparison — in ways a hit list is not.
+The main result of this work is that a quality-controlled perturbational operator contains
+recoverable modular organization beyond noise and hub structure. After spectral denoising isolates
+roughly ninety genuine signal directions from an atlas of thousands of regulators, the surviving
+regulator–regulator structure is strongly non-random and resolves into discrete co-regulated
+modules — organization that is invisible to a ranked hit list and that emerges only when the screen
+is treated as a single object.
+
+Complex I provides the cleanest validation, precisely because it was recovered without annotations.
+A stability-gated community, defined purely by co-movement of perturbation signatures, matches a
+curated molecular complex at FDR 1.4 × 10⁻⁷; the clustering never saw the subunit assignments. When
+an unsupervised partition reconstructs a known complex, the denoising, the fingerprint
+representation, and the clustering are validated simultaneously — there is no interpretive degree of
+freedom to absorb the result.
+
+SAGA illustrates a different evidentiary mode, and the contrast is worth stating plainly because it
+reflects methodological maturity rather than a weakness to hide. The SAGA-centered module is not a
+stably recovered community — its Leiden partition stability sits below our gate — but three
+independent sources converge on the same grouping: database identity, factor concentration, and
+cohesion in a second cell type. We distinguish these two classes of discovery — a *recovered
+community* versus a *convergent regulatory module* — rather than merge them under one label, because
+the difference is real and a careful reader would otherwise find it themselves.
+
+The same object is what makes the rest of the analysis possible: it predicts the unobserved
+late-stimulation response of out-of-panel regulators from shared low-rank structure (Section 3),
+reads condition-gating off directly as bootstrap-tested factors (Section 5), and turns each
+regulator's effect profile into the unit of a cross-cell-type comparison sustained across three
+lineages (Section 6). But recoverable structure is not predictive reach. Holding out whole
+regulators, real and scrambled side-features perform identically, so the map from a regulator's
+identity to its trans-effects is not recoverable from available annotations. The operator organizes
+what it has seen; it does not, on this data, generalize to what it has not — a boundary we make
+explicit rather than eliding.
 
 ## Honest limits
 

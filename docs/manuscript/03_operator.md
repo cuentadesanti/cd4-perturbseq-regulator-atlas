@@ -93,7 +93,7 @@ operator one object rather than many: if the added regulators occupied their own
 subspace, the "shared" structure would be an average over unrelated blocks. A CANDECOMP/PARAFAC
 decomposition of the expanded operator rules this out. Two factors are gated by condition with
 bootstrap confidence intervals excluding a flat profile (peaking in resting and in
-early-stimulated cells respectively; Section 4), and two further factors are cleanly constitutive
+early-stimulated cells respectively; Section 5), and two further factors are cleanly constitutive
 — a cleaner decomposition than the pilot, which recovered no clean constitutive factor. That the
 decomposition finds coherent, condition-structured, partly-shared factors at 3,106 regulators is
 positive evidence that the representation remains genuinely pooled at the expanded scale, not a

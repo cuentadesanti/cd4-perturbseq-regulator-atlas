@@ -27,10 +27,11 @@ SECTION_FILES = [
     MAN / "01_introduction.md",
     MAN / "02_ranking.md",
     MAN / "03_operator.md",
-    MAN / "04_programs.md",
-    MAN / "05_k562.md",
-    MAN / "06_discussion.md",
-    MAN / "07_methods.md",
+    MAN / "04_modules.md",
+    MAN / "05_programs.md",
+    MAN / "06_generalization.md",
+    MAN / "07_discussion.md",
+    MAN / "08_methods.md",
 ]
 
 # --- DOI -> citekey, read straight from refs.bib so keys always match -------

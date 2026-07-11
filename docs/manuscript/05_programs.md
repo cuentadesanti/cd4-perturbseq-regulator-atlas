@@ -1,4 +1,4 @@
-# 4. The operator decomposes into gene programs gated by activation state
+# 5. The operator decomposes into gene programs gated by activation state
 
 Section 3 established that the operator has shared, low-dimensional predictive structure. This
 section asks what that structure *is*: when the operator is decomposed into factors, do those

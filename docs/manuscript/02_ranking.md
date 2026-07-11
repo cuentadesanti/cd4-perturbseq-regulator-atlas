@@ -31,7 +31,7 @@ large: the per-regulator effect-vector norm correlates with cell count at Spearm
 metric we use does not carry it: the FDR-restricted magnitude correlates with cell count at only
 ρ = −0.21, and `n_downstream` even less. The power confound is a property of the naive magnitude,
 not of the ranking, and it is precisely why every downstream operator analysis is performed in the
-pooled z-score space (Section 7) where the confound is removed.
+pooled z-score space (Section 8) where the confound is removed.
 
 Two further properties make the ranked signal interpretable. Effective knockdown gates it: 62% of
 contrasts have a statistically significant on-target knockdown, and those concentrate 85% of all
@@ -65,7 +65,7 @@ Excluding flagged regulators is therefore a legitimate specificity control. It d
 of the ranking — the SAGA chromatin complex is the clearest case, where two subunits (TADA2B,
 TAF6L) prove cis-inflated and collapse under exclusion while the cis-clean subunit SUPT20H rises
 (rank 4 → 3). The complex's identity survives on its cis-clean members, but the leading-subunit
-list is corrected; we carry this correction forward into the program naming of Section 4, where
+list is corrected; we carry this correction forward into the program naming of Section 5, where
 SUPT20H alone anchors the SAGA program.
 
 Taken together, these audits establish the ranking as an audited substrate: metric-robust,
