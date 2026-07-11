@@ -85,7 +85,7 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
         elif self.narrate == "deepgram":
             from voice import DeepgramService
             self.set_speech_service(DeepgramService(
-                voice=os.environ.get("DG_VOICE", "aura-asteria-en")))
+                voice=os.environ.get("DG_VOICE", "aura-athena-en")))
         elif self.narrate == "eleven":
             from voice import ElevenLabsByID
             self.set_speech_service(
