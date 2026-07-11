@@ -165,42 +165,52 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
         drops qualitatively (not a literal %), then the regulator hands off to
         three downstream genes (↑ / ↓ / ≈). Returns the end-state nodes."""
         S, C, M = T.SIGNAL, T.CLAUDE, T.MUTED
-        dna_y, pol_y = 0.0, 0.22
+        dna_y, pol_y = 0.0, 0.40  # Pol travels above the upper DNA strand
+        gene_c = np.array([0.0, dna_y - 0.09, 0])
+        gene_w, gene_h = 3.0, 0.42
+        gene_left = gene_c[0] - gene_w / 2
+        gene_bot = gene_c[1] - gene_h / 2  # -0.30
 
         def make_polymerase():
-            body = RoundedRectangle(width=0.66, height=0.48, corner_radius=0.22,
+            body = RoundedRectangle(width=0.66, height=0.44, corner_radius=0.22,
                                     fill_opacity=0.92, stroke_width=0, fill_color=S)
             return VGroup(body, txt("Pol", size=11, color=T.BG).move_to(body))
 
-        # genomic layout: DNA · promoter · start marker · gene · downstream
-        dna_top = Line([-5.0, dna_y, 0], [2.6, dna_y, 0], stroke_width=3, color=M)
+        # genomic layout: promoter → gap → TSS arrow → gap → gene body
+        dna_top = Line([-4.3, dna_y, 0], [4.3, dna_y, 0], stroke_width=3, color=M)
         dna_bot = dna_top.copy().shift(DOWN * 0.18)
         promoter = Line([-2.95, dna_y, 0], [-2.25, dna_y, 0], stroke_width=9, color=S)
-        prom_lab = txt("promoter", size=12, color=M).next_to(promoter, DOWN, buff=0.3)
-        tss = Arrow([-2.0, dna_y + 0.06, 0], [-1.55, dna_y + 0.06, 0], buff=0,
-                    stroke_width=2.5, color=M, max_tip_length_to_length_ratio=0.4)
-        gene = RoundedRectangle(width=3.0, height=0.5, corner_radius=0.12,
+        prom_lab = txt("promoter", size=11, color=M).next_to(promoter, DOWN, buff=0.24)
+        tss = Arrow([-2.02, dna_y, 0], [-1.68, dna_y, 0], buff=0, stroke_width=2.2,
+                    color=M, max_tip_length_to_length_ratio=0.35)
+        gene = RoundedRectangle(width=gene_w, height=gene_h, corner_radius=0.12,
                                 stroke_width=2, stroke_color=S, fill_color=S,
-                                fill_opacity=0.12).move_to([0.0, dna_y - 0.09, 0])
-        gene_lab = txt("target regulator", size=T.SMALL_SIZE, color=M).next_to(
-            gene, UP, buff=0.22)
+                                fill_opacity=0.12).move_to(gene_c)
+        gene_lab = txt("target regulator", size=17, color=M).set_opacity(0.8)
+        gene_lab.next_to(gene, UP, buff=0.80)  # clears Pol II with margin
 
         self.play(Create(dna_top), Create(dna_bot), run_time=0.5)
         self.play(FadeIn(promoter), FadeIn(prom_lab), Create(tss),
                   FadeIn(gene), FadeIn(gene_lab), run_time=0.7)
 
-        # (1) one successful transcription pass — transcripts emerge behind Pol
-        pol_active = make_polymerase().move_to([-5.0, pol_y, 0])
-        transcripts = VGroup(*[
-            ArcBetweenPoints([x, dna_y - 0.34, 0], [x + 0.5, dna_y - 0.92, 0],
-                             angle=-0.7, stroke_width=3, color=S)
-            for x in (-0.9, 0.1, 1.1)])
-        self.play(FadeIn(pol_active, shift=RIGHT * 0.2), run_time=0.3)
+        # (1) one successful pass — three related nascent RNAs behind Pol
+        pol_active = make_polymerase().move_to([-4.5, pol_y, 0])
+        transcripts = VGroup()
+        for frac, L in zip((0.30, 0.55, 0.80), (1.0, 0.85, 0.70)):
+            x = gene_left + frac * gene_w
+            stem = Line([x, gene_bot, 0], [x, gene_bot - 0.16, 0],
+                        stroke_width=3, color=S)
+            arc = ArcBetweenPoints([x, gene_bot - 0.16, 0],
+                                   [x + 0.42 * L, gene_bot - 0.16 - 0.40 * L, 0],
+                                   angle=-0.6, stroke_width=3, color=S)
+            transcripts.add(VGroup(stem, arc))
+        self.play(FadeIn(pol_active, shift=RIGHT * 0.2), run_time=0.35)
         self.play(pol_active.animate.move_to([1.6, pol_y, 0]),
-                  LaggedStart(*[Create(t) for t in transcripts], lag_ratio=0.55),
-                  run_time=1.5, rate_func=T.EASE_MOVE)
+                  LaggedStart(*[Create(t) for t in transcripts], lag_ratio=0.45),
+                  run_time=1.85, rate_func=T.EASE_MOVE)
         self.play(pol_active.animate.shift(RIGHT * 1.1).set_opacity(0.0),
-                  run_time=0.35)
+                  run_time=0.45)
+        self.wait(0.35)  # hold after successful transcription
         self.remove(pol_active)
 
         # (2) recruit dCas9–KRAB to the promoter (Claude orange; no DNA cut)
@@ -214,20 +224,21 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
         crispri = VGroup(dcas9, krab,
                          txt("CRISPRi", size=10, color=T.BG).move_to(dcas9))
         crispri.move_to([-2.6, 1.6, 0])
-        self.play(Create(guide), FadeIn(crispri, shift=DOWN * 0.2), run_time=0.6)
-        self.play(crispri.animate.move_to([-2.6, dna_y + 0.4, 0]),
-                  promoter.animate.set_color(C), run_time=0.7,
+        self.play(Create(guide), FadeIn(crispri, shift=DOWN * 0.2), run_time=0.70)
+        self.play(crispri.animate.move_to([-2.6, pol_y, 0]),
+                  promoter.animate.set_color(C), run_time=0.85,
                   rate_func=T.EASE_MOVE)
-        self.play(FadeOut(guide), run_time=0.3)
+        self.play(FadeOut(guide), run_time=0.25)
+        self.wait(0.35)  # hold after binding
 
         # (2b) a second polymerase enters and stalls just before the complex
-        pol_blocked = make_polymerase().move_to([-5.0, pol_y, 0])
-        self.play(FadeIn(pol_blocked, shift=RIGHT * 0.2), run_time=0.3)
-        self.play(pol_blocked.animate.move_to([-3.55, pol_y, 0]), run_time=0.7,
+        pol_blocked = make_polymerase().move_to([-4.5, pol_y, 0])
+        self.play(FadeIn(pol_blocked, shift=RIGHT * 0.2), run_time=0.35)
+        self.play(pol_blocked.animate.move_to([-3.5, pol_y, 0]), run_time=0.90,
                   rate_func=T.EASE_MOVE)
-        self.play(pol_blocked.animate.shift(RIGHT * 0.15), run_time=0.25,
+        self.play(pol_blocked.animate.shift(RIGHT * 0.15), run_time=0.40,
                   rate_func=rate_functions.there_and_back)
-        self.play(pol_blocked.animate.set_opacity(0.0), run_time=0.35)
+        self.play(pol_blocked.animate.set_opacity(0.0), run_time=0.40)
         self.remove(pol_blocked)
 
         # (2c) reduced transcription, shown qualitatively
@@ -235,7 +246,8 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
                       color=C).to_edge(UP, buff=0.9)
         self.play(LaggedStart(*[t.animate.set_opacity(0.1) for t in transcripts],
                               lag_ratio=0.3), FadeIn(red_lab),
-                  gene.animate.set_fill(M, opacity=0.1), run_time=0.9)
+                  gene.animate.set_fill(M, opacity=0.1), run_time=1.25)
+        self.wait(0.25)  # hold reduced state
 
         # hand off: regulator node → downstream genes (↑ / ↓ / ≈)
         reg_node = VGroup(Circle(radius=0.33, fill_opacity=0.9, stroke_width=0,
@@ -322,12 +334,14 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
             self.play(FadeTransform(gb, pert), FadeIn(ctrl), Create(axis),
                       FadeIn(axlab), FadeIn(ctrl_lab), FadeIn(pert_lab),
                       run_time=T.T_NORMAL)
-            self.play(pert.animate.shift(RIGHT * 1.4), run_time=0.5,
+            self.wait(0.30)
+            self.play(pert.animate.shift(RIGHT * 1.4), run_time=0.75,
                       rate_func=T.EASE_MOVE)
             self.play(FadeOut(axis), FadeOut(axlab), FadeOut(ctrl_lab),
                       FadeOut(pert_lab),
                       FadeTransform(VGroup(ctrl, pert), zval), run_time=T.T_NORMAL)
             self.play(FadeIn(znote), run_time=T.T_MICRO)
+            self.wait(0.35)
 
         # fingerprint
         vals = rng.normal(0, 1, 16)
@@ -477,7 +491,7 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
                                     for line in ident], lag_ratio=0.3),
                       run_time=T.T_REVEAL)
             self.play(FadeIn(stamp), run_time=T.T_NORMAL)
-        self.wait(1.8)  # let the main discovery land
+        self.wait(2.3)  # let the main discovery land
 
     # ================================================================== #
     # 4 — SAGA: a second, convergent biological result
@@ -585,10 +599,10 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
             txt("real ≈ shuffled ≈ 0", size=T.LABEL_SIZE, color=T.NEGATIVE, weight="BOLD"),
             txt("no detectable inductive signal", size=T.SMALL_SIZE, color=T.MUTED),
         ).arrange(DOWN, buff=0.15).next_to(zero, DOWN, buff=0.9)
-        with self.beat("And when we asked whether side-features could predict "
+        with self.beat("When we asked whether side-features could predict "
                        "completely unseen regulators, real and shuffled "
-                       "features scored identically. We stopped, and reported "
-                       "the null."):
+                       "features scored identically. Claude helped us stop "
+                       "there and report the null."):
             self.play(FadeOut(gate), FadeOut(verdicts), run_time=0.5)
             self.play(FadeIn(q), Create(zero), FadeIn(zlab),
                       FadeIn(real_lab), FadeIn(shuf_lab), run_time=T.T_NORMAL)
@@ -597,13 +611,7 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
                       run_time=T.T_REVEAL, rate_func=T.EASE_MOVE)
             self.add(real_dot, shuf_dot)
             self.play(FadeIn(concl, shift=UP * 0.15), run_time=T.T_NORMAL)
-
-        with self.beat("Claude helped generate the analysis — but its most "
-                       "valuable work was deciding which conclusions had to "
-                       "weaken, or fail."):
-            self.play(Indicate(head, color=T.CLAUDE, scale_factor=1.05),
-                      run_time=T.T_NORMAL)
-            self.wait(0.6)
+            self.wait(0.4)
 
     # ================================================================== #
     # 6 — REPRODUCIBILITY, a short seal

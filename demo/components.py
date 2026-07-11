@@ -57,6 +57,12 @@ class EvidenceCard(VGroup):
         )
         cap = txt(caption, size=T.SMALL_SIZE, color=T.MUTED)
         val = txt(value, size=T.SUB_SIZE, color=T.FG, weight="BOLD")
+        # shrink the value (and caption) to fit inside the card with padding
+        max_w = width - 0.5
+        if val.width > max_w:
+            val.scale_to_fit_width(max_w)
+        if cap.width > max_w:
+            cap.scale_to_fit_width(max_w)
         stack = VGroup(cap, val).arrange(DOWN, buff=0.12).move_to(box)
         self.add(box, stack)
         self.box, self.caption_mob, self.value_mob = box, cap, val
