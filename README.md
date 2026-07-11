@@ -2,6 +2,8 @@
 
 *A quality-aware, donor-audited framework for identifying robust regulators and transcriptional response programs in primary human CD4+ T cells*
 
+![Pipeline overview](docs/figures/00_pipeline_overview.png)
+
 ## Overview
 
 Genome-scale Perturb-seq screens contain thousands of statistically significant effects, but significance alone does not identify reliable regulators.
@@ -137,11 +139,11 @@ The audit also identifies prominent exceptions. For example, a regulator may hav
 
 ### Perturbation fingerprints recover recognizable programs
 
-Response similarity recovers coherent SAGA/chromatin, Mediator and TCR neighborhoods.
+Response similarity recovers coherent SAGA/chromatin, Mediator and TCR neighborhoods, each significantly cohesive by permutation test (TCR z = 11, SAGA z = 9, Mediator z = 3).
 
 The classifier is deliberately conservative. Most regulators remain unassigned rather than being forced into a known program.
 
-Candidate neighbors are treated as hypotheses based on response similarity. For example, CHD7 is placed near the SAGA/chromatin response program, but this is not presented as evidence of physical complex membership.
+Candidate neighbors are treated as hypotheses based on response similarity. For example, CHD7 is placed near the SAGA/chromatin response program (fingerprint cosine 0.84), but this is not presented as evidence of physical complex membership.
 
 ### Strong perturbations share a stimulation-linked interferon response
 
