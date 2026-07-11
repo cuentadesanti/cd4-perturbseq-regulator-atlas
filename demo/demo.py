@@ -510,33 +510,34 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
                        "communities — eight; three stable enough to trust."):
             self.crossfade_in(heat, head, run_time=0.9)
 
-        # target: the compact strong module in the lower-right corner.
-        # bounds detected from the actual heatmap (assets/heatmap_panel.png).
+        # target: the compact strong module in the extreme bottom-right corner
+        # (bounds read off assets/heatmap_panel.png).
         w_img = heat.width
         h_img = heat.height
-        bx = heat.get_center()[0] + 0.40 * w_img
-        by = heat.get_center()[1] - 0.40 * h_img
-        block = [bx, by, 0]
-        box = Rectangle(width=0.15 * w_img, height=0.15 * h_img,
+        bx = heat.get_center()[0] + 0.44 * w_img
+        by = heat.get_center()[1] - 0.44 * h_img
+        box = Rectangle(width=0.12 * w_img, height=0.12 * h_img,
                         stroke_color=T.POSITIVE, stroke_width=T.STROKE_MAIN)
-        box.move_to(block)
+        box.move_to([bx, by, 0])
+
+        # labels go to the LEFT of the box — the corner leaves no room on the
+        # right — and the camera frames box + labels together.
+        genes = ["NDUFA9", "NDUFS2", "NDUFV1", "NDUFS3", "NDUFB8", "NDUFS7"]
+        gene_col = VGroup(*[
+            txt(g, size=13, color=T.POSITIVE) for g in genes
+        ]).arrange(DOWN, buff=0.1, aligned_edge=RIGHT)
+        gene_col.next_to(box, LEFT, buff=0.4)
+        focus_grp = Group(box, gene_col)
 
         mask = spotlight(box, opacity=0.78)
         with self.beat("Watch this one."):
             self.play(FadeIn(mask), Create(box), FadeOut(head),
                       run_time=T.T_NORMAL)
-            self.focus_on(box, width=box.width * 2.7, run_time=1.6)
+            self.focus_on(focus_grp, width=focus_grp.width * 1.4, run_time=1.6)
 
-        # the genes name themselves — vector text, crisp under zoom.
-        # font sizes are small here because the camera is zoomed ~3x in.
-        genes = ["NDUFA9", "NDUFS2", "NDUFV1", "NDUFS3", "NDUFB8", "NDUFS7"]
-        gene_col = VGroup(*[
-            txt(g, size=13, color=T.POSITIVE) for g in genes
-        ]).arrange(DOWN, buff=0.11, aligned_edge=LEFT)
-        gene_col.next_to(box, RIGHT, buff=0.3)
         with self.beat("Its members name themselves — the N-D-U-F genes, "
                        "subunits of Mitochondrial Respiratory Chain Complex One."):
-            self.play(LaggedStart(*[FadeIn(g, shift=RIGHT * 0.1)
+            self.play(LaggedStart(*[FadeIn(g, shift=LEFT * 0.1)
                                     for g in gene_col],
                                   lag_ratio=0.25), run_time=2.0)
 
