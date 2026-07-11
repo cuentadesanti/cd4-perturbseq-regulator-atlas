@@ -1,39 +1,32 @@
 # Narration script
 
-Beat-level: each line is one `with self.beat(...)` block wrapping the animation it describes. Edit in `demo.py`; this mirrors it. Numbers from `docs/OPERATOR_ANALYSIS.md`.
+Beat-level, biology-led cut. ~138 wpm. Numbers from `docs/OPERATOR_ANALYSIS.md`.
 
-- We begin with a genome-scale screen of primary human T-cells: thousands of gene regulators, each switched off in turn, while single-cell sequencing reads the response.
-- Take one regulator. Inhibit it, and follow a single downstream gene.
-- Across many cells, the screen compares control to perturbed — the whole distribution shifts.
-- That shift collapses into one standardized effect — direction and evidence in a single number.
-- Do that for every gene — thousands of standardized effects stack into one transcriptional fingerprint.
-- One fingerprint per regulator — stack thousands into the regulator-by-gene map.
-- Correlate every pair, and the map folds into one square object — the operator.
-- A word on method. Every claim ran the same loop —
-- question, hypothesis, executable test, artifact — each one audited adversarially.
-- Concretely: is SAGA a stable community? The gate weakened it. Predict an unseen regulator? The control failed it.
-- Now the questions. Inside the operator, which directions are real — and which are noise?
-- Random-matrix theory draws a line. The closed-form Marchenko-Pastur edge admits three hundred and thirty-six directions.
-- But that edge is optimistic. A permutation null — the same data with the signal shuffled out — pushes it outward, and the honest count drops to ninety-two.
-- Real, reproducible structure — of which only about seven carry across held-out conditions.
-- Cleaned and clustered, the operator falls into communities — eight; three stable enough to trust.
-- Watch this one.
-- Its members name themselves — the N-D-U-F genes, subunits of Mitochondrial Respiratory Chain Complex One.
-- CORUM, an external database, confirms it — a false- discovery rate near one in ten million. The clustering used no annotations; we asked what it contained only afterward.
-- Good science also reports what fails — so Claude argued against its own results.
-- Take the SAGA module. Its subunits co-cluster — but as a stable community it misses the gate. It stands only as a convergent module, supported independently.
-- The hardest test: can a regulator's own features predict a regulator we have never perturbed?
-- No. Real features and shuffled features both land on zero. A clean null — reported, not buried.
-- None of this asks you to take our word for it.
-- The same code that runs the analysis writes the tables, the figures, and the manuscript itself.
-- Seventeen tests, open source, and the whole core rebuilding in about eight seconds on a laptop.
-- Which leaves one honest lesson. Recoverable structure is not the same as inductive predictability.
-- Claude helped us find the structure — and, just as importantly, where the claim stops.
+- Do thousands of gene perturbations form a hidden regulatory architecture — or are they just a noisy list of hits?
+- For each inhibited regulator, the screen measures how thousands of downstream genes respond across many cells.
+- Those observations become one signed, standardized effect.
+- Every gene gives one; together they form a transcriptional fingerprint.
+- Thousands of fingerprints form the regulatory operator.
+- Most of that apparent structure was noise. An empirical permutation control kept only the reproducible signal —
+- the surviving directions that reorganized into the communities we analyzed next.
+- Block-ordered, the operator's community structure sits far above a matched null.
+- Watch one community.
+- Its members name themselves — the NDUF genes of Mitochondrial Complex One.
+- The clustering used no biological annotations. Only after the community was fixed did we ask CORUM what it contained — an eight-in-thirteen match at a false- discovery rate near one in ten million.
+- A second module, centered on SAGA, was backed by independent evidence — complex identity, tensor factors, and an external K562 screen.
+- Across CD4, K562 and RPE1 cells, SAGA behaved as broadly conserved machinery, while an immune cytoskeletal program stayed T-cell-specific.
+- The SAGA module also carried autoimmune-risk signal under a matched null — a nomination, not a cause — while Complex One did not, a clean control.
+- Claude also challenged the appealing readings. SAGA's convergent support was strong — but its partition stability, 0.56, fell below our 0.8 gate. So: not a recovered stable community.
+- And when we asked whether side-features could predict completely unseen regulators, real and shuffled features scored identically. We stopped, and reported the null.
+- Claude helped generate the analysis — but its most valuable work was deciding which conclusions had to weaken, or fail.
+- Every result here is backed by an executable analysis and a versioned artifact in an open repository — and the whole workflow runs on public data, without the one-point-eight-terabyte cell-level atlas.
+- Recoverable structure is not the same as inductive predictability.
+- Claude helped us find the architecture — and the boundary of the claim.
 - The empirical regulatory operator of CD4 T-cells — built with Claude.
 
-_28 beats · 431 words._
+_21 beats · 348 words · ~2:41 · burned-in subtitles (BURN_SUBS=1)._
 
 
 ## Voice
-- Default preview: macOS `say` (Samantha), offline.
-- Target: ElevenLabs **Elise** (`EST9Ui6982FZPSi7gCHi`), wired as default `eleven` voice — blocked on the free plan (HTTP 402 on library voices); `./render.sh final eleven` after upgrading.
+- Default: macOS `say` (Samantha) at 138 wpm (`SAY_RATE`), offline.
+- Target: ElevenLabs **Elise** (`EST9Ui6982FZPSi7gCHi`) — needs a paid plan (free 402s on library voices).
