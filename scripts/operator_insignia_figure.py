@@ -48,8 +48,8 @@ def main():
     n_signal = int(pd.read_csv(TAB / "operator_community_null_3106.csv")
                    .set_index("metric").loc["noise_edge_empirical_p95", "n_signal"])
 
-    fig, axes = plt.subplots(2, 3, figsize=(15, 9.4))
-    (a, b, c), (dd, e, f) = axes
+    fig, axes = plt.subplots(3, 2, figsize=(11, 14))    # portrait: fills page height, larger panels
+    (a, b), (c, dd), (e, f) = axes
 
     # ---- (A) denoised operator, block-ordered by community ----
     order = np.argsort(lab)
@@ -77,9 +77,9 @@ def main():
     b.scatter([0], [ev[0]], s=45, color=RED, zorder=3)
     b.annotate(f"global mode λ₀ = {ev[0]:.0f}", (0, ev[0]), xytext=(40, -6),
                textcoords="offset points", fontsize=8, color=RED)
-    b.text(len(ev) * 0.98, emp_edge * 1.15, f"empirical edge {emp_edge:.2f}", color=ACCENT,
-           fontsize=8, ha="right")
-    b.text(len(ev) * 0.98, lam_plus * 0.6, f"MP bulk λ₊ = {lam_plus:.2f}", color=MUT, fontsize=8, ha="right")
+    b.text(690, emp_edge * 1.25, f"empirical edge {emp_edge:.2f}", color=ACCENT,
+           fontsize=8.5, ha="right")
+    b.text(690, lam_plus * 0.55, f"MP bulk λ₊ = {lam_plus:.2f}", color=MUT, fontsize=8.5, ha="right")
     b.axvspan(0, n_signal, color=ACCENT, alpha=0.06)
     b.text(n_signal + 30, ev[3], f"{n_signal} signal\ndirections", color=ACCENT, fontsize=8.5, fontweight="bold")
     b.set_xlim(-20, 700); b.set_xlabel("eigenvalue rank"); b.set_ylabel("eigenvalue")
