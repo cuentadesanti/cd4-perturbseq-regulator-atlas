@@ -35,17 +35,17 @@ null, gray = noise & baselines.
 
 ## Narration
 
-Each chapter is wrapped in a single `self.voiceover(...)`, so the visuals
-auto-stretch to the spoken length — no hand-tuned `wait()` calibration. No
-bookmarks are used, so no transcription model is needed.
+Narration is **beat-level**: each sentence is a `with self.beat("…")` block that
+wraps only the animation it describes, so the voiceover syncs to that moment and
+each beat holds its last frame until its audio ends (never plays over black). No
+bookmarks, so no transcription model is needed. Full text in `narration/script.md`.
 
-- **`say`** (default, works now): macOS `say` → mp3, zero cost, offline.
-  Pick a voice with `SAY_VOICE=Samantha ./render.sh final say`.
-- **`eleven`** (higher quality, needs a paid key): put the key in
-  `eleven_labs_raw_key.txt` and an allowed voice id in `ELEVEN_VOICE_ID`, then
-  `./render.sh final eleven`. The provided free key returns **HTTP 402**
-  ("free users cannot use library voices via the API"), so this path needs a
-  plan upgrade or a personal voice id.
+- **`say`** (default, works now): macOS `say` → mp3, zero cost, offline. Voice
+  defaults to **Samantha**; override with `SAY_VOICE=Daniel ./render.sh final say`.
+- **`eleven`** — target voice is **Elise** (`voice_id EST9Ui6982FZPSi7gCHi`,
+  already the default). The bundled free key returns **HTTP 402** ("free users
+  cannot use library voices via the API") for *every* library voice, so this
+  needs an ElevenLabs plan upgrade. Once upgraded: `./render.sh final eleven`.
 
 ## Notes / constraints
 
