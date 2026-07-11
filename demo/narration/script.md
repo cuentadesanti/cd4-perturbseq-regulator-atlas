@@ -2,8 +2,8 @@
 
 Beat-level: each line is one `with self.beat(...)` block wrapping the animation it describes. Edit in `demo.py`; this mirrors it. Numbers from `docs/OPERATOR_ANALYSIS.md`.
 
-- Meet the regulatory operator — a map of how one human immune cell is wired.
-- Where does each number come from? Inhibit one regulator, and follow one downstream gene.
+- We begin with a genome-scale screen of primary human T-cells: thousands of gene regulators, each switched off in turn, while single-cell sequencing reads the response.
+- Take one regulator. Inhibit it, and follow a single downstream gene.
 - Across many cells, the screen compares control to perturbed — the whole distribution shifts.
 - That shift collapses into one standardized effect — direction and evidence in a single number.
 - Do that for every gene — thousands of standardized effects stack into one transcriptional fingerprint.
@@ -31,7 +31,7 @@ Beat-level: each line is one `with self.beat(...)` block wrapping the animation 
 - Claude helped us find the structure — and, just as importantly, where the claim stops.
 - The empirical regulatory operator of CD4 T-cells — built with Claude.
 
-_28 beats · 424 words._
+_28 beats · 431 words._
 
 
 ## Voice

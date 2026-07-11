@@ -164,16 +164,22 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
         rng = np.random.default_rng(3)
         cell = 0.26
 
-        with self.beat("Meet the regulatory operator — a map of how one "
-                       "human immune cell is wired."):
+        with self.beat("We begin with a genome-scale screen of primary human "
+                       "T-cells: thousands of gene regulators, each switched "
+                       "off in turn, while single-cell sequencing reads the "
+                       "response."):
             head = title("The regulatory operator", color=T.SIGNAL)
             sub = txt("Genome-scale CRISPRi Perturb-seq · primary human "
                       "CD4⁺ T cells", size=T.SUB_SIZE, color=T.FG)
             VGroup(head, sub).arrange(DOWN, buff=0.4)
+            scale = txt("3,106 regulators · 4 donors × 3 states · single-cell "
+                        "readout", size=T.SMALL_SIZE, color=T.MUTED)
+            scale.next_to(sub, DOWN, buff=0.45)
             self.play(Write(head), run_time=T.T_NORMAL)
             self.play(FadeIn(sub, shift=UP * 0.2), run_time=T.T_MICRO)
-        self.play(FadeOut(sub), head.animate.scale(0.5).to_edge(UP),
-                  run_time=0.6)
+            self.play(FadeIn(scale), run_time=T.T_MICRO)
+        self.play(FadeOut(sub), FadeOut(scale),
+                  head.animate.scale(0.5).to_edge(UP), run_time=0.6)
 
         # --- where does one number come from? one regulator, one gene ---
         regA = VGroup(Dot(radius=0.16, color=T.NEGATIVE),
@@ -189,8 +195,8 @@ class FullDemo(VoiceoverScene, MovingCameraScene):
         geneB.move_to([-5.1, -1.4, 0])
         arr0 = Arrow(regA[0].get_bottom(), geneB[0].get_top(), buff=0.25,
                      color=T.MUTED, stroke_width=T.STROKE_MUTED)
-        with self.beat("Where does each number come from? Inhibit one "
-                       "regulator, and follow one downstream gene."):
+        with self.beat("Take one regulator. Inhibit it, and follow a single "
+                       "downstream gene."):
             self.play(FadeIn(regA), FadeIn(crispr), FadeIn(cross),
                       run_time=T.T_NORMAL)
             self.play(Create(arr0), FadeIn(geneB), run_time=T.T_NORMAL)
