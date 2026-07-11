@@ -97,9 +97,11 @@ connectivity, and functional-category composition, covering 98–99% of the pane
 
 Real and permuted regulator features yielded indistinguishable performance, indicating that the
 available annotations contain no detectable signal for leave-regulator-out prediction. A linear
-model and a non-linear gradient-boosted learner agree: out-of-sample R² is statistically
-indistinguishable from zero, and — decisively — from the same model trained on features permuted
-against the responses. When real and scrambled inputs perform identically, there is no learnable
+model (multi-output ridge, R² across five folds between −0.0015 and +0.0002) and a non-linear
+gradient-boosted learner on the response's leading components (R² between −0.0035 and +0.0010, at 10
+and 30 components alike) agree: out-of-sample R² is statistically indistinguishable from zero, and —
+decisively — from the same model trained on features permuted against the responses (shuffled control
+≈ 0 throughout). When real and scrambled inputs perform identically, there is no learnable
 map to recover. Per a pre-registered criterion, a model that fails to beat its shuffled control ends
 the inquiry rather than motivating a larger one, so we did not pursue further model classes.
 

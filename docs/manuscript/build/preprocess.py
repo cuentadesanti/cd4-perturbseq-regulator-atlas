@@ -81,9 +81,8 @@ FIGURES = {
           "(z = 16.1). (E) Partition stability against the 0.8 gate distinguishes a recovered "
           "community (Complex I) from the convergent SAGA module (0.56, below the gate). (F) "
           "Leave-regulator-out prediction of unseen regulators: real and shuffled features "
-          "perform identically at R² ≈ 0 (ridge and CatBoost), and a capacity probe confirms the "
-          "learners fit the training response while failing to generalize — the predictive "
-          "boundary."),
+          "perform identically at R² ≈ 0 (ridge and CatBoost), so the negative rests on the "
+          "shuffled control — the predictive boundary."),
     "4": ("docs/figures/34_operator_cp_condition_factors_3106.png",
           "**Figure 4. The operator decomposes into gene programs gated by activation state.** "
           "CANDECOMP/PARAFAC condition-factor weights across Rest / Stim8hr / Stim48hr. Two "

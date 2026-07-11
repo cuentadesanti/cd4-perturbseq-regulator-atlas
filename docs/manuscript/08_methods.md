@@ -132,5 +132,5 @@ composition (605 features; 98–99 % panel coverage). Per-regulator held-out R²
 the training mean, so a mean predictor scores 0. A ridge model (a full-rank inductive matrix
 completion) and a CatBoost gradient-boosted learner (one model per component of a train-fold SVD of
 the response, K ∈ {10, 30}) were each compared against an identical model trained on row-permuted
-features; a capacity probe without early stopping confirmed the learners fit the training response
-while failing to generalize out of sample. (`scripts/imc_inductive.py`, `scripts/imc_nonlinear.py`.)
+features. Real and permuted features performed identically out of sample, so the negative rests on
+the shuffled control alone. (`scripts/imc_inductive.py`, `scripts/imc_nonlinear.py`.)

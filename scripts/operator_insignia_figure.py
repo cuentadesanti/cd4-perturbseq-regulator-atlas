@@ -43,8 +43,8 @@ def main():
     lab = comm["community"].to_numpy()
     stab = comm.groupby(comm["community"]).community_stability.first() if "community_stability" in comm else None
     null = pd.read_csv(TAB / "operator_community_null_3106.csv").set_index("metric")["value"]
-    emp_edge = float(null.get("noise_edge_empirical_p95", 2.95))
-    mod_z = float(null.get("modularity_null_z", 259))
+    emp_edge = float(null["noise_edge_empirical_p95"])   # loud KeyError if the null CSV is incomplete
+    mod_z = float(null["modularity_null_z"])
     n_signal = int(pd.read_csv(TAB / "operator_community_null_3106.csv")
                    .set_index("metric").loc["noise_edge_empirical_p95", "n_signal"])
 
@@ -116,7 +116,9 @@ def main():
     # ---- (E) recovered vs convergent: stability against the gate ----
     order_comm = [7, 5, 6, 2]
     names = ["Complex I\n(recovered)", "unnamed\nstable", "unnamed\nstable", "SAGA\n(convergent)"]
-    vals = [float(stab.get(k, np.nan)) for k in order_comm] if stab is not None else [0.87, 0.835, 0.834, 0.56]
+    if stab is None:
+        raise SystemExit("stability CSV not found — refusing to draw hardcoded values")
+    vals = [float(stab[k]) for k in order_comm]          # loud KeyError if a community is missing
     cols = [ACCENT, MUT, MUT, VIOLET]
     e.bar(range(4), vals, color=cols, edgecolor="white")
     e.axhline(0.8, color=RED, ls="--", lw=1.3)
@@ -139,7 +141,7 @@ def main():
     f.set_ylim(-0.01, 0.01); f.set_ylabel("held-out R²  (unseen regulators)")
     f.legend(frameon=False, fontsize=8, loc="upper right")
     f.set_title("F · Predictive boundary: real ≈ shuffled ≈ 0", fontweight="bold")
-    f.text(0.5, -0.16, "capacity probe: train R² = +0.13 while test R² = −0.02 — capacity present, signal absent",
+    f.text(0.5, -0.16, "real ≈ shuffled ≈ 0 — unseen regulators not predictable from available features",
            transform=f.transAxes, ha="center", fontsize=8, color=MUT)
 
     fig.suptitle("Denoised operator structure reveals regulatory modules — and its predictive boundary",
