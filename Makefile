@@ -1,6 +1,6 @@
 PY := python3
 
-.PHONY: all eda model audit report spike edges eda-edges repro-meta fingerprints operator operator-tensor operator-svd operator-cp operator-completion operator-communities operator-donors operator-deconv spectral class-programs specificity-control disease-overlap module-gwas convergence-extras convergence-figures api clean pipeline help
+.PHONY: all eda model audit report spike edges eda-edges repro-meta fingerprints operator operator-tensor operator-svd operator-cp operator-completion operator-communities operator-insignia operator-donors operator-deconv spectral class-programs specificity-control disease-overlap module-gwas convergence-extras convergence-figures api clean pipeline help
 
 help:
 	@echo "Targets:"
@@ -89,6 +89,10 @@ operator-completion:
 # Needs `pip install leidenalg python-igraph` and `make operator-tensor` first.
 operator-communities:
 	$(PY) scripts/operator_communities.py --k 15 --res 0.2:2.0:0.2 --seeds 50 --stab-threshold 0.8
+
+# Insignia figure (manuscript Figure 3): the module-discovery logic in one 6-panel view.
+operator-insignia:
+	$(PY) scripts/operator_insignia_figure.py
 
 # Step 4: are the gene programs donor-reproducible AS SUBSPACES?
 # Principal angles between top-k gene-program subspaces of DISJOINT donor pairs only.

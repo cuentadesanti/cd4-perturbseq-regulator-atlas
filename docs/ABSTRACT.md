@@ -1,28 +1,22 @@
-# Abstract (draft)
+# Abstract
 
-Genome-scale Perturb-seq screens are typically read as ranked lists of individual regulator
-hits. We argue that, in primary human CD4⁺ T cells, the perturbation effects instead form a
-shared **regulatory operator** that can be estimated, interrogated geometrically, and used to
-predict — and that treating it as one object, rather than a hit list, recovers biology the ranked
-view cannot. Working from a genome-scale CRISPRi Perturb-seq atlas
-(four donors × three activation states; ~1.8 TB raw) entirely on a laptop, we assemble a
-regulator × gene × condition effect tensor in a power-decoupled z-score space (confound
-ρ = −0.006) and establish three results. First, the operator's **predictive subspace is
-low-dimensional (~7 components)**: a low-rank fit predicts the unobserved late-stimulation
-response of out-of-panel regulators, beating a persistence baseline at every rank across a 4×
-expansion of the regulator axis (3,106 regulators; aggregate margin Δ R² = +0.379). The advantage
-survives strength stratification — even the strongest, panel-matched regulators, for which
-persistence is a fair baseline, stay positive (+0.21) — so it is not an artifact of weak-regulator
-baseline collapse. This converts the operator from descriptive to predictive, with the honest
-caveat that the absolute precision is modest (model R² ≈ 0.06–0.08) and softens at scale. Second, a CANDECOMP/PARAFAC decomposition resolves **gene programs gated by activation
-state** (bootstrap-CI–supported factors peaking in resting versus early-stimulated cells),
-assigned to regulators blind to annotation. Third, cross–cell-type concordance against an
-external K562 screen **separates universal from T-cell-specific regulation**: chromatin/SAGA
-machinery is universal (anchor SUPT20H), whereas the immune Rac→WAVE→actin cytoskeletal module
-(anchor DOCK2) is T-cell-specific and donor-reproducible — an independent screen recovering the
-same axis the decomposition named. Every claim is gated by an explicit control for the
-power–magnitude confound, cis-off-target artifacts, donor reproducibility, and decomposition
-stability; caveats are reported in the direction that costs signal. The contribution is not a new
-estimator or a new biological hit, but the operator view itself — inheriting calibrated
-differential-expression front-ends and adding low-rank predictivity, condition-resolved programs,
-and cell-type specificity on top.
+Genome-scale Perturb-seq screens resolve thousands of regulators at once, but the resulting effects
+mix genuine signal with noise, connectivity hubs, and context dependence, and it is unclear whether
+they assemble into a reproducible regulatory architecture — or whether any such architecture
+generalizes beyond the perturbations observed. We address both questions in a genome-scale CRISPRi
+Perturb-seq atlas of primary human CD4⁺ T cells by building a quality-audited regulatory operator —
+regulators filtered for reproducibility and context, effects taken as a single object rather than a
+hit list — and denoising it spectrally. After separating a global co-variation mode and a
+Marchenko–Pastur noise bulk, an empirically calibrated **92 signal directions** (not the 336 a
+closed-form edge would admit) carry a strongly non-random community structure (consensus modularity
+z = 259). Blind, annotation-free community detection recovers a known molecular complex:
+Mitochondrial Respiratory Chain Complex I, at BH-FDR 1.4 × 10⁻⁷ — a stable, unsupervised community
+matching a curated complex, which validates the denoising, representation, and clustering at once.
+Convergent evidence — CORUM identity, CP-factor concentration, and cross-cell-type cohesion —
+supports a second, SAGA-centered coactivator module, and the module organization nominates
+autoimmune risk regulators against a length-matched null. The universal-versus-T-specific
+distinction the operator draws is sustained across three diverse cell types. Yet the same structure
+does not translate into prediction: real and permuted regulator features perform identically for
+leave-regulator-out inference, so unseen regulators are not predictable from available annotations.
+The perturbational operator contains recoverable biological structure — but recoverable structure is
+not equivalent to inductive predictability.

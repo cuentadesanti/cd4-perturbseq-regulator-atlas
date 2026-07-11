@@ -1,4 +1,4 @@
-# 7. Methods
+# 8. Methods
 
 ## Dataset and access
 
@@ -87,3 +87,50 @@ Random seeds are fixed (`random_state = 0`, `--seed 0`) throughout. All result t
 text are written to `docs/tables/` with a `_3106` suffix for the escalated analysis, and the
 pilot-scale tables are retained alongside them so the pilot↔escalation comparison is itself
 reproducible from disk.
+
+## Spectral denoising and community detection
+
+Each regulator's 2,000-gene z-score fingerprint was concatenated across the three conditions
+(3,106 × 6,000; q = 0.52) and the regulator–regulator Pearson correlation formed. The leading global
+mode (λ₀ = 167) was deflated and the Marchenko–Pastur bulk (edge λ₊ = 1.49) discarded; the denoised
+operator is reconstructed from the intermediate signal eigenvalues. Because the feature columns are
+not independent (one gene across three conditions), the closed-form MP edge is a lower bound, so the
+number of signal directions was set empirically — the 95th percentile of the top eigenvalue over 100
+column-permuted correlations (λ₊ = 2.95) leaves 92 signal directions. Communities were detected with
+Leiden (RBConfiguration objective) swept over resolution and 50 seeds (500 partitions), aggregated
+into a consensus co-assignment and re-clustered; communities with mean intra-community co-assignment
+s_c ≥ 0.8 are stability-gated. Consensus modularity was compared to a label-permutation null
+(z = 259). Community identity was tested by hypergeometric CORUM enrichment (BH-FDR) over complexes
+with ≥ 2 panel members. (`scripts/operator_communities.py`, `operator_community_null.py`,
+`operator_community_identity.py`.)
+
+## Disease-risk enrichment of communities
+
+Autoimmune genetic-risk load per community was the summed per-gene maximum Open Targets
+`genetic_association` score across five diseases (SLE, RA, MS, Sjögren, T1D; score ≥ 0.01).
+Enrichment was tested against a null resampling 10,000 length-decile-matched sets from the 3,106
+panel regulators (never the genome), reported with and without the chr6 MHC block (~28–34 Mb)
+excluded from module and universe. Results are reported as nominations, not causal claims.
+(`scripts/community_gwas.py`.)
+
+## RPE1 third-cell-type concordance
+
+The cross-cell-type concordance pipeline was applied unchanged to Replogle's essential-scale RPE1
+bulk product (`rpe1_normalized_bulk_01.h5ad`, figshare plus 20029387), with per-gene Ensembl
+intersection and gene-level collapse identical to K562. A pre-registered overlap gate (proceed at
+≥ 100 shared regulators; 962 shared) was checked before analysis. SAGA universality was read from the
+SAGA subunits present in the essential-scale set; the T-cell-specific side was assessed at the class
+level over the regulators classified T-specific in the CD4↔K562 comparison and also present in RPE1.
+(`scripts/analyze_rpe1_concordance.py`.)
+
+## Inductive prediction of unseen regulators
+
+Leave-regulator-out prediction held out whole regulators (all three conditions at once) under 5-fold
+cross-validation and predicted their 6,000-dimensional trans-response from regulator side-features —
+transcription-factor and DNA-binding-domain annotation, STRING network degree, and GO/Pfam
+composition (605 features; 98–99 % panel coverage). Per-regulator held-out R² was measured against
+the training mean, so a mean predictor scores 0. A ridge model (a full-rank inductive matrix
+completion) and a CatBoost gradient-boosted learner (one model per component of a train-fold SVD of
+the response, K ∈ {10, 30}) were each compared against an identical model trained on row-permuted
+features. Real and permuted features performed identically out of sample, so the negative rests on
+the shuffled control alone. (`scripts/imc_inductive.py`, `scripts/imc_nonlinear.py`.)

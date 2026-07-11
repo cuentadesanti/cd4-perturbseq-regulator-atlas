@@ -1,4 +1,4 @@
-# 4. The operator decomposes into gene programs gated by activation state
+# 5. The operator decomposes into gene programs gated by activation state
 
 Section 3 established that the operator has shared, low-dimensional predictive structure. This
 section asks what that structure *is*: when the operator is decomposed into factors, do those
@@ -13,7 +13,7 @@ transcriptional magnitude varies across resting, early-stimulated (Stim8hr), and
 ## Condition gating is the proven result
 
 Two factors are gated by activation state with bootstrap confidence intervals that exclude a flat
-profile (Figure&nbsp;3 (`docs/figures/34_operator_cp_condition_factors_3106.png`); source `operator_cp_factors_3106.csv`). One peaks in
+profile (Figure&nbsp;4 (`docs/figures/34_operator_cp_condition_factors_3106.png`); source `operator_cp_factors_3106.csv`). One peaks in
 resting cells (factor 1: condition weights 0.91 / 0.39 / 0.15 across Rest / Stim8hr / Stim48hr)
 and one peaks in early stimulation (factor 6: 0.08 / 0.98 / 0.17). Two further factors are cleanly
 constitutive — flat across conditions. That both a resting-peaked and a stimulation-peaked program

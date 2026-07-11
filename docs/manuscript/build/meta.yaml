@@ -1,6 +1,6 @@
 ---
 title: "The empirical regulatory operator of CD4⁺ T cells"
-subtitle: "A low-dimensional, condition-gated, partly cell-type-specific reading of a genome-scale Perturb-seq screen"
+subtitle: "Spectral denoising reveals modular, condition-gated and cell-type-specific perturbation structure"
 author:
   - Santiago Silva Avalos
 date: "2026-07-10"
@@ -25,6 +25,16 @@ header-includes: |
   \newunicodechar{≥}{\ensuremath{\geq}}
   \newunicodechar{⁺}{\textsuperscript{+}}
   \newunicodechar{²}{\textsuperscript{2}}
+  \newunicodechar{³}{\textsuperscript{3}}
+  \newunicodechar{⁴}{\textsuperscript{4}}
+  \newunicodechar{⁷}{\textsuperscript{7}}
+  \newunicodechar{⁻}{\textsuperscript{\ensuremath{-}}}
+  \newunicodechar{₀}{\textsubscript{0}}
+  \newunicodechar{₊}{\textsubscript{+}}
+  \newunicodechar{±}{\ensuremath{\pm}}
+  \newunicodechar{λ}{\ensuremath{\lambda}}
+  \newunicodechar{∈}{\ensuremath{\in}}
+  \newunicodechar{ö}{\"{o}}
   \usepackage{caption}
   \captionsetup{labelformat=empty,font=small,justification=justified}
   \captionsetup[figure]{skip=6pt}

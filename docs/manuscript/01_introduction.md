@@ -20,17 +20,21 @@ perturbations or extracting gene programs, and to our knowledge it has not been 
 primary-cell Perturb-seq screen: existing analyses either rank regulators by effect breadth or
 factor the expression matrix into programs, but none builds the regulator × gene operator and
 interrogates it as an operator — its predictive structure, its low-dimensional subspace, its
-decomposition by condition. That is the gap this work addresses, and the three results that follow
-are three properties of the operator: it predicts, it is gated by condition, and it separates
-universal from cell-type-specific regulation.
+decomposition by condition. That is the gap this work addresses, and the results that follow are
+properties of the operator: it completes held-out conditions of observed regulators, it is gated by
+condition, its denoised structure resolves into reproducible modules — one of them a known molecular
+complex recovered blind to annotation — and it separates universal from cell-type-specific
+regulation, while failing to predict the trans-effects of regulators it never saw.
 
 Positioning this against the single-cell-CRISPR methodology literature clarifies what is inherited
 and what is contributed. The front end — turning raw counts into calibrated, harmonized
 per-regulator effect estimates — is a solved problem we build on rather than redo: calibrated
 single-cell-CRISPR testing [Barry 2024 `10.1186/s13059-024-03254-2`] and the scPerturb
 effect-quantification framework [Peidli 2024 `10.1038/s41592-023-02144-y`] define that layer. Our
-contribution sits above it: the operator, its condition factors, and its out-of-panel
-predictivity. The closest methodological neighbor is guided sparse factor analysis
+contribution sits above this calibrated front end: a spectrally denoised perturbational operator, its
+modular and condition-resolved organization, and an explicit separation between within-operator
+completion and prediction of unseen regulators. The closest methodological neighbor is guided sparse
+factor analysis
 [Zhou 2023 `10.1038/s41592-023-02017-4`], which recovers gene programs and their driving
 perturbations probabilistically; our CP/SVD operator decomposition is a deterministic analogue of
 that object, and we treat it as a comparison rather than a claim of priority. The predictive
@@ -40,7 +44,7 @@ reliably beat simple baselines [Ahlmann-Eltze 2025 `10.1038/s41592-025-02772-6`;
 the operator's shared structure beats an honest persistence baseline out-of-panel — a lower, more
 falsifiable bar.
 
-A methodological posture runs through all three results, and we state it as a choice rather than
+A methodological posture runs through all results, and we state it as a choice rather than
 leave it implicit: fewer claims, each controlled for the confound that most threatens it. Every
 result in this paper is gated by an explicit control — for the power–magnitude confound that
 inflates naive effect sizes, for cis-off-target artifacts, for donor reproducibility, and for
@@ -48,11 +52,18 @@ decomposition stability — and where a control costs signal, we report the redu
 field where predictive claims often do not survive a fair baseline, this discipline is part of the
 argument, not decoration around it.
 
-Finally, a note on structure. The thesis has three legs — the operator, its condition-gated
-programs, and the universal/T-cell-specific split — but the results open (Section 2, Figure 1)
-with neither: they open with the regulator ranking. This is deliberate. The operator is built on
-top of the ranking, and the ranking is only trustworthy if its effect metric is not an artifact of
-statistical power; Section 2 establishes exactly that — the ranking is metric-robust and
-power-controlled — so that the operator built on it in Sections 3–5 stands on an audited
-foundation rather than an assumed one. The ranking is the substrate, not a fourth claim; we
-establish it first and then build.
+A note on structure. The results open (Section 2, Figure 1) not with the operator but with the
+regulator ranking: the operator is built on top of the ranking, and the ranking is only trustworthy
+if its effect metric is not an artifact of statistical power — Section 2 establishes exactly that,
+so everything built on it stands on an audited foundation rather than an assumed one. On that
+substrate we (i) construct a quality-audited regulatory operator, filtering effects for
+reproducibility and context rather than trusting raw hubs or nominal significance; (ii) denoise it
+spectrally and show its community structure is strongly non-random; (iii) recover Mitochondrial
+Complex I by annotation-blind clustering, the cleanest evidence the operator contains real
+biological organization; (iv) identify a SAGA-centered coactivator module and condition-dependent
+programs by convergent evidence; (v) show the universal-versus-specific distinction is sustained
+across three cell types; and (vi) demonstrate, with a scrambled-feature control, that unseen
+regulators are not inductively predictable from the annotations available. The organizing conclusion
+is that a perturbational operator can contain recoverable biological structure while that structure
+remains predictively inaccessible from external covariates — a distinction we make explicit rather
+than eliding.
