@@ -61,7 +61,7 @@ pipeline. Naming this gap is part of the honest accounting, not a claim that our
 
 Three extensions follow naturally. The donor axis can be examined as a subspace-stability question
 — whether the operator's leading structure is preserved across donors, measurable as principal
-angles between per-donor operators (`operator_donor_angles.csv`) — turning donor reproducibility
+angles between per-donor operators — turning donor reproducibility
 from a per-regulator annotation into a statement about the shared structure itself. The operator's
 off-diagonal structure invites a network-deconvolution treatment, which should be benchmarked
 against the recent single-cell perturbation network-inference benchmark of Chevalley et al. (2025,

@@ -16,7 +16,9 @@ Two factors are gated by activation state with bootstrap confidence intervals th
 profile (Figure&nbsp;4 (`docs/figures/34_operator_cp_condition_factors_3106.png`); source `operator_cp_factors_3106.csv`). One peaks in
 resting cells (factor 1: condition weights 0.91 / 0.39 / 0.15 across Rest / Stim8hr / Stim48hr)
 and one peaks in early stimulation (factor 6: 0.08 / 0.98 / 0.17). Two further factors are cleanly
-constitutive — flat across conditions. That both a resting-peaked and a stimulation-peaked program
+constitutive — flat across conditions; the remaining two (factors 2 and 5) form a degenerate pair
+(cofactor cosine 0.97) and are excluded from interpretation. That both a resting-peaked and a
+stimulation-peaked program
 emerge, each with a confidence interval excluding flatness, is the load-bearing claim of this
 section: the operator's shared structure is not a single undifferentiated block but resolves into
 programs whose activity is *modulated by* activation state, in both directions. This is a proven,

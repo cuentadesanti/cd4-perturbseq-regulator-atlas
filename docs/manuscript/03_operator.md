@@ -76,7 +76,7 @@ low-dimensionality statement, but a carefully scoped one: it is the **predictive
 is low-dimensional (~7 components), not the operator as a whole. The operator's own effective rank,
 measured on its singular spectrum, is roughly an order of magnitude higher
 (Figure&nbsp;S1 (`docs/figures/32_operator_svd_scree_3106.png`)); the ~7-dimensional structure is the part of it that generalizes to
-unseen regulators. The distinction matters — a reader who took "low-rank operator" at face value
+out-of-panel regulators. The distinction matters — a reader who took "low-rank operator" at face value
 would expect a spectrum that collapses after seven components, and the spectrum does not. What is
 low-rank is the shared, transferable structure, and it is a property of this 3,106-regulator
 holdout configuration rather than an intrinsic constant of T-cell regulation.
@@ -94,8 +94,8 @@ decomposition finds coherent, condition-structured, partly-shared factors at 3,1
 positive evidence that the representation remains genuinely pooled at the expanded scale, not a
 mosaic of independent per-regulator effects.
 
-Taken together, these results convert the operator from a descriptive summary into a predictive
-object: a shared, low-dimensional structure that anticipates the unobserved late-stimulation
+Taken together, these results establish the operator as a shared structure that supports condition
+completion: a low-dimensional structure that anticipates the unobserved late-stimulation
 response of regulators outside the panel, robustly beats a fair baseline, and remains one pooled
 object at four times the scale at which it was first validated — with an absolute precision we
 report honestly as modest.

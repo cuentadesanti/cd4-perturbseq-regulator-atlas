@@ -89,13 +89,15 @@ FIGURES = {
           "factors are gated with bootstrap confidence intervals excluding a flat profile — "
           "one peaking in resting cells (factor 1) and one in early stimulation (factor 6) — "
           "while two further factors are constitutive, evidencing bidirectional gating rather "
-          "than a single activation program."),
+          "than a single activation program. The remaining two lines (factors 2 and 5) are a "
+          "degenerate pair (cofactor cosine 0.97) excluded from interpretation, so the interpreted "
+          "set is four factors — two gated, two constitutive."),
     "S1": ("docs/figures/32_operator_svd_scree_3106.png",
            "**Figure S1. The operator's own effective rank is far higher than its predictive "
            "subspace.** Singular-value scree of the 3,106-regulator operator. The spectrum does "
            "not collapse after seven components (effective rank ≈ 86); the ~7-dimensional "
-           "structure identified in Figure 2 is the transferable part that generalizes to unseen "
-           "regulators, not the operator's full rank."),
+           "structure identified in Figure 2 is the transferable part that generalizes to "
+           "out-of-panel regulators, not the operator's full rank."),
 }
 
 # --- Table 1: rank-7 (peak) slice read straight from the stratified CSV ------

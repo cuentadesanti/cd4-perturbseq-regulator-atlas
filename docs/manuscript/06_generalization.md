@@ -82,8 +82,8 @@ of the 142 regulators classified T-specific in the CD4↔K562 comparison and als
 none become universal (mean concordance z = −0.013). We flag the honest limit rather than paper over
 it: DOCK2, the clean T-specific anchor, is not in RPE1's essential-scale screen at all — it is a
 hematopoietic-specific exchange factor, not a core-essential gene — so its arm is carried by the
-class-level result, not a direct measurement, and its very absence from a core-essential screen is
-itself weakly consistent with an immune-restricted role. Across three diverse backgrounds, SAGA
+class-level result, not a direct measurement; its absence is consistent with the essential-scale
+design and prevents direct validation of the anchor in RPE1. Across three diverse backgrounds, SAGA
 regulation reads as universal and the immune cytoskeletal module as T-cell-specific — a distinction
 built from data in three lineages rather than asserted from one.
 

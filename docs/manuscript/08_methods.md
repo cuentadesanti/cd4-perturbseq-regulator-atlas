@@ -21,7 +21,7 @@ standardized at the layer level across the full regulator population rather than
 
 ## Operator tensor construction
 
-The operator is assembled as a regulator × gene × condition tensor (`build_operator_tensor.py`).
+The operator is assembled as a regulator × gene × condition tensor.
 Genes are the top-variance panel (2,000 genes by default). Regulators are selected by a
 per-condition cell-count floor (retaining regulators above the median), which yields 3,106
 regulators for the escalated analysis and 800 for the validation pilot. After the z-score fetch, a
@@ -32,8 +32,8 @@ passes at ρ = −0.006, and a power gate on the leading singular subspace holds
 ## CP decomposition
 
 The tensor is decomposed with a masked CANDECOMP/PARAFAC factorization
-(`decompose_operator_cp.py`; `tensorly` `parafac` with a missingness mask, `n_iter_max = 400`,
-`n_init = 10`, `random_state = 0`). Before fitting, condition slabs are RMS scale-controlled so
+(`tensorly` `parafac` with a missingness mask, `n_iter_max = 400`, `n_init = 10`,
+`random_state = 0`). Before fitting, condition slabs are RMS scale-controlled so
 that a single high-variance condition cannot dominate the fit. Rank is selected by split-half
 stability: for each candidate rank we compute the matched-factor cosine between decompositions of
 two random halves (subsample 400), and take the largest rank whose stability exceeds 0.70. Each
@@ -46,20 +46,18 @@ rotation change, `tol = 1e-6`).
 
 ## Out-of-panel completion
 
-Predictive structure is assessed by low-rank matrix completion of a held-out condition fiber
-(`operator_completion.py`, kernels in `scripts/_opkernels.py`). We hold out the late-stimulation
-(Stim48hr) entries of regulators outside the original variance-selected panel (a seed-0 20%
-sample; `--holdout 0.2 --seed 0`), fit a low-rank model to the remaining entries, and predict the
-held-out fiber. Standardization is computed on the training entries only
-(`train_test_standardize`, centering each gene on its train-mask values) to prevent leakage.
-Completion uses soft-impute with a truncated SVD (`soft_impute`, `n_iter = 100`, `tol = 1e-4`); the
-truncated solver (`scipy.sparse.linalg.svds`) is numerically identical to a full-SVD soft-impute to
-machine precision (a regression test asserts agreement to ~1e-13) and is roughly an order of
-magnitude faster. The baseline is persistence — predicting the late-stimulation response equals the
+Predictive structure is assessed by low-rank matrix completion of a held-out condition fiber. We
+hold out the late-stimulation (Stim48hr) entries of regulators outside the original
+variance-selected panel (a seed-0 20% sample), fit a low-rank model to the remaining entries, and
+predict the held-out fiber. Standardization is computed on the training entries only (centering each
+gene on its train-mask values) to prevent leakage. Completion uses soft-impute with a truncated SVD
+(`n_iter = 100`, `tol = 1e-4`); the truncated solver is numerically identical to a full-SVD
+soft-impute to machine precision (a regression test asserts agreement to ~1e-13) and is roughly an
+order of magnitude faster. The baseline is persistence — predicting the late-stimulation response equals the
 early-stimulation one. We report the model−persistence margin per rank, and stratify the held-out
-regulators by knockdown strength (`operator_completion_stratified.py`), with the stratum thresholds
-hardcoded and documented in that script: a median split on effect strength, and a panel-matched
-stratum (regulators at least as strong as the median in-panel regulator).
+regulators by knockdown strength, with the stratum thresholds documented alongside the results: a
+median split on effect strength, and a panel-matched stratum (regulators at least as strong as the
+median in-panel regulator).
 
 ## K562 cross-cell-type concordance
 
@@ -80,11 +78,11 @@ sign and magnitude of their concordance Z-score.
 
 ## Reproducibility
 
-The full operator pipeline runs from `make operator` (tensor → SVD → CP → completion → donor
-angles). Numerical kernels are isolated in `scripts/_opkernels.py` and covered by a unit-test suite
-(17 tests, `tests/test_opkernels.py`), including the svds/full-SVD equivalence regression test.
-Random seeds are fixed (`random_state = 0`, `--seed 0`) throughout. All result tables cited in the
-text are written to `docs/tables/` with a `_3106` suffix for the escalated analysis, and the
+The full operator pipeline runs end-to-end from a single build command (tensor → SVD → CP →
+completion → donor angles). Numerical kernels are isolated in a tested module (17 unit tests),
+including the truncated-SVD/full-SVD equivalence regression test. Random seeds are fixed
+(`random_state = 0`) throughout. All result tables cited in the text are written to `docs/tables/`
+with a `_3106` suffix for the escalated analysis, and the
 pilot-scale tables are retained alongside them so the pilot↔escalation comparison is itself
 reproducible from disk.
 
@@ -101,8 +99,7 @@ Leiden (RBConfiguration objective) swept over resolution and 50 seeds (500 parti
 into a consensus co-assignment and re-clustered; communities with mean intra-community co-assignment
 s_c ≥ 0.8 are stability-gated. Consensus modularity was compared to a label-permutation null
 (z = 259). Community identity was tested by hypergeometric CORUM enrichment (BH-FDR) over complexes
-with ≥ 2 panel members. (`scripts/operator_communities.py`, `operator_community_null.py`,
-`operator_community_identity.py`.)
+with ≥ 2 panel members.
 
 ## Disease-risk enrichment of communities
 
@@ -111,7 +108,6 @@ Autoimmune genetic-risk load per community was the summed per-gene maximum Open 
 Enrichment was tested against a null resampling 10,000 length-decile-matched sets from the 3,106
 panel regulators (never the genome), reported with and without the chr6 MHC block (~28–34 Mb)
 excluded from module and universe. Results are reported as nominations, not causal claims.
-(`scripts/community_gwas.py`.)
 
 ## RPE1 third-cell-type concordance
 
@@ -121,7 +117,6 @@ intersection and gene-level collapse identical to K562. A pre-registered overlap
 ≥ 100 shared regulators; 962 shared) was checked before analysis. SAGA universality was read from the
 SAGA subunits present in the essential-scale set; the T-cell-specific side was assessed at the class
 level over the regulators classified T-specific in the CD4↔K562 comparison and also present in RPE1.
-(`scripts/analyze_rpe1_concordance.py`.)
 
 ## Inductive prediction of unseen regulators
 
@@ -133,4 +128,18 @@ the training mean, so a mean predictor scores 0. A ridge model (a full-rank indu
 completion) and a CatBoost gradient-boosted learner (one model per component of a train-fold SVD of
 the response, K ∈ {10, 30}) were each compared against an identical model trained on row-permuted
 features. Real and permuted features performed identically out of sample, so the negative rests on
-the shuffled control alone. (`scripts/imc_inductive.py`, `scripts/imc_nonlinear.py`.)
+the shuffled control alone.
+
+## Code availability
+
+All analysis code is available in the accompanying repository. The pipeline is organized by analysis:
+operator tensor construction, SVD/CP decomposition, and out-of-panel completion
+(`build_operator_tensor.py`, `decompose_operator_cp.py`, `operator_completion.py`,
+`operator_completion_stratified.py`), with numerical kernels in `_opkernels.py` and unit tests in
+`tests/test_opkernels.py`; spectral denoising, consensus community detection, and community identity
+(`operator_communities.py`, `operator_community_null.py`, `operator_community_identity.py`); the
+Section&nbsp;3 insignia figure (`operator_insignia_figure.py`); community disease-risk enrichment
+(`community_gwas.py`); cross-cell-type concordance for K562 and RPE1 (`analyze_k562_concordance.py`,
+`analyze_rpe1_concordance.py`); and inductive prediction of unseen regulators (`imc_inductive.py`,
+`imc_nonlinear.py`). The full operator pipeline is driven by `make operator`; random seeds are fixed
+throughout, and all cited result tables are regenerated to `docs/tables/`.
